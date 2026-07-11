@@ -8,9 +8,9 @@ export const Route = createFileRoute("/kontakt")({
       { name: "description", content: "Kontakt zur Rechtsanwaltskanzlei Goldmann in Berlin. Vertrauliches Erstgespräch, Termin nach Vereinbarung." },
       { property: "og:title", content: "Kontakt — Kanzlei Goldmann" },
       { property: "og:description", content: "Vertrauliches Erstgespräch, Termin nach Vereinbarung." },
-      { property: "og:url", content: "/kontakt" },
+      { property: "og:url", content: "https://kanzlei-goldmann.de/kontakt" },
     ],
-    links: [{ rel: "canonical", href: "/kontakt" }],
+    links: [{ rel: "canonical", href: "https://kanzlei-goldmann.de/kontakt" }],
   }),
   component: KontaktPage,
 });
@@ -50,11 +50,11 @@ function KontaktPage() {
             </div>
             <div className="grid grid-cols-[8rem_1fr] gap-4">
               <dt className="text-muted-foreground">E-Mail</dt>
-              <dd><a href="mailto:kanzlei@ra-goldmann.de" className="text-primary hover:text-gold">kanzlei@ra-goldmann.de</a></dd>
+              <dd><a href="mailto:kanzlei@kanzlei-goldmann.de" className="text-primary hover:text-gold">kanzlei@kanzlei-goldmann.de</a></dd>
             </div>
             <div className="grid grid-cols-[8rem_1fr] gap-4">
               <dt className="text-muted-foreground">Web</dt>
-              <dd>ra-goldmann.de</dd>
+              <dd>kanzlei-goldmann.de</dd>
             </div>
           </dl>
 

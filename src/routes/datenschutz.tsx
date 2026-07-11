@@ -6,9 +6,9 @@ export const Route = createFileRoute("/datenschutz")({
       { title: "Datenschutz — Rechtsanwaltskanzlei Goldmann" },
       { name: "description", content: "Datenschutzerklärung der Rechtsanwaltskanzlei Goldmann." },
       { name: "robots", content: "noindex" },
-      { property: "og:url", content: "/datenschutz" },
+      { property: "og:url", content: "https://kanzlei-goldmann.de/datenschutz" },
     ],
-    links: [{ rel: "canonical", href: "/datenschutz" }],
+    links: [{ rel: "canonical", href: "https://kanzlei-goldmann.de/datenschutz" }],
   }),
   component: DatenschutzPage,
 });

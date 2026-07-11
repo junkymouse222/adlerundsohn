@@ -7,9 +7,9 @@ export const Route = createFileRoute("/fachgebiete")({
       { name: "description", content: "Regelinsolvenzverfahren, Eigenverwaltung, Schutzschirm, Gläubigervertretung, Verbraucherinsolvenz und Insolvenzverwaltung — spezialisiert seit 1998." },
       { property: "og:title", content: "Fachgebiete — Kanzlei Goldmann" },
       { property: "og:description", content: "Alle Bereiche des Insolvenzrechts unter einem Dach." },
-      { property: "og:url", content: "/fachgebiete" },
+      { property: "og:url", content: "https://kanzlei-goldmann.de/fachgebiete" },
     ],
-    links: [{ rel: "canonical", href: "/fachgebiete" }],
+    links: [{ rel: "canonical", href: "https://kanzlei-goldmann.de/fachgebiete" }],
   }),
   component: FachgebietePage,
 });
