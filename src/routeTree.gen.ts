@@ -9,8 +9,50 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as KontaktRouteImport } from './routes/kontakt'
+import { Route as KanzleiRouteImport } from './routes/kanzlei'
+import { Route as ImpressumRouteImport } from './routes/impressum'
+import { Route as FachgebieteRouteImport } from './routes/fachgebiete'
+import { Route as DatenschutzRouteImport } from './routes/datenschutz'
+import { Route as AnwaelteRouteImport } from './routes/anwaelte'
 import { Route as IndexRouteImport } from './routes/index'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KontaktRoute = KontaktRouteImport.update({
+  id: '/kontakt',
+  path: '/kontakt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KanzleiRoute = KanzleiRouteImport.update({
+  id: '/kanzlei',
+  path: '/kanzlei',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImpressumRoute = ImpressumRouteImport.update({
+  id: '/impressum',
+  path: '/impressum',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FachgebieteRoute = FachgebieteRouteImport.update({
+  id: '/fachgebiete',
+  path: '/fachgebiete',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DatenschutzRoute = DatenschutzRouteImport.update({
+  id: '/datenschutz',
+  path: '/datenschutz',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnwaelteRoute = AnwaelteRouteImport.update({
+  id: '/anwaelte',
+  path: '/anwaelte',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +61,130 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/anwaelte': typeof AnwaelteRoute
+  '/datenschutz': typeof DatenschutzRoute
+  '/fachgebiete': typeof FachgebieteRoute
+  '/impressum': typeof ImpressumRoute
+  '/kanzlei': typeof KanzleiRoute
+  '/kontakt': typeof KontaktRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/anwaelte': typeof AnwaelteRoute
+  '/datenschutz': typeof DatenschutzRoute
+  '/fachgebiete': typeof FachgebieteRoute
+  '/impressum': typeof ImpressumRoute
+  '/kanzlei': typeof KanzleiRoute
+  '/kontakt': typeof KontaktRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/anwaelte': typeof AnwaelteRoute
+  '/datenschutz': typeof DatenschutzRoute
+  '/fachgebiete': typeof FachgebieteRoute
+  '/impressum': typeof ImpressumRoute
+  '/kanzlei': typeof KanzleiRoute
+  '/kontakt': typeof KontaktRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/anwaelte'
+    | '/datenschutz'
+    | '/fachgebiete'
+    | '/impressum'
+    | '/kanzlei'
+    | '/kontakt'
+    | '/sitemap.xml'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/anwaelte'
+    | '/datenschutz'
+    | '/fachgebiete'
+    | '/impressum'
+    | '/kanzlei'
+    | '/kontakt'
+    | '/sitemap.xml'
+  id:
+    | '__root__'
+    | '/'
+    | '/anwaelte'
+    | '/datenschutz'
+    | '/fachgebiete'
+    | '/impressum'
+    | '/kanzlei'
+    | '/kontakt'
+    | '/sitemap.xml'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AnwaelteRoute: typeof AnwaelteRoute
+  DatenschutzRoute: typeof DatenschutzRoute
+  FachgebieteRoute: typeof FachgebieteRoute
+  ImpressumRoute: typeof ImpressumRoute
+  KanzleiRoute: typeof KanzleiRoute
+  KontaktRoute: typeof KontaktRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kontakt': {
+      id: '/kontakt'
+      path: '/kontakt'
+      fullPath: '/kontakt'
+      preLoaderRoute: typeof KontaktRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kanzlei': {
+      id: '/kanzlei'
+      path: '/kanzlei'
+      fullPath: '/kanzlei'
+      preLoaderRoute: typeof KanzleiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/impressum': {
+      id: '/impressum'
+      path: '/impressum'
+      fullPath: '/impressum'
+      preLoaderRoute: typeof ImpressumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fachgebiete': {
+      id: '/fachgebiete'
+      path: '/fachgebiete'
+      fullPath: '/fachgebiete'
+      preLoaderRoute: typeof FachgebieteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/datenschutz': {
+      id: '/datenschutz'
+      path: '/datenschutz'
+      fullPath: '/datenschutz'
+      preLoaderRoute: typeof DatenschutzRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/anwaelte': {
+      id: '/anwaelte'
+      path: '/anwaelte'
+      fullPath: '/anwaelte'
+      preLoaderRoute: typeof AnwaelteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,17 +197,14 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AnwaelteRoute: AnwaelteRoute,
+  DatenschutzRoute: DatenschutzRoute,
+  FachgebieteRoute: FachgebieteRoute,
+  ImpressumRoute: ImpressumRoute,
+  KanzleiRoute: KanzleiRoute,
+  KontaktRoute: KontaktRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
