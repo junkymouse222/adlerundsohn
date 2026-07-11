@@ -7,9 +7,9 @@ export const Route = createFileRoute("/kanzlei")({
       { name: "description", content: "Seit 1998 spezialisiert auf Insolvenzrecht und Insolvenzverwaltung. Erfahren Sie mehr über die Geschichte und Werte der Kanzlei Goldmann." },
       { property: "og:title", content: "Die Kanzlei — Rechtsanwaltskanzlei Goldmann" },
       { property: "og:description", content: "Erfahren Sie mehr über Geschichte und Werte der Kanzlei Goldmann." },
-      { property: "og:url", content: "/kanzlei" },
+      { property: "og:url", content: "https://kanzlei-goldmann.de/kanzlei" },
     ],
-    links: [{ rel: "canonical", href: "/kanzlei" }],
+    links: [{ rel: "canonical", href: "https://kanzlei-goldmann.de/kanzlei" }],
   }),
   component: KanzleiPage,
 });

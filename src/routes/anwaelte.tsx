@@ -10,9 +10,9 @@ export const Route = createFileRoute("/anwaelte")({
       { name: "description", content: "Lernen Sie die Anwältinnen und Anwälte der Kanzlei Goldmann kennen: Fachanwälte für Insolvenzrecht mit langjähriger Erfahrung." },
       { property: "og:title", content: "Anwälte — Rechtsanwaltskanzlei Goldmann" },
       { property: "og:description", content: "Fachanwälte für Insolvenzrecht mit langjähriger Erfahrung." },
-      { property: "og:url", content: "/anwaelte" },
+      { property: "og:url", content: "https://kanzlei-goldmann.de/anwaelte" },
     ],
-    links: [{ rel: "canonical", href: "/anwaelte" }],
+    links: [{ rel: "canonical", href: "https://kanzlei-goldmann.de/anwaelte" }],
   }),
   component: AnwaeltePage,
 });
@@ -32,7 +32,7 @@ const anwaelte = [
       "Promotion, Humboldt-Universität zu Berlin (2001)",
       "Fachanwalt für Insolvenzrecht (seit 2005)",
     ],
-    kontakt: "f.goldmann@ra-goldmann.de",
+    kontakt: "f.goldmann@kanzlei-goldmann.de",
   },
   {
     name: "Dr. Katharina Weber",
@@ -48,7 +48,7 @@ const anwaelte = [
       "Promotion zum StaRUG (2013)",
       "Fachanwältin für Handels- und Gesellschaftsrecht",
     ],
-    kontakt: "k.weber@ra-goldmann.de",
+    kontakt: "k.weber@kanzlei-goldmann.de",
   },
   {
     name: "Marcus Hartmann",
@@ -64,7 +64,7 @@ const anwaelte = [
       "Referendariat am OLG Hamm",
       "Fachanwalt für Insolvenzrecht (seit 2018)",
     ],
-    kontakt: "m.hartmann@ra-goldmann.de",
+    kontakt: "m.hartmann@kanzlei-goldmann.de",
   },
 ];
 

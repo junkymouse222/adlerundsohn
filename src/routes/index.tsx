@@ -5,11 +5,11 @@ import goldmannImg from "@/assets/anwalt-goldmann.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { property: "og:url", content: "/" },
+      { property: "og:url", content: "https://kanzlei-goldmann.de/" },
       { property: "og:image", content: heroImg },
       { name: "twitter:image", content: heroImg },
     ],
-    links: [{ rel: "canonical", href: "/" }],
+    links: [{ rel: "canonical", href: "https://kanzlei-goldmann.de/" }],
     scripts: [{
       type: "application/ld+json",
       children: JSON.stringify({
@@ -17,7 +17,7 @@ export const Route = createFileRoute("/")({
         "@type": "LegalService",
         name: "Rechtsanwaltskanzlei Goldmann",
         description: "Fachanwaltskanzlei für Insolvenzrecht und Insolvenzverwaltung.",
-        url: "https://ra-goldmann.de",
+        url: "https://kanzlei-goldmann.de",
         telephone: "+49-30-40551290",
         address: {
           "@type": "PostalAddress",

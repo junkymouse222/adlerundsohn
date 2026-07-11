@@ -191,7 +191,7 @@ function Footer() {
             <li>Friedrichstraße 112</li>
             <li>10117 Berlin</li>
             <li>+49 (0)30 40 55 12 90</li>
-            <li>kanzlei@ra-goldmann.de</li>
+            <li>kanzlei@kanzlei-goldmann.de</li>
           </ul>
         </div>
         <div>
@@ -204,7 +204,7 @@ function Footer() {
       </div>
       <div className="border-t border-primary-foreground/10">
         <div className="container-prose flex flex-col items-start justify-between gap-3 py-6 text-xs text-primary-foreground/50 md:flex-row md:items-center">
-          <span>© {new Date().getFullYear()} Rechtsanwaltskanzlei Goldmann · ra-goldmann.de</span>
+          <span>© {new Date().getFullYear()} Rechtsanwaltskanzlei Goldmann · kanzlei-goldmann.de</span>
           <span>Mitglied der Rechtsanwaltskammer Berlin</span>
         </div>
       </div>

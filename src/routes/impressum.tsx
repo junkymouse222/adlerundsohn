@@ -6,9 +6,9 @@ export const Route = createFileRoute("/impressum")({
       { title: "Impressum — Rechtsanwaltskanzlei Goldmann" },
       { name: "description", content: "Impressum und Angaben gemäß § 5 TMG der Rechtsanwaltskanzlei Goldmann." },
       { name: "robots", content: "noindex" },
-      { property: "og:url", content: "/impressum" },
+      { property: "og:url", content: "https://kanzlei-goldmann.de/impressum" },
     ],
-    links: [{ rel: "canonical", href: "/impressum" }],
+    links: [{ rel: "canonical", href: "https://kanzlei-goldmann.de/impressum" }],
   }),
   component: ImpressumPage,
 });
@@ -28,7 +28,7 @@ function ImpressumPage() {
           </div>
           <div>
             <p className="text-[0.7rem] uppercase tracking-[0.22em] text-muted-foreground">Kontakt</p>
-            <p className="mt-3">Telefon: +49 (0)30 40 55 12 90<br />Telefax: +49 (0)30 40 55 12 91<br />E-Mail: kanzlei@ra-goldmann.de</p>
+            <p className="mt-3">Telefon: +49 (0)30 40 55 12 90<br />Telefax: +49 (0)30 40 55 12 91<br />E-Mail: kanzlei@kanzlei-goldmann.de</p>
           </div>
           <div>
             <p className="text-[0.7rem] uppercase tracking-[0.22em] text-muted-foreground">USt-IdNr.</p>
