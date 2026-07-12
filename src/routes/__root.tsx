@@ -191,7 +191,7 @@ function Footer() {
             <li>Friedrichstraße 112</li>
             <li>10117 Berlin</li>
             <li>+49 6591 6659636</li>
-            <li>kanzlei@kanzlei-goldmann.de</li>
+            <li>info@kanzlei-goldmann.de</li>
           </ul>
         </div>
         <div>
