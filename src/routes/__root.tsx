@@ -190,7 +190,7 @@ function Footer() {
           <ul className="mt-4 space-y-2 text-sm text-primary-foreground/80">
             <li>Friedrichstraße 112</li>
             <li>10117 Berlin</li>
-            <li>+49 (0)30 40 55 12 90</li>
+            <li>+49 6591 6659636</li>
             <li>kanzlei@kanzlei-goldmann.de</li>
           </ul>
         </div>
