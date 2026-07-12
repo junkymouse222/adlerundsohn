@@ -28,7 +28,7 @@ function ImpressumPage() {
           </div>
           <div>
             <p className="text-[0.7rem] uppercase tracking-[0.22em] text-muted-foreground">Kontakt</p>
-            <p className="mt-3">Telefon: +49 6591 6659636<br />Telefax: +49 (0)30 40 55 12 91<br />E-Mail: kanzlei@kanzlei-goldmann.de</p>
+            <p className="mt-3">Telefon: +49 6591 6659636<br />Telefax: +49 (0)30 40 55 12 91<br />E-Mail: info@kanzlei-goldmann.de</p>
           </div>
           <div>
             <p className="text-[0.7rem] uppercase tracking-[0.22em] text-muted-foreground">USt-IdNr.</p>
