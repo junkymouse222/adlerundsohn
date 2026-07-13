@@ -13,10 +13,12 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as KontaktRouteImport } from './routes/kontakt'
 import { Route as KanzleiRouteImport } from './routes/kanzlei'
 import { Route as ImpressumRouteImport } from './routes/impressum'
+import { Route as FileuploadRouteImport } from './routes/fileupload'
 import { Route as FachgebieteRouteImport } from './routes/fachgebiete'
 import { Route as DatenschutzRouteImport } from './routes/datenschutz'
 import { Route as AnwaelteRouteImport } from './routes/anwaelte'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as JuliAngeboteFilenameRouteImport } from './routes/juli.angebote.$filename'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -36,6 +38,11 @@ const KanzleiRoute = KanzleiRouteImport.update({
 const ImpressumRoute = ImpressumRouteImport.update({
   id: '/impressum',
   path: '/impressum',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FileuploadRoute = FileuploadRouteImport.update({
+  id: '/fileupload',
+  path: '/fileupload',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FachgebieteRoute = FachgebieteRouteImport.update({
@@ -58,26 +65,35 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const JuliAngeboteFilenameRoute = JuliAngeboteFilenameRouteImport.update({
+  id: '/juli/angebote/$filename',
+  path: '/juli/angebote/$filename',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/anwaelte': typeof AnwaelteRoute
   '/datenschutz': typeof DatenschutzRoute
   '/fachgebiete': typeof FachgebieteRoute
+  '/fileupload': typeof FileuploadRoute
   '/impressum': typeof ImpressumRoute
   '/kanzlei': typeof KanzleiRoute
   '/kontakt': typeof KontaktRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/anwaelte': typeof AnwaelteRoute
   '/datenschutz': typeof DatenschutzRoute
   '/fachgebiete': typeof FachgebieteRoute
+  '/fileupload': typeof FileuploadRoute
   '/impressum': typeof ImpressumRoute
   '/kanzlei': typeof KanzleiRoute
   '/kontakt': typeof KontaktRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -85,10 +101,12 @@ export interface FileRoutesById {
   '/anwaelte': typeof AnwaelteRoute
   '/datenschutz': typeof DatenschutzRoute
   '/fachgebiete': typeof FachgebieteRoute
+  '/fileupload': typeof FileuploadRoute
   '/impressum': typeof ImpressumRoute
   '/kanzlei': typeof KanzleiRoute
   '/kontakt': typeof KontaktRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -97,30 +115,36 @@ export interface FileRouteTypes {
     | '/anwaelte'
     | '/datenschutz'
     | '/fachgebiete'
+    | '/fileupload'
     | '/impressum'
     | '/kanzlei'
     | '/kontakt'
     | '/sitemap.xml'
+    | '/juli/angebote/$filename'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/anwaelte'
     | '/datenschutz'
     | '/fachgebiete'
+    | '/fileupload'
     | '/impressum'
     | '/kanzlei'
     | '/kontakt'
     | '/sitemap.xml'
+    | '/juli/angebote/$filename'
   id:
     | '__root__'
     | '/'
     | '/anwaelte'
     | '/datenschutz'
     | '/fachgebiete'
+    | '/fileupload'
     | '/impressum'
     | '/kanzlei'
     | '/kontakt'
     | '/sitemap.xml'
+    | '/juli/angebote/$filename'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -128,10 +152,12 @@ export interface RootRouteChildren {
   AnwaelteRoute: typeof AnwaelteRoute
   DatenschutzRoute: typeof DatenschutzRoute
   FachgebieteRoute: typeof FachgebieteRoute
+  FileuploadRoute: typeof FileuploadRoute
   ImpressumRoute: typeof ImpressumRoute
   KanzleiRoute: typeof KanzleiRoute
   KontaktRoute: typeof KontaktRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  JuliAngeboteFilenameRoute: typeof JuliAngeboteFilenameRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -164,6 +190,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ImpressumRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/fileupload': {
+      id: '/fileupload'
+      path: '/fileupload'
+      fullPath: '/fileupload'
+      preLoaderRoute: typeof FileuploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/fachgebiete': {
       id: '/fachgebiete'
       path: '/fachgebiete'
@@ -192,6 +225,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/juli/angebote/$filename': {
+      id: '/juli/angebote/$filename'
+      path: '/juli/angebote/$filename'
+      fullPath: '/juli/angebote/$filename'
+      preLoaderRoute: typeof JuliAngeboteFilenameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -200,21 +240,13 @@ const rootRouteChildren: RootRouteChildren = {
   AnwaelteRoute: AnwaelteRoute,
   DatenschutzRoute: DatenschutzRoute,
   FachgebieteRoute: FachgebieteRoute,
+  FileuploadRoute: FileuploadRoute,
   ImpressumRoute: ImpressumRoute,
   KanzleiRoute: KanzleiRoute,
   KontaktRoute: KontaktRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  JuliAngeboteFilenameRoute: JuliAngeboteFilenameRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
