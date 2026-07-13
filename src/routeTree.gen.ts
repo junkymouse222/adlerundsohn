@@ -13,6 +13,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as KontaktRouteImport } from './routes/kontakt'
 import { Route as KanzleiRouteImport } from './routes/kanzlei'
 import { Route as ImpressumRouteImport } from './routes/impressum'
+import { Route as FileuploadRouteImport } from './routes/fileupload'
 import { Route as FachgebieteRouteImport } from './routes/fachgebiete'
 import { Route as DatenschutzRouteImport } from './routes/datenschutz'
 import { Route as AnwaelteRouteImport } from './routes/anwaelte'
@@ -36,6 +37,11 @@ const KanzleiRoute = KanzleiRouteImport.update({
 const ImpressumRoute = ImpressumRouteImport.update({
   id: '/impressum',
   path: '/impressum',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FileuploadRoute = FileuploadRouteImport.update({
+  id: '/fileupload',
+  path: '/fileupload',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FachgebieteRoute = FachgebieteRouteImport.update({
@@ -64,6 +70,7 @@ export interface FileRoutesByFullPath {
   '/anwaelte': typeof AnwaelteRoute
   '/datenschutz': typeof DatenschutzRoute
   '/fachgebiete': typeof FachgebieteRoute
+  '/fileupload': typeof FileuploadRoute
   '/impressum': typeof ImpressumRoute
   '/kanzlei': typeof KanzleiRoute
   '/kontakt': typeof KontaktRoute
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/anwaelte': typeof AnwaelteRoute
   '/datenschutz': typeof DatenschutzRoute
   '/fachgebiete': typeof FachgebieteRoute
+  '/fileupload': typeof FileuploadRoute
   '/impressum': typeof ImpressumRoute
   '/kanzlei': typeof KanzleiRoute
   '/kontakt': typeof KontaktRoute
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/anwaelte': typeof AnwaelteRoute
   '/datenschutz': typeof DatenschutzRoute
   '/fachgebiete': typeof FachgebieteRoute
+  '/fileupload': typeof FileuploadRoute
   '/impressum': typeof ImpressumRoute
   '/kanzlei': typeof KanzleiRoute
   '/kontakt': typeof KontaktRoute
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/anwaelte'
     | '/datenschutz'
     | '/fachgebiete'
+    | '/fileupload'
     | '/impressum'
     | '/kanzlei'
     | '/kontakt'
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/anwaelte'
     | '/datenschutz'
     | '/fachgebiete'
+    | '/fileupload'
     | '/impressum'
     | '/kanzlei'
     | '/kontakt'
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/anwaelte'
     | '/datenschutz'
     | '/fachgebiete'
+    | '/fileupload'
     | '/impressum'
     | '/kanzlei'
     | '/kontakt'
@@ -128,6 +140,7 @@ export interface RootRouteChildren {
   AnwaelteRoute: typeof AnwaelteRoute
   DatenschutzRoute: typeof DatenschutzRoute
   FachgebieteRoute: typeof FachgebieteRoute
+  FileuploadRoute: typeof FileuploadRoute
   ImpressumRoute: typeof ImpressumRoute
   KanzleiRoute: typeof KanzleiRoute
   KontaktRoute: typeof KontaktRoute
@@ -162,6 +175,13 @@ declare module '@tanstack/react-router' {
       path: '/impressum'
       fullPath: '/impressum'
       preLoaderRoute: typeof ImpressumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fileupload': {
+      id: '/fileupload'
+      path: '/fileupload'
+      fullPath: '/fileupload'
+      preLoaderRoute: typeof FileuploadRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/fachgebiete': {
@@ -200,6 +220,7 @@ const rootRouteChildren: RootRouteChildren = {
   AnwaelteRoute: AnwaelteRoute,
   DatenschutzRoute: DatenschutzRoute,
   FachgebieteRoute: FachgebieteRoute,
+  FileuploadRoute: FileuploadRoute,
   ImpressumRoute: ImpressumRoute,
   KanzleiRoute: KanzleiRoute,
   KontaktRoute: KontaktRoute,
