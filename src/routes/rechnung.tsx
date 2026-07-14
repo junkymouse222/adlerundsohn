@@ -198,6 +198,25 @@ function RechnungPage() {
             />
           </div>
 
+          <div className="space-y-3 border-t border-border pt-4">
+            <div className="text-[0.7rem] uppercase tracking-[0.2em] text-muted-foreground">
+              Abweichende Lieferanschrift
+            </div>
+            <input
+              value={lieferName}
+              onChange={(e) => setLieferName(e.target.value)}
+              placeholder="Name / Firma (optional)"
+              className="w-full border border-border bg-background px-3 py-2 text-sm"
+            />
+            <textarea
+              value={lieferAnschrift}
+              onChange={(e) => setLieferAnschrift(e.target.value)}
+              placeholder="Straße, PLZ Ort, Land (optional)"
+              rows={3}
+              className="w-full border border-border bg-background px-3 py-2 text-sm"
+            />
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <label className="block">
               <span className="block text-[0.7rem] uppercase tracking-[0.2em] text-muted-foreground">Rabatt (%)</span>
