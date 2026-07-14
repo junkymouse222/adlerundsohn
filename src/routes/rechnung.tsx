@@ -419,12 +419,17 @@ function RechnungPage() {
           </div>
           <div className="text-right">
             <div className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
-              Verwertungsverfahren
+              Lieferanschrift
             </div>
-            <div className="mt-2 text-sm">
-              Bestandsliste vom 13. Juli 2026
-              <br />
-              Direktverkauf aus Insolvenzverfahren
+            <div className="mt-2 whitespace-pre-line text-sm">
+              {lieferName || lieferAnschrift ? (
+                <>
+                  {lieferName || "—"}
+                  {lieferAnschrift && "\n" + lieferAnschrift}
+                </>
+              ) : (
+                <span className="text-muted-foreground">Gleich Rechnungsempfänger</span>
+              )}
             </div>
           </div>
         </div>
