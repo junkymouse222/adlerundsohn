@@ -28,6 +28,10 @@ function RechnungPage() {
     () => `${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9000) + 1000)}`,
   );
   const [datum, setDatum] = useState(heute());
+  const [bankName, setBankName] = useState("Sparkasse Trier");
+  const [bankIban, setBankIban] = useState("DE00 0000 0000 0000 0000 00");
+  const [bankBic, setBankBic] = useState("TRISDE55XXX");
+  const [bankInhaber, setBankInhaber] = useState("Kanzlei Goldmann");
   const [gueltigBis, setGueltigBis] = useState(() => {
     const d = new Date();
     d.setDate(d.getDate() + 21);
