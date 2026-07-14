@@ -60,6 +60,8 @@ function RechnungPage() {
   const [kundeName, setKundeName] = useState("");
   const [kundeAnschrift, setKundeAnschrift] = useState("");
   const [kundeUstId, setKundeUstId] = useState("");
+  const [lieferName, setLieferName] = useState("");
+  const [lieferAnschrift, setLieferAnschrift] = useState("");
   const [mwstSatz, setMwstSatz] = useState(19);
   const [rabatt, setRabatt] = useState(0);
   const [notizen, setNotizen] = useState(
@@ -192,6 +194,25 @@ function RechnungPage() {
               value={kundeUstId}
               onChange={(e) => setKundeUstId(e.target.value)}
               placeholder="USt-IdNr. (optional)"
+              className="w-full border border-border bg-background px-3 py-2 text-sm"
+            />
+          </div>
+
+          <div className="space-y-3 border-t border-border pt-4">
+            <div className="text-[0.7rem] uppercase tracking-[0.2em] text-muted-foreground">
+              Abweichende Lieferanschrift
+            </div>
+            <input
+              value={lieferName}
+              onChange={(e) => setLieferName(e.target.value)}
+              placeholder="Name / Firma (optional)"
+              className="w-full border border-border bg-background px-3 py-2 text-sm"
+            />
+            <textarea
+              value={lieferAnschrift}
+              onChange={(e) => setLieferAnschrift(e.target.value)}
+              placeholder="Straße, PLZ Ort, Land (optional)"
+              rows={3}
               className="w-full border border-border bg-background px-3 py-2 text-sm"
             />
           </div>
@@ -398,12 +419,17 @@ function RechnungPage() {
           </div>
           <div className="text-right">
             <div className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
-              Verwertungsverfahren
+              Lieferanschrift
             </div>
-            <div className="mt-2 text-sm">
-              Bestandsliste vom 13. Juli 2026
-              <br />
-              Direktverkauf aus Insolvenzverfahren
+            <div className="mt-2 whitespace-pre-line text-sm">
+              {lieferName || lieferAnschrift ? (
+                <>
+                  {lieferName || "—"}
+                  {lieferAnschrift && "\n" + lieferAnschrift}
+                </>
+              ) : (
+                <span className="text-muted-foreground">Gleich Rechnungsempfänger</span>
+              )}
             </div>
           </div>
         </div>
