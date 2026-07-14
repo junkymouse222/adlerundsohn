@@ -479,9 +479,31 @@ function RechnungPage() {
           </div>
         )}
 
-        <footer className="mt-10 border-t border-border pt-4 text-[0.65rem] uppercase tracking-[0.15em] text-muted-foreground">
+        {belegArt === "Rechnung" && (
+          <div className="mt-8 grid gap-6 border-t border-border pt-6 text-xs sm:grid-cols-2">
+            <div>
+              <div className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">Zahlungsbedingungen</div>
+              <p className="mt-2 leading-relaxed">
+                Bitte überweisen Sie den Rechnungsbetrag bis zum{" "}
+                <strong>{new Date(gueltigBis).toLocaleDateString("de-DE")}</strong> auf das
+                unten genannte Konto unter Angabe der Rechnungsnummer <strong>{belegNr}</strong>.
+              </p>
+            </div>
+            <div>
+              <div className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">Bankverbindung</div>
+              <div className="mt-2 space-y-0.5 leading-relaxed">
+                <div>Kontoinhaber: <strong>{bankInhaber}</strong></div>
+                <div>Bank: {bankName}</div>
+                <div>IBAN: <span className="tabular-nums">{bankIban}</span></div>
+                <div>BIC: <span className="tabular-nums">{bankBic}</span></div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="beleg-footer mt-10 border-t border-border pt-4 text-[0.65rem] uppercase tracking-[0.15em] text-muted-foreground">
           Kanzlei Goldmann · Friedrichstraße 112 · 10117 Berlin · +49 6591 6659636 · info@kanzlei-goldmann.de
-        </footer>
+        </div>
       </article>
 
       <style>{`
@@ -492,7 +514,6 @@ function RechnungPage() {
           .beleg { position: absolute; inset: 0; margin: 0; padding: 24px; }
           .no-print { display: none !important; }
           .print-only { display: inline; }
-          header, nav, footer.site-footer { display: none !important; }
         }
       `}</style>
     </section>
