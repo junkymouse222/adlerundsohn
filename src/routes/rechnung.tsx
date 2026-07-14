@@ -2,6 +2,26 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { PRODUKTE, KATEGORIEN, type Produkt } from "@/lib/katalog";
 
+const printStyles = `
+  @page { margin: 0; size: auto; }
+  @media print {
+    body * { visibility: hidden; }
+    .beleg, .beleg * { visibility: visible; }
+    .beleg {
+      position: absolute;
+      inset: 0;
+      margin: 0;
+      padding: 16mm 18mm 20mm 18mm;
+      width: 100%;
+      min-height: 100%;
+      box-sizing: border-box;
+    }
+    .no-print { display: none !important; }
+    .print-only { display: inline; }
+    .site-footer { display: none !important; }
+  }
+`;
+
 export const Route = createFileRoute("/rechnung")({
   head: () => ({
     meta: [
@@ -506,16 +526,7 @@ function RechnungPage() {
         </div>
       </article>
 
-      <style>{`
-        .print-only { display: none; }
-        @media print {
-          body * { visibility: hidden; }
-          .beleg, .beleg * { visibility: visible; }
-          .beleg { position: absolute; inset: 0; margin: 0; padding: 24px; }
-          .no-print { display: none !important; }
-          .print-only { display: inline; }
-        }
-      `}</style>
+      <style>{printStyles}</style>
     </section>
   );
 }
