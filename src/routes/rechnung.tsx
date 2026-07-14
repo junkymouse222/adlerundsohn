@@ -212,6 +212,38 @@ function RechnungPage() {
               className="mt-2 w-full border border-border bg-background px-3 py-2 text-sm"
             />
           </label>
+
+          {belegArt === "Rechnung" && (
+            <div className="space-y-3 border-t border-border pt-4">
+              <div className="text-[0.7rem] uppercase tracking-[0.2em] text-muted-foreground">
+                Bankverbindung (nur Rechnung)
+              </div>
+              <input
+                value={bankInhaber}
+                onChange={(e) => setBankInhaber(e.target.value)}
+                placeholder="Kontoinhaber"
+                className="w-full border border-border bg-background px-3 py-2 text-sm"
+              />
+              <input
+                value={bankName}
+                onChange={(e) => setBankName(e.target.value)}
+                placeholder="Bank"
+                className="w-full border border-border bg-background px-3 py-2 text-sm"
+              />
+              <input
+                value={bankIban}
+                onChange={(e) => setBankIban(e.target.value)}
+                placeholder="IBAN"
+                className="w-full border border-border bg-background px-3 py-2 text-sm"
+              />
+              <input
+                value={bankBic}
+                onChange={(e) => setBankBic(e.target.value)}
+                placeholder="BIC"
+                className="w-full border border-border bg-background px-3 py-2 text-sm"
+              />
+            </div>
+          )}
         </div>
 
         {/* Katalog */}
