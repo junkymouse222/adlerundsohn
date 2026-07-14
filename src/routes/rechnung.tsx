@@ -28,6 +28,10 @@ function RechnungPage() {
     () => `${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9000) + 1000)}`,
   );
   const [datum, setDatum] = useState(heute());
+  const [bankName, setBankName] = useState("Sparkasse Trier");
+  const [bankIban, setBankIban] = useState("DE00 0000 0000 0000 0000 00");
+  const [bankBic, setBankBic] = useState("TRISDE55XXX");
+  const [bankInhaber, setBankInhaber] = useState("Kanzlei Goldmann");
   const [gueltigBis, setGueltigBis] = useState(() => {
     const d = new Date();
     d.setDate(d.getDate() + 21);
@@ -208,6 +212,38 @@ function RechnungPage() {
               className="mt-2 w-full border border-border bg-background px-3 py-2 text-sm"
             />
           </label>
+
+          {belegArt === "Rechnung" && (
+            <div className="space-y-3 border-t border-border pt-4">
+              <div className="text-[0.7rem] uppercase tracking-[0.2em] text-muted-foreground">
+                Bankverbindung (nur Rechnung)
+              </div>
+              <input
+                value={bankInhaber}
+                onChange={(e) => setBankInhaber(e.target.value)}
+                placeholder="Kontoinhaber"
+                className="w-full border border-border bg-background px-3 py-2 text-sm"
+              />
+              <input
+                value={bankName}
+                onChange={(e) => setBankName(e.target.value)}
+                placeholder="Bank"
+                className="w-full border border-border bg-background px-3 py-2 text-sm"
+              />
+              <input
+                value={bankIban}
+                onChange={(e) => setBankIban(e.target.value)}
+                placeholder="IBAN"
+                className="w-full border border-border bg-background px-3 py-2 text-sm"
+              />
+              <input
+                value={bankBic}
+                onChange={(e) => setBankBic(e.target.value)}
+                placeholder="BIC"
+                className="w-full border border-border bg-background px-3 py-2 text-sm"
+              />
+            </div>
+          )}
         </div>
 
         {/* Katalog */}
@@ -303,7 +339,7 @@ function RechnungPage() {
 
       {/* ============ BELEG (auch Bildschirm-Vorschau) ============ */}
       <article className="beleg mt-12 border border-border bg-background p-8 md:p-12 print:mt-0 print:border-0 print:p-0">
-        <header className="flex flex-wrap items-start justify-between gap-6 border-b border-gold pb-6">
+        <div className="beleg-header flex flex-wrap items-start justify-between gap-6 border-b border-gold pb-6">
           <div>
             <div className="text-2xl font-serif tracking-widest">G O L D M A N N</div>
             <div className="mt-1 text-[0.65rem] uppercase tracking-[0.25em] text-muted-foreground">
@@ -327,7 +363,7 @@ function RechnungPage() {
               {new Date(gueltigBis).toLocaleDateString("de-DE")}
             </div>
           </div>
-        </header>
+        </div>
 
         <div className="mt-8 grid grid-cols-2 gap-8 text-xs">
           <div>
@@ -443,9 +479,31 @@ function RechnungPage() {
           </div>
         )}
 
-        <footer className="mt-10 border-t border-border pt-4 text-[0.65rem] uppercase tracking-[0.15em] text-muted-foreground">
+        {belegArt === "Rechnung" && (
+          <div className="mt-8 grid gap-6 border-t border-border pt-6 text-xs sm:grid-cols-2">
+            <div>
+              <div className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">Zahlungsbedingungen</div>
+              <p className="mt-2 leading-relaxed">
+                Bitte überweisen Sie den Rechnungsbetrag bis zum{" "}
+                <strong>{new Date(gueltigBis).toLocaleDateString("de-DE")}</strong> auf das
+                unten genannte Konto unter Angabe der Rechnungsnummer <strong>{belegNr}</strong>.
+              </p>
+            </div>
+            <div>
+              <div className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">Bankverbindung</div>
+              <div className="mt-2 space-y-0.5 leading-relaxed">
+                <div>Kontoinhaber: <strong>{bankInhaber}</strong></div>
+                <div>Bank: {bankName}</div>
+                <div>IBAN: <span className="tabular-nums">{bankIban}</span></div>
+                <div>BIC: <span className="tabular-nums">{bankBic}</span></div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="beleg-footer mt-10 border-t border-border pt-4 text-[0.65rem] uppercase tracking-[0.15em] text-muted-foreground">
           Kanzlei Goldmann · Friedrichstraße 112 · 10117 Berlin · +49 6591 6659636 · info@kanzlei-goldmann.de
-        </footer>
+        </div>
       </article>
 
       <style>{`
@@ -456,7 +514,6 @@ function RechnungPage() {
           .beleg { position: absolute; inset: 0; margin: 0; padding: 24px; }
           .no-print { display: none !important; }
           .print-only { display: inline; }
-          header, nav, footer.site-footer { display: none !important; }
         }
       `}</style>
     </section>
