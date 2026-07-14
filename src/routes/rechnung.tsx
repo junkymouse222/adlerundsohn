@@ -363,7 +363,7 @@ function RechnungPage() {
               {new Date(gueltigBis).toLocaleDateString("de-DE")}
             </div>
           </div>
-        </header>
+        </div>
 
         <div className="mt-8 grid grid-cols-2 gap-8 text-xs">
           <div>
