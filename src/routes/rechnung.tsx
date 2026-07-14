@@ -60,6 +60,8 @@ function RechnungPage() {
   const [kundeName, setKundeName] = useState("");
   const [kundeAnschrift, setKundeAnschrift] = useState("");
   const [kundeUstId, setKundeUstId] = useState("");
+  const [lieferName, setLieferName] = useState("");
+  const [lieferAnschrift, setLieferAnschrift] = useState("");
   const [mwstSatz, setMwstSatz] = useState(19);
   const [rabatt, setRabatt] = useState(0);
   const [notizen, setNotizen] = useState(
