@@ -486,7 +486,7 @@ function RechnungPage() {
               </tr>
               <tr className="border-t border-gold">
                 <td className="py-2 text-sm font-semibold uppercase tracking-[0.15em]">Gesamt</td>
-                <td className="py-2 text-right text-lg font-serif tabular-nums">{fmtEUR(brutto)}</td>
+                <td className="py-2 text-right tabular-nums font-semibold">{fmtEUR(brutto)}</td>
               </tr>
             </tbody>
           </table>
