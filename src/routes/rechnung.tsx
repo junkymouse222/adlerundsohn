@@ -486,7 +486,7 @@ function RechnungPage() {
               </tr>
               <tr className="border-t border-gold">
                 <td className="py-2 text-sm font-semibold uppercase tracking-[0.15em]">Gesamt</td>
-                <td className="py-2 text-right text-lg font-serif tabular-nums">{fmtEUR(brutto)}</td>
+                <td className="py-2 text-right tabular-nums font-semibold">{fmtEUR(brutto)}</td>
               </tr>
             </tbody>
           </table>
@@ -522,7 +522,7 @@ function RechnungPage() {
         )}
 
         <div className="beleg-footer mt-10 border-t border-border pt-4 text-[0.65rem] uppercase tracking-[0.15em] text-muted-foreground">
-          Kanzlei Goldmann · Friedrichstraße 112 · 10117 Berlin · +49 6591 6659636 · info@kanzlei-goldmann.de
+          Kanzlei Goldmann · Friedrichstraße 112 · 10117 Berlin · +49 6591 6659636 · info@kanzlei-goldmann.de · USt-IdNr. DE271552088
         </div>
       </article>
 
