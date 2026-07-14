@@ -526,16 +526,7 @@ function RechnungPage() {
         </div>
       </article>
 
-      <style>{`
-        .print-only { display: none; }
-        @media print {
-          body * { visibility: hidden; }
-          .beleg, .beleg * { visibility: visible; }
-          .beleg { position: absolute; inset: 0; margin: 0; padding: 24px; }
-          .no-print { display: none !important; }
-          .print-only { display: inline; }
-        }
-      `}</style>
+      <style>{printStyles}</style>
     </section>
   );
 }
