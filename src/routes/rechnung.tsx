@@ -397,7 +397,7 @@ function RechnungPage() {
             <div className="text-[0.7rem] uppercase tracking-[0.25em] text-muted-foreground">
               {belegArt}
             </div>
-            <div className="mt-1 text-3xl font-serif">{belegNr}</div>
+            <div className="mt-1 text-3xl font-semibold tabular-nums">{belegNr}</div>
             <div className="mt-2 text-xs text-muted-foreground">
               Datum: {new Date(datum).toLocaleDateString("de-DE")}
               <br />
