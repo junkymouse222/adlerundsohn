@@ -63,6 +63,7 @@ function RechnungPage() {
   const [lieferAnschrift, setLieferAnschrift] = useState("");
   const [mwstSatz, setMwstSatz] = useState(19);
   const [rabatt, setRabatt] = useState(0);
+  const [lieferkosten, setLieferkosten] = useState(0);
   const [notizen, setNotizen] = useState(
     "Alle Positionen aus laufender Verwertung. Lieferung ab Bestellwert 3.000 € netto kostenfrei innerhalb des Liefergebiets. Zwischenverkauf vorbehalten.",
   );
@@ -111,7 +112,7 @@ function RechnungPage() {
 
   const zwischensumme = positionen.reduce((s, x) => s + x.produkt.einzelpreis * x.menge, 0);
   const rabattBetrag = zwischensumme * (rabatt / 100);
-  const netto = zwischensumme - rabattBetrag;
+  const netto = zwischensumme - rabattBetrag + lieferkosten;
   const mwst = netto * (mwstSatz / 100);
   const brutto = netto + mwst;
 
@@ -220,7 +221,7 @@ function RechnungPage() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
             <label className="block">
               <span className="block text-[0.7rem] uppercase tracking-[0.2em] text-muted-foreground">Rabatt (%)</span>
               <input
@@ -242,6 +243,17 @@ function RechnungPage() {
                 step={0.5}
                 value={mwstSatz}
                 onChange={(e) => setMwstSatz(Number(e.target.value) || 0)}
+                className="mt-2 w-full border border-border bg-background px-3 py-2 text-sm"
+              />
+            </label>
+            <label className="block">
+              <span className="block text-[0.7rem] uppercase tracking-[0.2em] text-muted-foreground">Lieferkosten (€ netto)</span>
+              <input
+                type="number"
+                min={0}
+                step={0.01}
+                value={lieferkosten}
+                onChange={(e) => setLieferkosten(Number(e.target.value) || 0)}
                 className="mt-2 w-full border border-border bg-background px-3 py-2 text-sm"
               />
             </label>
