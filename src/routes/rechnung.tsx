@@ -517,6 +517,12 @@ function RechnungPage() {
                   <td className="py-1 text-right tabular-nums">−{fmtEUR(rabattBetrag)}</td>
                 </tr>
               )}
+              {lieferkosten > 0 && (
+                <tr>
+                  <td className="py-1 text-muted-foreground">Lieferkosten</td>
+                  <td className="py-1 text-right tabular-nums">{fmtEUR(lieferkosten)}</td>
+                </tr>
+              )}
               <tr className="border-t border-border">
                 <td className="py-1 text-muted-foreground">Netto</td>
                 <td className="py-1 text-right tabular-nums">{fmtEUR(netto)}</td>
