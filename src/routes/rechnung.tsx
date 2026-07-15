@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PRODUKTE, KATEGORIEN, type Produkt } from "@/lib/katalog";
 
 
@@ -45,9 +45,7 @@ const heute = () => new Date().toISOString().slice(0, 10);
 
 function RechnungPage() {
   const [belegArt, setBelegArt] = useState<BelegArt>("Angebot");
-  const [belegNr, setBelegNr] = useState(
-    () => `${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9000) + 1000)}`,
-  );
+  const [belegNr, setBelegNr] = useState(`${new Date().getFullYear()}-0000`);
   const [datum, setDatum] = useState(heute());
   const [bankName, setBankName] = useState("Sparkasse Trier");
   const [bankIban, setBankIban] = useState("DE00 0000 0000 0000 0000 00");
@@ -68,6 +66,10 @@ function RechnungPage() {
   const [notizen, setNotizen] = useState(
     "Alle Positionen aus laufender Verwertung. Lieferung ab Bestellwert 3.000 € netto kostenfrei innerhalb des Liefergebiets. Zwischenverkauf vorbehalten.",
   );
+
+  useEffect(() => {
+    setBelegNr(`${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9000) + 1000)}`);
+  }, []);
 
   const [positionen, setPositionen] = useState<Position[]>([]);
   const [suche, setSuche] = useState("");
