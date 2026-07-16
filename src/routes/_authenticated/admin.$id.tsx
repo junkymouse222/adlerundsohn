@@ -98,14 +98,24 @@ function AdminDetailPage() {
           <h1 className="mt-2 font-mono text-3xl">{offer.angebot_nr}</h1>
           <span className="rule-gold mt-4" />
         </div>
-        <button
-          onClick={() => setConfirmOpen(true)}
-          disabled={resending}
-          className="bg-primary px-6 py-3 text-xs uppercase tracking-[0.2em] text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
-        >
-          {resending ? "Wird gesendet …" : "Jetzt senden"}
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setConfirmOpen(true)}
+            disabled={resending}
+            className="bg-primary px-6 py-3 text-xs uppercase tracking-[0.2em] text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
+          >
+            {resending ? "Wird gesendet …" : "Angebot senden (PDF)"}
+          </button>
+          <button
+            onClick={() => setInvoiceConfirmOpen(true)}
+            disabled={invoicing}
+            className="border border-gold bg-parchment px-6 py-3 text-xs uppercase tracking-[0.2em] text-primary hover:bg-primary hover:text-primary-foreground disabled:opacity-60"
+          >
+            {invoicing ? "Wird gesendet …" : offer.rechnung_status === "sent" ? "Rechnung erneut senden" : "Rechnung senden"}
+          </button>
+        </div>
       </div>
+
 
       {sendResult && (
         <div
