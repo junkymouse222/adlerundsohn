@@ -214,6 +214,11 @@ function AdminDetailPage() {
             <div className="flex justify-between"><dt className="text-muted-foreground">Gesendet</dt><dd>{fmtDate(offer.sent_at)}</dd></div>
             {offer.ref_source && <div className="flex justify-between"><dt className="text-muted-foreground">Quelle</dt><dd className="font-mono text-xs">{offer.ref_source}</dd></div>}
             {offer.resend_message_id && <div className="flex justify-between"><dt className="text-muted-foreground">Resend-ID</dt><dd className="font-mono text-xs">{offer.resend_message_id}</dd></div>}
+            {offer.rechnung_nr && <div className="flex justify-between border-t border-border pt-2"><dt className="text-muted-foreground">Rechnung</dt><dd className="font-mono text-xs">{offer.rechnung_nr}</dd></div>}
+            {offer.rechnung_status && offer.rechnung_status !== "none" && <div className="flex justify-between"><dt className="text-muted-foreground">Rechnungsstatus</dt><dd>{offer.rechnung_status}</dd></div>}
+            {offer.rechnung_sent_at && <div className="flex justify-between"><dt className="text-muted-foreground">Rechnung gesendet</dt><dd>{fmtDate(offer.rechnung_sent_at)}</dd></div>}
+            {offer.rechnung_faellig_am && <div className="flex justify-between"><dt className="text-muted-foreground">Fällig am</dt><dd>{new Date(offer.rechnung_faellig_am).toLocaleDateString("de-DE")}</dd></div>}
+            {offer.rechnung_error && <div className="mt-2 border-t border-border pt-2 text-red-700">{offer.rechnung_error}</div>}
             {offer.error_message && <div className="mt-2 border-t border-border pt-2 text-red-700">{offer.error_message}</div>}
           </dl>
         </div>
