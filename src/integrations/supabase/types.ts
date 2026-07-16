@@ -81,6 +81,12 @@ export type Database = {
           mwst: number
           mwst_rate: number
           offer_html: string | null
+          rechnung_error: string | null
+          rechnung_faellig_am: string | null
+          rechnung_message_id: string | null
+          rechnung_nr: string | null
+          rechnung_sent_at: string | null
+          rechnung_status: string
           ref_source: string | null
           resend_message_id: string | null
           scheduled_send_at: string
@@ -106,6 +112,12 @@ export type Database = {
           mwst?: number
           mwst_rate?: number
           offer_html?: string | null
+          rechnung_error?: string | null
+          rechnung_faellig_am?: string | null
+          rechnung_message_id?: string | null
+          rechnung_nr?: string | null
+          rechnung_sent_at?: string | null
+          rechnung_status?: string
           ref_source?: string | null
           resend_message_id?: string | null
           scheduled_send_at: string
@@ -131,6 +143,12 @@ export type Database = {
           mwst?: number
           mwst_rate?: number
           offer_html?: string | null
+          rechnung_error?: string | null
+          rechnung_faellig_am?: string | null
+          rechnung_message_id?: string | null
+          rechnung_nr?: string | null
+          rechnung_sent_at?: string | null
+          rechnung_status?: string
           ref_source?: string | null
           resend_message_id?: string | null
           scheduled_send_at?: string
