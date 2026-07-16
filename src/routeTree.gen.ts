@@ -20,6 +20,7 @@ import { Route as DatenschutzRouteImport } from './routes/datenschutz'
 import { Route as AnwaelteRouteImport } from './routes/anwaelte'
 import { Route as AngebotAnfordernRouteImport } from './routes/angebot-anfordern'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AngebotAnfordernDankeRouteImport } from './routes/angebot-anfordern.danke'
 import { Route as JuliAngeboteFilenameRouteImport } from './routes/juli.angebote.$filename'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -77,6 +78,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AngebotAnfordernDankeRoute = AngebotAnfordernDankeRouteImport.update({
+  id: '/danke',
+  path: '/danke',
+  getParentRoute: () => AngebotAnfordernRoute,
+} as any)
 const JuliAngeboteFilenameRoute = JuliAngeboteFilenameRouteImport.update({
   id: '/juli/angebote/$filename',
   path: '/juli/angebote/$filename',
@@ -85,7 +91,7 @@ const JuliAngeboteFilenameRoute = JuliAngeboteFilenameRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/angebot-anfordern': typeof AngebotAnfordernRoute
+  '/angebot-anfordern': typeof AngebotAnfordernRouteWithChildren
   '/anwaelte': typeof AnwaelteRoute
   '/datenschutz': typeof DatenschutzRoute
   '/fachgebiete': typeof FachgebieteRoute
@@ -95,11 +101,12 @@ export interface FileRoutesByFullPath {
   '/kontakt': typeof KontaktRoute
   '/rechnung': typeof RechnungRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/angebot-anfordern/danke': typeof AngebotAnfordernDankeRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/angebot-anfordern': typeof AngebotAnfordernRoute
+  '/angebot-anfordern': typeof AngebotAnfordernRouteWithChildren
   '/anwaelte': typeof AnwaelteRoute
   '/datenschutz': typeof DatenschutzRoute
   '/fachgebiete': typeof FachgebieteRoute
@@ -109,12 +116,13 @@ export interface FileRoutesByTo {
   '/kontakt': typeof KontaktRoute
   '/rechnung': typeof RechnungRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/angebot-anfordern/danke': typeof AngebotAnfordernDankeRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/angebot-anfordern': typeof AngebotAnfordernRoute
+  '/angebot-anfordern': typeof AngebotAnfordernRouteWithChildren
   '/anwaelte': typeof AnwaelteRoute
   '/datenschutz': typeof DatenschutzRoute
   '/fachgebiete': typeof FachgebieteRoute
@@ -124,6 +132,7 @@ export interface FileRoutesById {
   '/kontakt': typeof KontaktRoute
   '/rechnung': typeof RechnungRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/angebot-anfordern/danke': typeof AngebotAnfordernDankeRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
 }
 export interface FileRouteTypes {
@@ -140,6 +149,7 @@ export interface FileRouteTypes {
     | '/kontakt'
     | '/rechnung'
     | '/sitemap.xml'
+    | '/angebot-anfordern/danke'
     | '/juli/angebote/$filename'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -154,6 +164,7 @@ export interface FileRouteTypes {
     | '/kontakt'
     | '/rechnung'
     | '/sitemap.xml'
+    | '/angebot-anfordern/danke'
     | '/juli/angebote/$filename'
   id:
     | '__root__'
@@ -168,12 +179,13 @@ export interface FileRouteTypes {
     | '/kontakt'
     | '/rechnung'
     | '/sitemap.xml'
+    | '/angebot-anfordern/danke'
     | '/juli/angebote/$filename'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AngebotAnfordernRoute: typeof AngebotAnfordernRoute
+  AngebotAnfordernRoute: typeof AngebotAnfordernRouteWithChildren
   AnwaelteRoute: typeof AnwaelteRoute
   DatenschutzRoute: typeof DatenschutzRoute
   FachgebieteRoute: typeof FachgebieteRoute
@@ -265,6 +277,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/angebot-anfordern/danke': {
+      id: '/angebot-anfordern/danke'
+      path: '/danke'
+      fullPath: '/angebot-anfordern/danke'
+      preLoaderRoute: typeof AngebotAnfordernDankeRouteImport
+      parentRoute: typeof AngebotAnfordernRoute
+    }
     '/juli/angebote/$filename': {
       id: '/juli/angebote/$filename'
       path: '/juli/angebote/$filename'
@@ -275,9 +294,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AngebotAnfordernRouteChildren {
+  AngebotAnfordernDankeRoute: typeof AngebotAnfordernDankeRoute
+}
+
+const AngebotAnfordernRouteChildren: AngebotAnfordernRouteChildren = {
+  AngebotAnfordernDankeRoute: AngebotAnfordernDankeRoute,
+}
+
+const AngebotAnfordernRouteWithChildren =
+  AngebotAnfordernRoute._addFileChildren(AngebotAnfordernRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AngebotAnfordernRoute: AngebotAnfordernRoute,
+  AngebotAnfordernRoute: AngebotAnfordernRouteWithChildren,
   AnwaelteRoute: AnwaelteRoute,
   DatenschutzRoute: DatenschutzRoute,
   FachgebieteRoute: FachgebieteRoute,
