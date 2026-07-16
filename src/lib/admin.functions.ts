@@ -54,6 +54,12 @@ export type OfferDetail = {
     offer_html: string | null;
     resend_message_id: string | null;
     error_message: string | null;
+    rechnung_nr: string | null;
+    rechnung_status: string | null;
+    rechnung_sent_at: string | null;
+    rechnung_message_id: string | null;
+    rechnung_faellig_am: string | null;
+    rechnung_error: string | null;
   };
   items: Array<{
     id: string;
@@ -67,6 +73,7 @@ export type OfferDetail = {
     position_total: number;
   }>;
 };
+
 
 export const listOfferRequests = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
