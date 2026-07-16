@@ -25,6 +25,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AngebotAnfordernDankeRouteImport } from './routes/angebot-anfordern.danke'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as JuliAngeboteFilenameRouteImport } from './routes/juli.angebote.$filename'
+import { Route as AuthenticatedAdminIdRouteImport } from './routes/_authenticated/admin.$id'
 import { Route as ApiPublicHooksSendScheduledOffersRouteImport } from './routes/api/public/hooks/send-scheduled-offers'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -106,6 +107,11 @@ const JuliAngeboteFilenameRoute = JuliAngeboteFilenameRouteImport.update({
   path: '/juli/angebote/$filename',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminIdRoute = AuthenticatedAdminIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const ApiPublicHooksSendScheduledOffersRoute =
   ApiPublicHooksSendScheduledOffersRouteImport.update({
     id: '/api/public/hooks/send-scheduled-offers',
@@ -126,8 +132,9 @@ export interface FileRoutesByFullPath {
   '/kontakt': typeof KontaktRoute
   '/rechnung': typeof RechnungRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/angebot-anfordern/danke': typeof AngebotAnfordernDankeRoute
+  '/admin/$id': typeof AuthenticatedAdminIdRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
   '/api/public/hooks/send-scheduled-offers': typeof ApiPublicHooksSendScheduledOffersRoute
 }
@@ -144,8 +151,9 @@ export interface FileRoutesByTo {
   '/kontakt': typeof KontaktRoute
   '/rechnung': typeof RechnungRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/angebot-anfordern/danke': typeof AngebotAnfordernDankeRoute
+  '/admin/$id': typeof AuthenticatedAdminIdRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
   '/api/public/hooks/send-scheduled-offers': typeof ApiPublicHooksSendScheduledOffersRoute
 }
@@ -164,8 +172,9 @@ export interface FileRoutesById {
   '/kontakt': typeof KontaktRoute
   '/rechnung': typeof RechnungRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/angebot-anfordern/danke': typeof AngebotAnfordernDankeRoute
+  '/_authenticated/admin/$id': typeof AuthenticatedAdminIdRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
   '/api/public/hooks/send-scheduled-offers': typeof ApiPublicHooksSendScheduledOffersRoute
 }
@@ -186,6 +195,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/admin'
     | '/angebot-anfordern/danke'
+    | '/admin/$id'
     | '/juli/angebote/$filename'
     | '/api/public/hooks/send-scheduled-offers'
   fileRoutesByTo: FileRoutesByTo
@@ -204,6 +214,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/admin'
     | '/angebot-anfordern/danke'
+    | '/admin/$id'
     | '/juli/angebote/$filename'
     | '/api/public/hooks/send-scheduled-offers'
   id:
@@ -223,6 +234,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/_authenticated/admin'
     | '/angebot-anfordern/danke'
+    | '/_authenticated/admin/$id'
     | '/juli/angebote/$filename'
     | '/api/public/hooks/send-scheduled-offers'
   fileRoutesById: FileRoutesById
@@ -359,6 +371,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JuliAngeboteFilenameRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/$id': {
+      id: '/_authenticated/admin/$id'
+      path: '/$id'
+      fullPath: '/admin/$id'
+      preLoaderRoute: typeof AuthenticatedAdminIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/api/public/hooks/send-scheduled-offers': {
       id: '/api/public/hooks/send-scheduled-offers'
       path: '/api/public/hooks/send-scheduled-offers'
@@ -369,12 +388,23 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminIdRoute: typeof AuthenticatedAdminIdRoute
+}
+
+const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminIdRoute: AuthenticatedAdminIdRoute,
+}
+
+const AuthenticatedAdminRouteWithChildren =
+  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -412,3 +442,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
