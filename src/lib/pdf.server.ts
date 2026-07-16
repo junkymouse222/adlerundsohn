@@ -76,6 +76,8 @@ async function renderBeleg(
   offer: OfferForPdf,
   items: ItemForPdf[],
   invoice?: InvoiceMeta,
+  acceptUrl?: string | null,
+  alreadyAccepted?: boolean,
 ): Promise<Uint8Array> {
   const pdf = await PDFDocument.create();
   const font = await pdf.embedFont(StandardFonts.Helvetica);
