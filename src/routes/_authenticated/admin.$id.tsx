@@ -23,6 +23,8 @@ function AdminDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [resending, setResending] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [sendResult, setSendResult] = useState<{ ok: boolean; msg: string } | null>(null);
 
   async function load() {
     setLoading(true);
@@ -41,15 +43,16 @@ function AdminDetailPage() {
     load();
   }, [id]);
 
-  async function handleResend() {
-    if (!confirm("Angebot jetzt per E-Mail an den Kunden senden?")) return;
+  async function handleResendConfirmed() {
+    setConfirmOpen(false);
     setResending(true);
+    setSendResult(null);
     try {
-      await resendOfferNow({ data: { id } });
+      const res = await resendOfferNow({ data: { id } });
       await load();
-      alert("Angebot wurde versendet.");
+      setSendResult({ ok: true, msg: `Angebot versendet${res.messageId ? ` (ID: ${res.messageId})` : ""}.` });
     } catch (e) {
-      alert(e instanceof Error ? e.message : "Fehler beim Senden.");
+      setSendResult({ ok: false, msg: e instanceof Error ? e.message : "Fehler beim Senden." });
     } finally {
       setResending(false);
     }
@@ -74,13 +77,43 @@ function AdminDetailPage() {
           <span className="rule-gold mt-4" />
         </div>
         <button
-          onClick={handleResend}
+          onClick={() => setConfirmOpen(true)}
           disabled={resending}
           className="bg-primary px-6 py-3 text-xs uppercase tracking-[0.2em] text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
         >
           {resending ? "Wird gesendet …" : "Jetzt senden"}
         </button>
       </div>
+
+      {sendResult && (
+        <div
+          className={`mt-6 border p-4 text-sm ${
+            sendResult.ok ? "border-green-700 bg-green-50 text-green-900" : "border-red-700 bg-red-50 text-red-800"
+          }`}
+        >
+          {sendResult.msg}
+        </div>
+      )}
+
+      {confirmOpen && (
+        <div className="mt-6 border border-gold bg-parchment p-4 text-sm">
+          <p className="mb-3">Angebot jetzt per E-Mail an <strong>{offer.customer_email}</strong> senden?</p>
+          <div className="flex gap-2">
+            <button
+              onClick={handleResendConfirmed}
+              className="bg-primary px-4 py-2 text-xs uppercase tracking-widest text-primary-foreground hover:bg-primary/90"
+            >
+              Ja, senden
+            </button>
+            <button
+              onClick={() => setConfirmOpen(false)}
+              className="border border-border px-4 py-2 text-xs uppercase tracking-widest text-muted-foreground hover:text-primary"
+            >
+              Abbrechen
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="mt-8 grid gap-8 md:grid-cols-2">
         <div className="border border-border p-6">
