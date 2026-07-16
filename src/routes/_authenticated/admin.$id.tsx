@@ -42,13 +42,14 @@ function AdminDetailPage() {
   }, [id]);
 
   async function handleResend() {
-    if (!confirm("Erneut senden? Das Angebot wird beim nächsten Cron-Lauf (in max. 5 Min.) versendet.")) return;
+    if (!confirm("Angebot jetzt per E-Mail an den Kunden senden?")) return;
     setResending(true);
     try {
       await resendOfferNow({ data: { id } });
       await load();
+      alert("Angebot wurde versendet.");
     } catch (e) {
-      alert(e instanceof Error ? e.message : "Fehler beim erneuten Senden.");
+      alert(e instanceof Error ? e.message : "Fehler beim Senden.");
     } finally {
       setResending(false);
     }
@@ -77,7 +78,7 @@ function AdminDetailPage() {
           disabled={resending}
           className="bg-primary px-6 py-3 text-xs uppercase tracking-[0.2em] text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
         >
-          {resending ? "Wird geplant …" : "Erneut senden"}
+          {resending ? "Wird gesendet …" : "Jetzt senden"}
         </button>
       </div>
 

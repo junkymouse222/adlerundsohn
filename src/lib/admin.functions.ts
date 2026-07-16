@@ -110,13 +110,53 @@ export const getOfferRequest = createServerFn({ method: "GET" })
 export const resendOfferNow = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
-  .handler(async ({ context, data }): Promise<{ ok: true }> => {
+  .handler(async ({ context, data }): Promise<{ ok: true; messageId?: string }> => {
     await assertAdmin(context.supabase as never, context.userId);
-    const client = context.supabase as any;
-    const { error } = await client
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { renderOfferHtml, sendOfferEmail } = await import("@/lib/offer-email.server");
+
+    const admin = supabaseAdmin as any;
+    const { data: offer, error: offerErr } = await admin
       .from("offer_requests")
-      .update({ status: "pending", scheduled_send_at: new Date().toISOString(), error_message: null })
+      .select("*")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (offerErr) throw new Error(offerErr.message);
+    if (!offer) throw new Error("Anfrage nicht gefunden.");
+
+    const { data: items, error: itemsErr } = await admin
+      .from("offer_request_items")
+      .select("*")
+      .eq("request_id", data.id)
+      .order("pos", { ascending: true });
+    if (itemsErr) throw new Error(itemsErr.message);
+
+    const html = renderOfferHtml(offer as never, (items ?? []) as never);
+    const send = await sendOfferEmail({
+      to: offer.customer_email as string,
+      subject: `Ihr Angebot ${offer.angebot_nr as string} — Kanzlei Adler und Sohn`,
+      html,
+    });
+
+    if (!send.ok) {
+      await admin
+        .from("offer_requests")
+        .update({ status: "failed", offer_html: html, error_message: send.error })
+        .eq("id", data.id);
+      throw new Error(send.error);
+    }
+
+    await admin
+      .from("offer_requests")
+      .update({
+        status: "sent",
+        sent_at: new Date().toISOString(),
+        offer_html: html,
+        resend_message_id: send.messageId,
+        error_message: null,
+      })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
-    return { ok: true };
+
+    return { ok: true, messageId: send.messageId };
   });
