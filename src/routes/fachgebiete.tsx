@@ -3,13 +3,13 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 export const Route = createFileRoute("/fachgebiete")({
   head: () => ({
     meta: [
-      { title: "Fachgebiete — Insolvenzrecht & Insolvenzverwaltung | Kanzlei Goldmann" },
+      { title: "Fachgebiete — Insolvenzrecht & Insolvenzverwaltung | Kanzlei Adler und Sohn" },
       { name: "description", content: "Regelinsolvenzverfahren, Eigenverwaltung, Schutzschirm, Gläubigervertretung, Verbraucherinsolvenz und Insolvenzverwaltung — spezialisiert seit 1998." },
-      { property: "og:title", content: "Fachgebiete — Kanzlei Goldmann" },
+      { property: "og:title", content: "Fachgebiete — Kanzlei Adler und Sohn" },
       { property: "og:description", content: "Alle Bereiche des Insolvenzrechts unter einem Dach." },
-      { property: "og:url", content: "https://kanzlei-goldmann.de/fachgebiete" },
+      { property: "og:url", content: "https://adlerundsohn.com/fachgebiete" },
     ],
-    links: [{ rel: "canonical", href: "https://kanzlei-goldmann.de/fachgebiete" }],
+    links: [{ rel: "canonical", href: "https://adlerundsohn.com/fachgebiete" }],
   }),
   component: FachgebietePage,
 });

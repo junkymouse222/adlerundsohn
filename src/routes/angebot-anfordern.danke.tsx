@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 export const Route = createFileRoute("/angebot-anfordern/danke")({
   head: () => ({
     meta: [
-      { title: "Anfrage eingegangen — Kanzlei Goldmann" },
+      { title: "Anfrage eingegangen — Kanzlei Adler und Sohn" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -22,7 +22,7 @@ function DankePage() {
       <span className="rule-gold mt-8" />
       <p className="mt-8 max-w-2xl text-lg leading-relaxed text-foreground/80">
         Ihr Angebot wird jetzt erstellt und automatisch an Ihre E-Mail-Adresse
-        versendet — üblicherweise innerhalb von 15 bis 30 Minuten während
+        versendet — üblicherweise innerhalb weniger Stunden während
         unserer Geschäftszeiten (Mo–Fr, 07:00–19:00 Uhr).
       </p>
       {nr && (

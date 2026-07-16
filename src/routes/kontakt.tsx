@@ -4,13 +4,13 @@ import { useState } from "react";
 export const Route = createFileRoute("/kontakt")({
   head: () => ({
     meta: [
-      { title: "Kontakt — Rechtsanwaltskanzlei Goldmann Berlin" },
-      { name: "description", content: "Kontakt zur Rechtsanwaltskanzlei Goldmann in Berlin. Vertrauliches Erstgespräch, Termin nach Vereinbarung." },
-      { property: "og:title", content: "Kontakt — Kanzlei Goldmann" },
+      { title: "Kontakt — Rechtsanwaltskanzlei Adler und Sohn Berlin" },
+      { name: "description", content: "Kontakt zur Rechtsanwaltskanzlei Adler und Sohn auf Sylt. Vertrauliches Erstgespräch, Termin nach Vereinbarung." },
+      { property: "og:title", content: "Kontakt — Kanzlei Adler und Sohn" },
       { property: "og:description", content: "Vertrauliches Erstgespräch, Termin nach Vereinbarung." },
-      { property: "og:url", content: "https://kanzlei-goldmann.de/kontakt" },
+      { property: "og:url", content: "https://adlerundsohn.com/kontakt" },
     ],
-    links: [{ rel: "canonical", href: "https://kanzlei-goldmann.de/kontakt" }],
+    links: [{ rel: "canonical", href: "https://adlerundsohn.com/kontakt" }],
   }),
   component: KontaktPage,
 });
@@ -31,12 +31,12 @@ function KontaktPage() {
 
       <section className="container-prose grid gap-16 py-20 md:grid-cols-2 md:py-28">
         <div>
-          <h2 className="text-3xl">Kanzlei Berlin</h2>
+          <h2 className="text-3xl">Kanzlei Sylt</h2>
           <span className="rule-gold mt-6" />
           <address className="mt-8 space-y-1 not-italic text-base text-foreground/80">
-            <p>Rechtsanwaltskanzlei Goldmann</p>
-            <p>Friedrichstraße 112</p>
-            <p>10117 Berlin-Mitte</p>
+            <p>Rechtsanwaltskanzlei Adler und Sohn</p>
+            <p>Strandstraße 14</p>
+            <p>25980 Westerland/Sylt</p>
           </address>
 
           <dl className="mt-8 space-y-4 border-t border-border pt-8 text-sm">
@@ -51,14 +51,14 @@ function KontaktPage() {
             <div className="grid grid-cols-[8rem_1fr] gap-4">
               <dt className="text-muted-foreground">E-Mail</dt>
               <dd>
-                <a href="mailto:info@kanzlei-goldmann.de" className="text-primary hover:text-gold">info@kanzlei-goldmann.de</a>
+                <a href="mailto:info@adlerundsohn.com" className="text-primary hover:text-gold">info@adlerundsohn.com</a>
                 <br />
-                <a href="mailto:info@goldmann-ra.de" className="text-primary hover:text-gold">info@goldmann-ra.de</a>
+                <a href="mailto:info@adlerundsohn.com" className="text-primary hover:text-gold">info@adlerundsohn.com</a>
               </dd>
             </div>
             <div className="grid grid-cols-[8rem_1fr] gap-4">
               <dt className="text-muted-foreground">Web</dt>
-              <dd>kanzlei-goldmann.de</dd>
+              <dd>adlerundsohn.com</dd>
             </div>
           </dl>
 

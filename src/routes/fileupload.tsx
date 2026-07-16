@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/fileupload")({
   head: () => ({
     meta: [
-      { title: "PDF Upload — Kanzlei Goldmann" },
+      { title: "PDF Upload — Kanzlei Adler und Sohn" },
       { name: "description", content: "Interner PDF-Upload für Angebote." },
       { name: "robots", content: "noindex, nofollow" },
     ],

@@ -3,13 +3,13 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 export const Route = createFileRoute("/kanzlei")({
   head: () => ({
     meta: [
-      { title: "Die Kanzlei — Rechtsanwaltskanzlei Goldmann" },
-      { name: "description", content: "Seit 1998 spezialisiert auf Insolvenzrecht und Insolvenzverwaltung. Erfahren Sie mehr über die Geschichte und Werte der Kanzlei Goldmann." },
-      { property: "og:title", content: "Die Kanzlei — Rechtsanwaltskanzlei Goldmann" },
-      { property: "og:description", content: "Erfahren Sie mehr über Geschichte und Werte der Kanzlei Goldmann." },
-      { property: "og:url", content: "https://kanzlei-goldmann.de/kanzlei" },
+      { title: "Die Kanzlei — Rechtsanwaltskanzlei Adler und Sohn" },
+      { name: "description", content: "Seit 1998 spezialisiert auf Insolvenzrecht und Insolvenzverwaltung. Erfahren Sie mehr über die Geschichte und Werte der Kanzlei Adler und Sohn." },
+      { property: "og:title", content: "Die Kanzlei — Rechtsanwaltskanzlei Adler und Sohn" },
+      { property: "og:description", content: "Erfahren Sie mehr über Geschichte und Werte der Kanzlei Adler und Sohn." },
+      { property: "og:url", content: "https://adlerundsohn.com/kanzlei" },
     ],
-    links: [{ rel: "canonical", href: "https://kanzlei-goldmann.de/kanzlei" }],
+    links: [{ rel: "canonical", href: "https://adlerundsohn.com/kanzlei" }],
   }),
   component: KanzleiPage,
 });
@@ -31,8 +31,8 @@ function KanzleiPage() {
         <p className="eyebrow">Über uns</p>
         <div className="space-y-6 text-lg leading-relaxed text-foreground/85">
           <p>
-            Die Rechtsanwaltskanzlei Goldmann wurde 1998 in Berlin von Dr.
-            Friedrich Goldmann gegründet. Aus einer Einzelkanzlei mit Fokus auf
+            Die Rechtsanwaltskanzlei Adler und Sohn wurde 1998 auf Sylt von Dr.
+            Friedrich Adler gegründet. Aus einer Einzelkanzlei mit Fokus auf
             klassisches Wirtschafts- und Insolvenzrecht ist über die
             Jahrzehnte eine spezialisierte Sozietät gewachsen, die heute
             Mandanten aus ganz Deutschland betreut.
@@ -97,7 +97,7 @@ function KanzleiPage() {
           </div>
           <div className="space-y-10">
             {[
-              ["1998", "Gründung der Einzelkanzlei durch Dr. Friedrich Goldmann in Berlin-Mitte."],
+              ["1998", "Gründung der Einzelkanzlei durch Dr. Friedrich Adler in Westerland auf Sylt."],
               ["2003", "Erste Bestellung als Insolvenzverwalter am Amtsgericht Berlin-Charlottenburg."],
               ["2011", "Erweiterung um Anwältin Dr. Katharina Weber, Schwerpunkt Sanierungs- und Restrukturierungsrecht."],
               ["2017", "Aufnahme in den VID Verband Insolvenzverwalter Deutschlands e.V."],

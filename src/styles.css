@@ -41,7 +41,7 @@
 :root {
   --radius: 0.25rem;
 
-  /* Kanzlei Goldmann — navy, parchment, gold */
+  /* Kanzlei Adler und Sohn — navy, parchment, gold */
   --parchment: oklch(0.975 0.008 85);
   --background: oklch(0.985 0.005 85);
   --foreground: oklch(0.18 0.02 260);

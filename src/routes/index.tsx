@@ -5,23 +5,23 @@ import goldmannImg from "@/assets/anwalt-goldmann.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { property: "og:url", content: "https://kanzlei-goldmann.de/" },
+      { property: "og:url", content: "https://adlerundsohn.com/" },
       { property: "og:image", content: heroImg },
       { name: "twitter:image", content: heroImg },
     ],
-    links: [{ rel: "canonical", href: "https://kanzlei-goldmann.de/" }],
+    links: [{ rel: "canonical", href: "https://adlerundsohn.com/" }],
     scripts: [{
       type: "application/ld+json",
       children: JSON.stringify({
         "@context": "https://schema.org",
         "@type": "LegalService",
-        name: "Rechtsanwaltskanzlei Goldmann",
+        name: "Rechtsanwaltskanzlei Adler und Sohn",
         description: "Fachanwaltskanzlei für Insolvenzrecht und Insolvenzverwaltung.",
-        url: "https://kanzlei-goldmann.de",
+        url: "https://adlerundsohn.com",
         telephone: "+49-30-40551290",
         address: {
           "@type": "PostalAddress",
-          streetAddress: "Friedrichstraße 112",
+          streetAddress: "Strandstraße 14",
           addressLocality: "Berlin",
           postalCode: "10117",
           addressCountry: "DE",
@@ -41,7 +41,7 @@ function Index() {
         <div className="absolute inset-0 -z-10">
           <img
             src={heroImg}
-            alt="Empfangshalle der Rechtsanwaltskanzlei Goldmann"
+            alt="Empfangshalle der Rechtsanwaltskanzlei Adler und Sohn"
             className="h-full w-full object-cover"
             width={1920}
             height={1280}
@@ -59,7 +59,7 @@ function Index() {
             juristischer Präzision.
           </h1>
           <p className="mt-8 max-w-xl text-lg leading-relaxed text-primary-foreground/80">
-            Die Rechtsanwaltskanzlei Goldmann begleitet Unternehmen, Gläubiger
+            Die Rechtsanwaltskanzlei Adler und Sohn begleitet Unternehmen, Gläubiger
             und Privatpersonen durch komplexe Insolvenzverfahren — diskret,
             strukturiert und mit über 25 Jahren Erfahrung als bestellter
             Insolvenzverwalter.
@@ -134,7 +134,7 @@ function Index() {
           <div className="order-2 md:order-1">
             <p className="text-[0.7rem] uppercase tracking-[0.24em] text-gold">Gründer & Insolvenzverwalter</p>
             <h2 className="mt-4 font-serif text-4xl text-primary-foreground md:text-5xl">
-              Dr. Friedrich Goldmann
+              Dr. Friedrich Adler
             </h2>
             <span className="rule-gold mt-6" />
             <p className="mt-8 text-base leading-relaxed text-primary-foreground/80">
@@ -155,7 +155,7 @@ function Index() {
           <div className="order-1 md:order-2">
             <img
               src={goldmannImg}
-              alt="Portrait Dr. Friedrich Goldmann"
+              alt="Portrait Dr. Friedrich Adler"
               className="aspect-[4/5] w-full object-cover grayscale-[15%]"
               width={1024}
               height={1280}

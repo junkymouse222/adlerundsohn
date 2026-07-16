@@ -6,24 +6,24 @@ import hartmannImg from "@/assets/anwalt-hartmann.jpg";
 export const Route = createFileRoute("/anwaelte")({
   head: () => ({
     meta: [
-      { title: "Anwälte — Rechtsanwaltskanzlei Goldmann" },
-      { name: "description", content: "Lernen Sie die Anwältinnen und Anwälte der Kanzlei Goldmann kennen: Fachanwälte für Insolvenzrecht mit langjähriger Erfahrung." },
-      { property: "og:title", content: "Anwälte — Rechtsanwaltskanzlei Goldmann" },
+      { title: "Anwälte — Rechtsanwaltskanzlei Adler und Sohn" },
+      { name: "description", content: "Lernen Sie die Anwältinnen und Anwälte der Kanzlei Adler und Sohn kennen: Fachanwälte für Insolvenzrecht mit langjähriger Erfahrung." },
+      { property: "og:title", content: "Anwälte — Rechtsanwaltskanzlei Adler und Sohn" },
       { property: "og:description", content: "Fachanwälte für Insolvenzrecht mit langjähriger Erfahrung." },
-      { property: "og:url", content: "https://kanzlei-goldmann.de/anwaelte" },
+      { property: "og:url", content: "https://adlerundsohn.com/anwaelte" },
     ],
-    links: [{ rel: "canonical", href: "https://kanzlei-goldmann.de/anwaelte" }],
+    links: [{ rel: "canonical", href: "https://adlerundsohn.com/anwaelte" }],
   }),
   component: AnwaeltePage,
 });
 
 const anwaelte = [
   {
-    name: "Dr. Friedrich Goldmann",
+    name: "Dr. Friedrich Adler",
     role: "Gründungspartner · Insolvenzverwalter",
     img: goldmannImg,
     bio: [
-      "Dr. Friedrich Goldmann gründete die Kanzlei 1998. Er wird seit 2003 regelmäßig als Insolvenzverwalter, Sachwalter und Treuhänder an den Amtsgerichten Berlin-Charlottenburg und Potsdam bestellt und hat in dieser Funktion Verfahren von mittelständischen Produktionsbetrieben bis zu international vernetzten Handelsgesellschaften geführt.",
+      "Dr. Friedrich Adler gründete die Kanzlei 1998. Er wird seit 2003 regelmäßig als Insolvenzverwalter, Sachwalter und Treuhänder an den Amtsgerichten Berlin-Charlottenburg und Potsdam bestellt und hat in dieser Funktion Verfahren von mittelständischen Produktionsbetrieben bis zu international vernetzten Handelsgesellschaften geführt.",
       "Er promovierte an der Humboldt-Universität zu Berlin über die Reform der Restschuldbefreiung und veröffentlicht regelmäßig in der ZInsO und der NZI.",
     ],
     schwerpunkte: ["Regelinsolvenzverfahren", "Eigenverwaltung", "Konzerninsolvenzen", "Sanierungsberatung"],
@@ -32,7 +32,7 @@ const anwaelte = [
       "Promotion, Humboldt-Universität zu Berlin (2001)",
       "Fachanwalt für Insolvenzrecht (seit 2005)",
     ],
-    kontakt: "f.goldmann@kanzlei-goldmann.de",
+    kontakt: "f.adler@adlerundsohn.com",
   },
   {
     name: "Dr. Katharina Weber",
@@ -48,7 +48,7 @@ const anwaelte = [
       "Promotion zum StaRUG (2013)",
       "Fachanwältin für Handels- und Gesellschaftsrecht",
     ],
-    kontakt: "k.weber@kanzlei-goldmann.de",
+    kontakt: "k.weber@adlerundsohn.com",
   },
   {
     name: "Marcus Hartmann",
@@ -64,7 +64,7 @@ const anwaelte = [
       "Referendariat am OLG Hamm",
       "Fachanwalt für Insolvenzrecht (seit 2018)",
     ],
-    kontakt: "m.hartmann@kanzlei-goldmann.de",
+    kontakt: "m.hartmann@adlerundsohn.com",
   },
 ];
 

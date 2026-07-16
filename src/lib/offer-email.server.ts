@@ -62,10 +62,10 @@ export function renderOfferHtml(offer: OfferRow, items: ItemRow[]): string {
     <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
       <tr>
         <td>
-          <div style="font-family:Georgia,serif;font-size:28px;color:#0f2740;">Rechtsanwaltskanzlei Goldmann</div>
+          <div style="font-family:Georgia,serif;font-size:28px;color:#0f2740;">Rechtsanwaltskanzlei Adler und Sohn</div>
           <div style="height:2px;width:60px;background:#c9a55c;margin-top:8px;"></div>
-          <div style="font-size:12px;color:#666;margin-top:8px;">Friedrichstraße 112 · 10117 Berlin</div>
-          <div style="font-size:12px;color:#666;">info@goldmann-ra.de</div>
+          <div style="font-size:12px;color:#666;margin-top:8px;">Strandstraße 14 · 25980 Westerland/Sylt</div>
+          <div style="font-size:12px;color:#666;">info@adlerundsohn.com</div>
         </td>
         <td style="text-align:right;vertical-align:top;font-family:'Courier New',monospace;">
           <div style="font-size:12px;color:#666;letter-spacing:1px;">ANGEBOT</div>
@@ -109,7 +109,7 @@ export function renderOfferHtml(offer: OfferRow, items: ItemRow[]): string {
 
     <div style="margin-top:32px;padding-top:16px;border-top:1px solid #eee;font-size:12px;color:#666;line-height:1.6;">
       <p>Vielen Dank für Ihre Anfrage. Dieses Angebot ist 21 Tage gültig. Alle Positionen aus laufender Verwertung. Lieferung ab Bestellwert 3.000 € netto kostenfrei innerhalb des Liefergebiets. Zwischenverkauf vorbehalten.</p>
-      <p>Bei Fragen erreichen Sie uns unter <a href="mailto:info@goldmann-ra.de" style="color:#0f2740;">info@goldmann-ra.de</a>.</p>
+      <p>Bei Fragen erreichen Sie uns unter <a href="mailto:info@adlerundsohn.com" style="color:#0f2740;">info@adlerundsohn.com</a>.</p>
     </div>
   </div>
 </body></html>`;
@@ -131,7 +131,7 @@ export async function sendOfferEmail(params: {
 }): Promise<{ ok: true; messageId: string } | { ok: false; error: string }> {
   const LOVABLE_API_KEY = process.env.LOVABLE_API_KEY;
   const RESEND_API_KEY = process.env.RESEND_API_KEY;
-  const FROM = process.env.OFFER_FROM_EMAIL || "Kanzlei Goldmann <angebote@goldmann-ra.de>";
+  const FROM = process.env.OFFER_FROM_EMAIL || "Kanzlei Adler und Sohn <angebote@adlerundsohn.com>";
 
   if (!LOVABLE_API_KEY) return { ok: false, error: "LOVABLE_API_KEY missing" };
   if (!RESEND_API_KEY) {

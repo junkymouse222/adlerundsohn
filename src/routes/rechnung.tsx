@@ -26,7 +26,7 @@ const printStyles = `
 export const Route = createFileRoute("/rechnung")({
   head: () => ({
     meta: [
-      { title: "Angebots- & Rechnungsgenerator — Kanzlei Goldmann" },
+      { title: "Angebots- & Rechnungsgenerator — Kanzlei Adler und Sohn" },
       { name: "description", content: "Internes Tool zur Erstellung von Angeboten und Rechnungen aus dem Verwertungskatalog." },
       { name: "robots", content: "noindex, nofollow" },
     ],
@@ -50,7 +50,7 @@ function RechnungPage() {
   const [bankName, setBankName] = useState("Sparkasse Trier");
   const [bankIban, setBankIban] = useState("DE00 0000 0000 0000 0000 00");
   const [bankBic, setBankBic] = useState("TRISDE55XXX");
-  const [bankInhaber, setBankInhaber] = useState("Kanzlei Goldmann");
+  const [bankInhaber, setBankInhaber] = useState("Kanzlei Adler und Sohn");
   const [gueltigBis, setGueltigBis] = useState(() => {
     const d = new Date();
     d.setDate(d.getDate() + 21);
@@ -402,9 +402,9 @@ function RechnungPage() {
               Rechtsanwaltskanzlei · Berlin
             </div>
             <div className="mt-4 text-xs leading-relaxed text-muted-foreground">
-              Kanzlei Goldmann · Friedrichstraße 112 · 10117 Berlin
+              Kanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt
               <br />
-              Telefon +49 6591 6659636 · info@goldmann-ra.de
+              Telefon +49 6591 6659636 · info@adlerundsohn.com
             </div>
           </div>
           <div className="text-right">
@@ -569,7 +569,7 @@ function RechnungPage() {
         )}
 
         <div className="beleg-footer mt-10 border-t border-border pt-4 text-[0.65rem] uppercase tracking-[0.15em] text-muted-foreground">
-          Kanzlei Goldmann · Friedrichstraße 112 · 10117 Berlin · +49 6591 6659636 · info@goldmann-ra.de · USt-IdNr. DE271552088
+          Kanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt · +49 6591 6659636 · info@adlerundsohn.com · USt-IdNr. DE271552088
         </div>
       </article>
 

@@ -53,7 +53,7 @@ export const Route = createFileRoute("/api/public/hooks/send-scheduled-offers")(
             const html = renderOfferHtml(row as never, (items ?? []) as never);
             const send = await sendOfferEmail({
               to: row.customer_email as string,
-              subject: `Ihr Angebot ${row.angebot_nr as string} — Kanzlei Goldmann`,
+              subject: `Ihr Angebot ${row.angebot_nr as string} — Kanzlei Adler und Sohn`,
               html,
             });
 
