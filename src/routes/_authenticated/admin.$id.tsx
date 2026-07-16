@@ -23,6 +23,8 @@ function AdminDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [resending, setResending] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [sendResult, setSendResult] = useState<{ ok: boolean; msg: string } | null>(null);
 
   async function load() {
     setLoading(true);
@@ -41,15 +43,16 @@ function AdminDetailPage() {
     load();
   }, [id]);
 
-  async function handleResend() {
-    if (!confirm("Angebot jetzt per E-Mail an den Kunden senden?")) return;
+  async function handleResendConfirmed() {
+    setConfirmOpen(false);
     setResending(true);
+    setSendResult(null);
     try {
-      await resendOfferNow({ data: { id } });
+      const res = await resendOfferNow({ data: { id } });
       await load();
-      alert("Angebot wurde versendet.");
+      setSendResult({ ok: true, msg: `Angebot versendet${res.messageId ? ` (ID: ${res.messageId})` : ""}.` });
     } catch (e) {
-      alert(e instanceof Error ? e.message : "Fehler beim Senden.");
+      setSendResult({ ok: false, msg: e instanceof Error ? e.message : "Fehler beim Senden." });
     } finally {
       setResending(false);
     }
