@@ -185,13 +185,13 @@ function Footer() {
             Verlässliche Beratung für Unternehmen, Gläubiger und Privatpersonen.
           </p>
         </div>
-        <div>
+          <div>
           <p className="text-[0.7rem] uppercase tracking-[0.24em] text-gold">Kontakt</p>
           <ul className="mt-4 space-y-2 text-sm text-primary-foreground/80">
             <li>Friedrichstraße 112</li>
             <li>10117 Berlin</li>
             <li>+49 6591 6659636</li>
-            <li>info@kanzlei-goldmann.de</li>
+            <li>info@kanzlei-goldmann.de · info@goldmann-ra.de</li>
           </ul>
         </div>
         <div>

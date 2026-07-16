@@ -50,7 +50,11 @@ function KontaktPage() {
             </div>
             <div className="grid grid-cols-[8rem_1fr] gap-4">
               <dt className="text-muted-foreground">E-Mail</dt>
-              <dd><a href="mailto:info@kanzlei-goldmann.de" className="text-primary hover:text-gold">info@kanzlei-goldmann.de</a></dd>
+              <dd>
+                <a href="mailto:info@kanzlei-goldmann.de" className="text-primary hover:text-gold">info@kanzlei-goldmann.de</a>
+                <br />
+                <a href="mailto:info@goldmann-ra.de" className="text-primary hover:text-gold">info@goldmann-ra.de</a>
+              </dd>
             </div>
             <div className="grid grid-cols-[8rem_1fr] gap-4">
               <dt className="text-muted-foreground">Web</dt>
