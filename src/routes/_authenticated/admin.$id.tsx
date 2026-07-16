@@ -147,6 +147,51 @@ function AdminDetailPage() {
         </div>
       )}
 
+      {invoiceResult && (
+        <div
+          className={`mt-6 border p-4 text-sm ${
+            invoiceResult.ok ? "border-green-700 bg-green-50 text-green-900" : "border-red-700 bg-red-50 text-red-800"
+          }`}
+        >
+          {invoiceResult.msg}
+        </div>
+      )}
+
+      {invoiceConfirmOpen && (
+        <div className="mt-6 border border-gold bg-parchment p-4 text-sm">
+          <p className="mb-3">
+            Rechnung über <strong>{fmtEUR(offer.total)}</strong> automatisch generieren und als PDF an{" "}
+            <strong>{offer.customer_email}</strong> senden?
+          </p>
+          <label className="mb-3 flex items-center gap-2">
+            <span className="text-xs uppercase tracking-widest text-muted-foreground">Zahlungsziel (Tage)</span>
+            <input
+              type="number"
+              min={1}
+              max={120}
+              value={faelligTage}
+              onChange={(e) => setFaelligTage(Number(e.target.value) || 14)}
+              className="w-20 border border-border bg-background px-2 py-1 text-sm"
+            />
+          </label>
+          <div className="flex gap-2">
+            <button
+              onClick={handleInvoiceConfirmed}
+              className="bg-primary px-4 py-2 text-xs uppercase tracking-widest text-primary-foreground hover:bg-primary/90"
+            >
+              Ja, Rechnung senden
+            </button>
+            <button
+              onClick={() => setInvoiceConfirmOpen(false)}
+              className="border border-border px-4 py-2 text-xs uppercase tracking-widest text-muted-foreground hover:text-primary"
+            >
+              Abbrechen
+            </button>
+          </div>
+        </div>
+      )}
+
+
       <div className="mt-8 grid gap-8 md:grid-cols-2">
         <div className="border border-border p-6">
           <h2 className="text-sm uppercase tracking-widest text-muted-foreground">Kunde</h2>
