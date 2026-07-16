@@ -61,7 +61,23 @@ function AdminDetailPage() {
       setSendResult({ ok: false, msg: e instanceof Error ? e.message : "Fehler beim Senden." });
     } finally {
       setResending(false);
+  }
+
+  async function handleInvoiceConfirmed() {
+    setInvoiceConfirmOpen(false);
+    setInvoicing(true);
+    setInvoiceResult(null);
+    try {
+      const res = await sendInvoiceNow({ data: { id, faellig_tage: faelligTage } });
+      await load();
+      setInvoiceResult({ ok: true, msg: `Rechnung ${res.rechnung_nr} versendet${res.messageId ? ` (ID: ${res.messageId})` : ""}.` });
+    } catch (e) {
+      setInvoiceResult({ ok: false, msg: e instanceof Error ? e.message : "Fehler beim Rechnungsversand." });
+    } finally {
+      setInvoicing(false);
     }
+  }
+
   }
 
   if (loading) return <section className="container-prose py-16 text-sm text-muted-foreground">Lade …</section>;
