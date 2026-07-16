@@ -91,7 +91,7 @@ export const listOfferRequests = createServerFn({ method: "GET" })
     const client = context.supabase as any;
     const { data, error } = await client
       .from("offer_requests")
-      .select("id, created_at, scheduled_send_at, sent_at, status, angebot_nr, customer_company, customer_name, customer_email, subtotal, total, error_message")
+      .select("id, created_at, scheduled_send_at, sent_at, status, angebot_nr, customer_company, customer_name, customer_email, subtotal, total, error_message, accepted_at, rechnung_status")
       .order("created_at", { ascending: false })
       .limit(200);
     if (error) throw new Error(error.message);
