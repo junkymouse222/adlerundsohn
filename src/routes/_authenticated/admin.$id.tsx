@@ -1,7 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { getOfferRequest, resendOfferNow, sendInvoiceNow, type OfferDetail } from "@/lib/admin.functions";
-
+import {
+  getOfferRequest,
+  resendOfferNow,
+  sendInvoiceNow,
+  previewOfferPdf,
+  previewInvoicePdf,
+  type OfferDetail,
+} from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/$id")({
   head: () => ({
@@ -18,6 +24,25 @@ const fmtEUR = (n: number) =>
 const fmtDate = (iso: string | null) =>
   iso ? new Date(iso).toLocaleString("de-DE", { dateStyle: "medium", timeStyle: "short" }) : "—";
 
+function openBase64Pdf(base64: string, filename: string) {
+  const bin = atob(base64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  const blob = new Blob([bytes], { type: "application/pdf" });
+  const url = URL.createObjectURL(blob);
+  window.open(url, "_blank", "noopener,noreferrer");
+  // best-effort: auch als Download-Link anbieten
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.style.display = "none";
+  document.body.appendChild(a);
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 60000);
+}
+
 function AdminDetailPage() {
   const { id } = Route.useParams();
   const [detail, setDetail] = useState<OfferDetail | null>(null);
@@ -28,9 +53,13 @@ function AdminDetailPage() {
   const [sendResult, setSendResult] = useState<{ ok: boolean; msg: string } | null>(null);
   const [invoicing, setInvoicing] = useState(false);
   const [invoiceConfirmOpen, setInvoiceConfirmOpen] = useState(false);
+  const [previewing, setPreviewing] = useState<"offer" | "invoice" | null>(null);
   const [faelligTage, setFaelligTage] = useState(14);
+  const [bankInhaber, setBankInhaber] = useState("Kanzlei Adler und Sohn");
+  const [bankName, setBankName] = useState("Sparkasse Trier");
+  const [bankIban, setBankIban] = useState("DE00 0000 0000 0000 0000 00");
+  const [bankBic, setBankBic] = useState("TRISDE55XXX");
   const [invoiceResult, setInvoiceResult] = useState<{ ok: boolean; msg: string } | null>(null);
-
 
   async function load() {
     setLoading(true);
@@ -38,6 +67,10 @@ function AdminDetailPage() {
     try {
       const res = await getOfferRequest({ data: { id } });
       setDetail(res);
+      if (res.offer.bank_inhaber) setBankInhaber(res.offer.bank_inhaber);
+      if (res.offer.bank_name) setBankName(res.offer.bank_name);
+      if (res.offer.bank_iban) setBankIban(res.offer.bank_iban);
+      if (res.offer.bank_bic) setBankBic(res.offer.bank_bic);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Laden fehlgeschlagen.");
     } finally {
@@ -69,7 +102,16 @@ function AdminDetailPage() {
     setInvoicing(true);
     setInvoiceResult(null);
     try {
-      const res = await sendInvoiceNow({ data: { id, faellig_tage: faelligTage } });
+      const res = await sendInvoiceNow({
+        data: {
+          id,
+          faellig_tage: faelligTage,
+          bank_inhaber: bankInhaber,
+          bank_name: bankName,
+          bank_iban: bankIban,
+          bank_bic: bankBic,
+        },
+      });
       await load();
       setInvoiceResult({ ok: true, msg: `Rechnung ${res.rechnung_nr} versendet${res.messageId ? ` (ID: ${res.messageId})` : ""}.` });
     } catch (e) {
@@ -79,6 +121,38 @@ function AdminDetailPage() {
     }
   }
 
+  async function handlePreviewOffer() {
+    setPreviewing("offer");
+    try {
+      const res = await previewOfferPdf({ data: { id } });
+      openBase64Pdf(res.base64, res.filename);
+    } catch (e) {
+      setSendResult({ ok: false, msg: e instanceof Error ? e.message : "Fehler beim PDF-Erstellen." });
+    } finally {
+      setPreviewing(null);
+    }
+  }
+
+  async function handlePreviewInvoice() {
+    setPreviewing("invoice");
+    try {
+      const res = await previewInvoicePdf({
+        data: {
+          id,
+          faellig_tage: faelligTage,
+          bank_inhaber: bankInhaber,
+          bank_name: bankName,
+          bank_iban: bankIban,
+          bank_bic: bankBic,
+        },
+      });
+      openBase64Pdf(res.base64, res.filename);
+    } catch (e) {
+      setInvoiceResult({ ok: false, msg: e instanceof Error ? e.message : "Fehler beim PDF-Erstellen." });
+    } finally {
+      setPreviewing(null);
+    }
+  }
 
   if (loading) return <section className="container-prose py-16 text-sm text-muted-foreground">Lade …</section>;
   if (error) return <section className="container-prose py-16 text-sm text-red-700">{error}</section>;
@@ -97,14 +171,27 @@ function AdminDetailPage() {
           <p className="eyebrow">Angebot</p>
           <h1 className="mt-2 font-mono text-3xl">{offer.angebot_nr}</h1>
           <span className="rule-gold mt-4" />
+          {offer.accepted_at && (
+            <div className="mt-4 inline-flex items-center gap-2 border border-green-700 bg-green-50 px-3 py-1.5 text-xs uppercase tracking-widest text-green-800">
+              ✓ Angenommen am {fmtDate(offer.accepted_at)}
+              {offer.accepted_ip && <span className="text-[0.65rem] normal-case tracking-normal text-green-700">({offer.accepted_ip})</span>}
+            </div>
+          )}
         </div>
         <div className="flex flex-wrap gap-2">
+          <button
+            onClick={handlePreviewOffer}
+            disabled={previewing === "offer"}
+            className="border border-border px-4 py-3 text-xs uppercase tracking-[0.2em] text-primary hover:border-primary disabled:opacity-60"
+          >
+            {previewing === "offer" ? "…" : "Angebot-PDF ansehen"}
+          </button>
           <button
             onClick={() => setConfirmOpen(true)}
             disabled={resending}
             className="bg-primary px-6 py-3 text-xs uppercase tracking-[0.2em] text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
           >
-            {resending ? "Wird gesendet …" : "Angebot senden (PDF)"}
+            {resending ? "Wird gesendet …" : "Angebot senden"}
           </button>
           <button
             onClick={() => setInvoiceConfirmOpen(true)}
@@ -116,31 +203,20 @@ function AdminDetailPage() {
         </div>
       </div>
 
-
       {sendResult && (
-        <div
-          className={`mt-6 border p-4 text-sm ${
-            sendResult.ok ? "border-green-700 bg-green-50 text-green-900" : "border-red-700 bg-red-50 text-red-800"
-          }`}
-        >
+        <div className={`mt-6 border p-4 text-sm ${sendResult.ok ? "border-green-700 bg-green-50 text-green-900" : "border-red-700 bg-red-50 text-red-800"}`}>
           {sendResult.msg}
         </div>
       )}
 
       {confirmOpen && (
         <div className="mt-6 border border-gold bg-parchment p-4 text-sm">
-          <p className="mb-3">Angebot jetzt per E-Mail an <strong>{offer.customer_email}</strong> senden?</p>
+          <p className="mb-3">Angebot jetzt per E-Mail an <strong>{offer.customer_email}</strong> senden? Der Kunde erhält das PDF im Anhang und einen Annahme-Button.</p>
           <div className="flex gap-2">
-            <button
-              onClick={handleResendConfirmed}
-              className="bg-primary px-4 py-2 text-xs uppercase tracking-widest text-primary-foreground hover:bg-primary/90"
-            >
+            <button onClick={handleResendConfirmed} className="bg-primary px-4 py-2 text-xs uppercase tracking-widest text-primary-foreground hover:bg-primary/90">
               Ja, senden
             </button>
-            <button
-              onClick={() => setConfirmOpen(false)}
-              className="border border-border px-4 py-2 text-xs uppercase tracking-widest text-muted-foreground hover:text-primary"
-            >
+            <button onClick={() => setConfirmOpen(false)} className="border border-border px-4 py-2 text-xs uppercase tracking-widest text-muted-foreground hover:text-primary">
               Abbrechen
             </button>
           </div>
@@ -148,49 +224,64 @@ function AdminDetailPage() {
       )}
 
       {invoiceResult && (
-        <div
-          className={`mt-6 border p-4 text-sm ${
-            invoiceResult.ok ? "border-green-700 bg-green-50 text-green-900" : "border-red-700 bg-red-50 text-red-800"
-          }`}
-        >
+        <div className={`mt-6 border p-4 text-sm ${invoiceResult.ok ? "border-green-700 bg-green-50 text-green-900" : "border-red-700 bg-red-50 text-red-800"}`}>
           {invoiceResult.msg}
         </div>
       )}
 
       {invoiceConfirmOpen && (
-        <div className="mt-6 border border-gold bg-parchment p-4 text-sm">
-          <p className="mb-3">
-            Rechnung über <strong>{fmtEUR(offer.total)}</strong> automatisch generieren und als PDF an{" "}
-            <strong>{offer.customer_email}</strong> senden?
+        <div className="mt-6 border border-gold bg-parchment p-5 text-sm">
+          <p className="mb-4">
+            Rechnung über <strong>{fmtEUR(offer.total)}</strong> an <strong>{offer.customer_email}</strong> senden.
           </p>
-          <label className="mb-3 flex items-center gap-2">
-            <span className="text-xs uppercase tracking-widest text-muted-foreground">Zahlungsziel (Tage)</span>
-            <input
-              type="number"
-              min={1}
-              max={120}
-              value={faelligTage}
-              onChange={(e) => setFaelligTage(Number(e.target.value) || 14)}
-              className="w-20 border border-border bg-background px-2 py-1 text-sm"
-            />
-          </label>
-          <div className="flex gap-2">
-            <button
-              onClick={handleInvoiceConfirmed}
-              className="bg-primary px-4 py-2 text-xs uppercase tracking-widest text-primary-foreground hover:bg-primary/90"
-            >
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="flex flex-col gap-1">
+              <span className="text-[0.65rem] uppercase tracking-widest text-muted-foreground">Zahlungsziel (Tage)</span>
+              <input
+                type="number"
+                min={1}
+                max={120}
+                value={faelligTage}
+                onChange={(e) => setFaelligTage(Number(e.target.value) || 14)}
+                className="border border-border bg-background px-3 py-2 text-sm"
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-[0.65rem] uppercase tracking-widest text-muted-foreground">Kontoinhaber</span>
+              <input value={bankInhaber} onChange={(e) => setBankInhaber(e.target.value)} className="border border-border bg-background px-3 py-2 text-sm" />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-[0.65rem] uppercase tracking-widest text-muted-foreground">Bank</span>
+              <input value={bankName} onChange={(e) => setBankName(e.target.value)} className="border border-border bg-background px-3 py-2 text-sm" />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-[0.65rem] uppercase tracking-widest text-muted-foreground">IBAN</span>
+              <input value={bankIban} onChange={(e) => setBankIban(e.target.value)} className="border border-border bg-background px-3 py-2 text-sm font-mono" />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-[0.65rem] uppercase tracking-widest text-muted-foreground">BIC</span>
+              <input value={bankBic} onChange={(e) => setBankBic(e.target.value)} className="border border-border bg-background px-3 py-2 text-sm font-mono" />
+            </label>
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-2">
+            <button onClick={handleInvoiceConfirmed} className="bg-primary px-4 py-2 text-xs uppercase tracking-widest text-primary-foreground hover:bg-primary/90">
               Ja, Rechnung senden
             </button>
             <button
-              onClick={() => setInvoiceConfirmOpen(false)}
-              className="border border-border px-4 py-2 text-xs uppercase tracking-widest text-muted-foreground hover:text-primary"
+              onClick={handlePreviewInvoice}
+              disabled={previewing === "invoice"}
+              className="border border-border px-4 py-2 text-xs uppercase tracking-widest text-primary hover:border-primary disabled:opacity-60"
             >
+              {previewing === "invoice" ? "…" : "Nur PDF ansehen"}
+            </button>
+            <button onClick={() => setInvoiceConfirmOpen(false)} className="border border-border px-4 py-2 text-xs uppercase tracking-widest text-muted-foreground hover:text-primary">
               Abbrechen
             </button>
           </div>
         </div>
       )}
-
 
       <div className="mt-8 grid gap-8 md:grid-cols-2">
         <div className="border border-border p-6">
@@ -212,8 +303,7 @@ function AdminDetailPage() {
             <div className="flex justify-between"><dt className="text-muted-foreground">Erstellt</dt><dd>{fmtDate(offer.created_at)}</dd></div>
             <div className="flex justify-between"><dt className="text-muted-foreground">Geplant</dt><dd>{fmtDate(offer.scheduled_send_at)}</dd></div>
             <div className="flex justify-between"><dt className="text-muted-foreground">Gesendet</dt><dd>{fmtDate(offer.sent_at)}</dd></div>
-            {offer.ref_source && <div className="flex justify-between"><dt className="text-muted-foreground">Quelle</dt><dd className="font-mono text-xs">{offer.ref_source}</dd></div>}
-            {offer.resend_message_id && <div className="flex justify-between"><dt className="text-muted-foreground">Resend-ID</dt><dd className="font-mono text-xs">{offer.resend_message_id}</dd></div>}
+            {offer.accepted_at && <div className="flex justify-between border-t border-border pt-2"><dt className="text-muted-foreground">Angenommen</dt><dd className="text-green-800">{fmtDate(offer.accepted_at)}</dd></div>}
             {offer.rechnung_nr && <div className="flex justify-between border-t border-border pt-2"><dt className="text-muted-foreground">Rechnung</dt><dd className="font-mono text-xs">{offer.rechnung_nr}</dd></div>}
             {offer.rechnung_status && offer.rechnung_status !== "none" && <div className="flex justify-between"><dt className="text-muted-foreground">Rechnungsstatus</dt><dd>{offer.rechnung_status}</dd></div>}
             {offer.rechnung_sent_at && <div className="flex justify-between"><dt className="text-muted-foreground">Rechnung gesendet</dt><dd>{fmtDate(offer.rechnung_sent_at)}</dd></div>}
@@ -278,11 +368,7 @@ function AdminDetailPage() {
             Gesendetes HTML-Angebot anzeigen
           </summary>
           <div className="mt-4 border border-border">
-            <iframe
-              title="Angebots-HTML"
-              srcDoc={offer.offer_html}
-              className="h-[800px] w-full bg-white"
-            />
+            <iframe title="Angebots-HTML" srcDoc={offer.offer_html} className="h-[800px] w-full bg-white" />
           </div>
         </details>
       )}
