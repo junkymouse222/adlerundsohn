@@ -324,10 +324,14 @@ async function renderBeleg(
   return pdf.save();
 }
 
-export function renderOfferPdf(offer: OfferForPdf, items: ItemForPdf[]): Promise<Uint8Array> {
+export function renderOfferPdf(
+  offer: OfferForPdf,
+  items: ItemForPdf[],
+  acceptUrl?: string | null,
+): Promise<Uint8Array> {
   const created = new Date(offer.created_at);
   const gueltigBis = new Date(created.getTime() + 21 * 24 * 3600 * 1000);
-  return renderBeleg("Angebot", offer.angebot_nr, created, gueltigBis, offer, items);
+  return renderBeleg("Angebot", offer.angebot_nr, created, gueltigBis, offer, items, undefined, acceptUrl, !!offer.accepted_at);
 }
 
 export function renderInvoicePdf(
