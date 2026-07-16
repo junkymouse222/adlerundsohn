@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { getOfferRequest, resendOfferNow, type OfferDetail } from "@/lib/admin.functions";
+import { getOfferRequest, resendOfferNow, sendInvoiceNow, type OfferDetail } from "@/lib/admin.functions";
+
 
 export const Route = createFileRoute("/_authenticated/admin/$id")({
   head: () => ({
@@ -25,6 +26,11 @@ function AdminDetailPage() {
   const [resending, setResending] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [sendResult, setSendResult] = useState<{ ok: boolean; msg: string } | null>(null);
+  const [invoicing, setInvoicing] = useState(false);
+  const [invoiceConfirmOpen, setInvoiceConfirmOpen] = useState(false);
+  const [faelligTage, setFaelligTage] = useState(14);
+  const [invoiceResult, setInvoiceResult] = useState<{ ok: boolean; msg: string } | null>(null);
+
 
   async function load() {
     setLoading(true);
@@ -58,6 +64,22 @@ function AdminDetailPage() {
     }
   }
 
+  async function handleInvoiceConfirmed() {
+    setInvoiceConfirmOpen(false);
+    setInvoicing(true);
+    setInvoiceResult(null);
+    try {
+      const res = await sendInvoiceNow({ data: { id, faellig_tage: faelligTage } });
+      await load();
+      setInvoiceResult({ ok: true, msg: `Rechnung ${res.rechnung_nr} versendet${res.messageId ? ` (ID: ${res.messageId})` : ""}.` });
+    } catch (e) {
+      setInvoiceResult({ ok: false, msg: e instanceof Error ? e.message : "Fehler beim Rechnungsversand." });
+    } finally {
+      setInvoicing(false);
+    }
+  }
+
+
   if (loading) return <section className="container-prose py-16 text-sm text-muted-foreground">Lade …</section>;
   if (error) return <section className="container-prose py-16 text-sm text-red-700">{error}</section>;
   if (!detail) return null;
@@ -76,14 +98,24 @@ function AdminDetailPage() {
           <h1 className="mt-2 font-mono text-3xl">{offer.angebot_nr}</h1>
           <span className="rule-gold mt-4" />
         </div>
-        <button
-          onClick={() => setConfirmOpen(true)}
-          disabled={resending}
-          className="bg-primary px-6 py-3 text-xs uppercase tracking-[0.2em] text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
-        >
-          {resending ? "Wird gesendet …" : "Jetzt senden"}
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setConfirmOpen(true)}
+            disabled={resending}
+            className="bg-primary px-6 py-3 text-xs uppercase tracking-[0.2em] text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
+          >
+            {resending ? "Wird gesendet …" : "Angebot senden (PDF)"}
+          </button>
+          <button
+            onClick={() => setInvoiceConfirmOpen(true)}
+            disabled={invoicing}
+            className="border border-gold bg-parchment px-6 py-3 text-xs uppercase tracking-[0.2em] text-primary hover:bg-primary hover:text-primary-foreground disabled:opacity-60"
+          >
+            {invoicing ? "Wird gesendet …" : offer.rechnung_status === "sent" ? "Rechnung erneut senden" : "Rechnung senden"}
+          </button>
+        </div>
       </div>
+
 
       {sendResult && (
         <div
@@ -115,6 +147,51 @@ function AdminDetailPage() {
         </div>
       )}
 
+      {invoiceResult && (
+        <div
+          className={`mt-6 border p-4 text-sm ${
+            invoiceResult.ok ? "border-green-700 bg-green-50 text-green-900" : "border-red-700 bg-red-50 text-red-800"
+          }`}
+        >
+          {invoiceResult.msg}
+        </div>
+      )}
+
+      {invoiceConfirmOpen && (
+        <div className="mt-6 border border-gold bg-parchment p-4 text-sm">
+          <p className="mb-3">
+            Rechnung über <strong>{fmtEUR(offer.total)}</strong> automatisch generieren und als PDF an{" "}
+            <strong>{offer.customer_email}</strong> senden?
+          </p>
+          <label className="mb-3 flex items-center gap-2">
+            <span className="text-xs uppercase tracking-widest text-muted-foreground">Zahlungsziel (Tage)</span>
+            <input
+              type="number"
+              min={1}
+              max={120}
+              value={faelligTage}
+              onChange={(e) => setFaelligTage(Number(e.target.value) || 14)}
+              className="w-20 border border-border bg-background px-2 py-1 text-sm"
+            />
+          </label>
+          <div className="flex gap-2">
+            <button
+              onClick={handleInvoiceConfirmed}
+              className="bg-primary px-4 py-2 text-xs uppercase tracking-widest text-primary-foreground hover:bg-primary/90"
+            >
+              Ja, Rechnung senden
+            </button>
+            <button
+              onClick={() => setInvoiceConfirmOpen(false)}
+              className="border border-border px-4 py-2 text-xs uppercase tracking-widest text-muted-foreground hover:text-primary"
+            >
+              Abbrechen
+            </button>
+          </div>
+        </div>
+      )}
+
+
       <div className="mt-8 grid gap-8 md:grid-cols-2">
         <div className="border border-border p-6">
           <h2 className="text-sm uppercase tracking-widest text-muted-foreground">Kunde</h2>
@@ -137,6 +214,11 @@ function AdminDetailPage() {
             <div className="flex justify-between"><dt className="text-muted-foreground">Gesendet</dt><dd>{fmtDate(offer.sent_at)}</dd></div>
             {offer.ref_source && <div className="flex justify-between"><dt className="text-muted-foreground">Quelle</dt><dd className="font-mono text-xs">{offer.ref_source}</dd></div>}
             {offer.resend_message_id && <div className="flex justify-between"><dt className="text-muted-foreground">Resend-ID</dt><dd className="font-mono text-xs">{offer.resend_message_id}</dd></div>}
+            {offer.rechnung_nr && <div className="flex justify-between border-t border-border pt-2"><dt className="text-muted-foreground">Rechnung</dt><dd className="font-mono text-xs">{offer.rechnung_nr}</dd></div>}
+            {offer.rechnung_status && offer.rechnung_status !== "none" && <div className="flex justify-between"><dt className="text-muted-foreground">Rechnungsstatus</dt><dd>{offer.rechnung_status}</dd></div>}
+            {offer.rechnung_sent_at && <div className="flex justify-between"><dt className="text-muted-foreground">Rechnung gesendet</dt><dd>{fmtDate(offer.rechnung_sent_at)}</dd></div>}
+            {offer.rechnung_faellig_am && <div className="flex justify-between"><dt className="text-muted-foreground">Fällig am</dt><dd>{new Date(offer.rechnung_faellig_am).toLocaleDateString("de-DE")}</dd></div>}
+            {offer.rechnung_error && <div className="mt-2 border-t border-border pt-2 text-red-700">{offer.rechnung_error}</div>}
             {offer.error_message && <div className="mt-2 border-t border-border pt-2 text-red-700">{offer.error_message}</div>}
           </dl>
         </div>

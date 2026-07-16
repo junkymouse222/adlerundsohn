@@ -124,10 +124,13 @@ function escapeHtml(s: string): string {
     .replace(/'/g, "&#39;");
 }
 
+export type EmailAttachment = { filename: string; content: string /* base64 */ };
+
 export async function sendOfferEmail(params: {
   to: string;
   subject: string;
   html: string;
+  attachments?: EmailAttachment[];
 }): Promise<{ ok: true; messageId: string } | { ok: false; error: string }> {
   const LOVABLE_API_KEY = process.env.LOVABLE_API_KEY;
   const RESEND_API_KEY = process.env.RESEND_API_KEY;
@@ -138,6 +141,16 @@ export async function sendOfferEmail(params: {
     return { ok: false, error: "Resend-Connector nicht verbunden (RESEND_API_KEY fehlt)" };
   }
 
+  const body: Record<string, unknown> = {
+    from: FROM,
+    to: [params.to],
+    subject: params.subject,
+    html: params.html,
+  };
+  if (params.attachments?.length) {
+    body.attachments = params.attachments.map((a) => ({ filename: a.filename, content: a.content }));
+  }
+
   const res = await fetch("https://connector-gateway.lovable.dev/resend/emails", {
     method: "POST",
     headers: {
@@ -145,19 +158,15 @@ export async function sendOfferEmail(params: {
       Authorization: `Bearer ${LOVABLE_API_KEY}`,
       "X-Connection-Api-Key": RESEND_API_KEY,
     },
-    body: JSON.stringify({
-      from: FROM,
-      to: [params.to],
-      subject: params.subject,
-      html: params.html,
-    }),
+    body: JSON.stringify(body),
   });
 
   if (!res.ok) {
-    const body = await res.text();
-    console.error(`[resend] send failed [${res.status}]: ${body}`);
-    return { ok: false, error: `Resend ${res.status}: ${body}` };
+    const txt = await res.text();
+    console.error(`[resend] send failed [${res.status}]: ${txt}`);
+    return { ok: false, error: `Resend ${res.status}: ${txt}` };
   }
   const data = (await res.json()) as { id?: string };
   return { ok: true, messageId: data.id ?? "" };
 }
+
