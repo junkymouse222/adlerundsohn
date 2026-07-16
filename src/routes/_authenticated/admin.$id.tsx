@@ -78,7 +78,7 @@ function AdminDetailPage() {
           disabled={resending}
           className="bg-primary px-6 py-3 text-xs uppercase tracking-[0.2em] text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
         >
-          {resending ? "Wird geplant …" : "Erneut senden"}
+          {resending ? "Wird gesendet …" : "Jetzt senden"}
         </button>
       </div>
 
