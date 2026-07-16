@@ -23,7 +23,7 @@ export const Route = createFileRoute("/")({
           "@type": "PostalAddress",
           streetAddress: "Strandstraße 14",
           addressLocality: "Westerland",
-          postalCode: "10117",
+          postalCode: "25980",
           addressCountry: "DE",
         },
         areaServed: "DE",

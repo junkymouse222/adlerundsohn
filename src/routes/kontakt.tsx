@@ -80,9 +80,9 @@ function KontaktPage() {
           <div className="mt-10 border-t border-border pt-8">
             <p className="text-[0.7rem] uppercase tracking-[0.22em] text-muted-foreground">Anfahrt</p>
             <p className="mt-4 text-sm text-foreground/80">
-              U-Bahn: Französische Straße (U6) · Stadtmitte (U2/U6)<br />
-              S-Bahn: Brandenburger Tor · Friedrichstraße<br />
-              Parkhäuser in unmittelbarer Nähe.
+              Bahn: Bahnhof Westerland (Sylt) — 5 Gehminuten<br />
+              Auto: A7 bis Niebüll, Sylt Shuttle nach Westerland<br />
+              Flug: Flughafen Sylt (GWT) — 10 Minuten mit dem Taxi
             </p>
           </div>
         </div>
