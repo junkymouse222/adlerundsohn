@@ -60,6 +60,13 @@ export type OfferDetail = {
     rechnung_message_id: string | null;
     rechnung_faellig_am: string | null;
     rechnung_error: string | null;
+    accept_token: string | null;
+    accepted_at: string | null;
+    accepted_ip: string | null;
+    bank_inhaber: string | null;
+    bank_name: string | null;
+    bank_iban: string | null;
+    bank_bic: string | null;
   };
   items: Array<{
     id: string;
