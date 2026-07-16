@@ -42,13 +42,14 @@ function AdminDetailPage() {
   }, [id]);
 
   async function handleResend() {
-    if (!confirm("Erneut senden? Das Angebot wird beim nächsten Cron-Lauf (in max. 5 Min.) versendet.")) return;
+    if (!confirm("Angebot jetzt per E-Mail an den Kunden senden?")) return;
     setResending(true);
     try {
       await resendOfferNow({ data: { id } });
       await load();
+      alert("Angebot wurde versendet.");
     } catch (e) {
-      alert(e instanceof Error ? e.message : "Fehler beim erneuten Senden.");
+      alert(e instanceof Error ? e.message : "Fehler beim Senden.");
     } finally {
       setResending(false);
     }
