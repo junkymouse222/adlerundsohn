@@ -66,7 +66,14 @@ export type Database = {
       }
       offer_requests: {
         Row: {
+          accept_token: string
+          accepted_at: string | null
+          accepted_ip: string | null
           angebot_nr: string
+          bank_bic: string | null
+          bank_iban: string | null
+          bank_inhaber: string | null
+          bank_name: string | null
           created_at: string
           customer_address: string
           customer_company: string | null
@@ -97,7 +104,14 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          accept_token?: string
+          accepted_at?: string | null
+          accepted_ip?: string | null
           angebot_nr: string
+          bank_bic?: string | null
+          bank_iban?: string | null
+          bank_inhaber?: string | null
+          bank_name?: string | null
           created_at?: string
           customer_address: string
           customer_company?: string | null
@@ -128,7 +142,14 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          accept_token?: string
+          accepted_at?: string | null
+          accepted_ip?: string | null
           angebot_nr?: string
+          bank_bic?: string | null
+          bank_iban?: string | null
+          bank_inhaber?: string | null
+          bank_name?: string | null
           created_at?: string
           customer_address?: string
           customer_company?: string | null

@@ -1,5 +1,5 @@
 // Server-only: rendert Angebot/Rechnung als PDF im Stil des internen Beleg-Generators.
-import { PDFDocument, StandardFonts, rgb, PDFFont, PDFPage } from "pdf-lib";
+import { PDFDocument, StandardFonts, rgb, PDFFont, PDFPage, PDFName, PDFString, PDFArray } from "pdf-lib";
 
 const fmtEUR = (n: number) =>
   new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(Number(n));
@@ -23,6 +23,8 @@ export type OfferForPdf = {
   mwst: number | string;
   total: number | string;
   lieferkosten: number | string;
+  accept_token?: string | null;
+  accepted_at?: string | null;
 };
 
 export type ItemForPdf = {
@@ -76,6 +78,8 @@ async function renderBeleg(
   offer: OfferForPdf,
   items: ItemForPdf[],
   invoice?: InvoiceMeta,
+  acceptUrl?: string | null,
+  alreadyAccepted?: boolean,
 ): Promise<Uint8Array> {
   const pdf = await PDFDocument.create();
   const font = await pdf.embedFont(StandardFonts.Helvetica);
@@ -266,6 +270,43 @@ async function renderBeleg(
     y -= 16;
   }
 
+  // ============ ANNAHME-BUTTON (nur Angebot, mit URL) ============
+  if (belegArt === "Angebot" && acceptUrl) {
+    ensureSpace(80);
+    const bw = 240;
+    const bh = 34;
+    const bx = (A4.w - bw) / 2;
+    const by = y - bh - 4;
+    if (alreadyAccepted) {
+      page.drawRectangle({ x: bx, y: by, width: bw, height: bh, color: rgb(0.96, 0.95, 0.91), borderColor: GOLD, borderWidth: 1 });
+      const label = "Angebot bereits angenommen";
+      const lw = font.widthOfTextAtSize(label, 11);
+      drawText(label, bx + (bw - lw) / 2, by + 12, { size: 11, color: NAVY });
+    } else {
+      page.drawRectangle({ x: bx, y: by, width: bw, height: bh, color: NAVY });
+      const label = "ANGEBOT ANNEHMEN";
+      const lw = bold.widthOfTextAtSize(label, 11);
+      drawText(label, bx + (bw - lw) / 2, by + 12, { font: bold, size: 11, color: rgb(0.96, 0.95, 0.91) });
+      // Link-Annotation
+      const link = pdf.context.obj({
+        Type: "Annot",
+        Subtype: "Link",
+        Rect: [bx, by, bx + bw, by + bh],
+        Border: [0, 0, 0],
+        A: { Type: "Action", S: "URI", URI: PDFString.of(acceptUrl) },
+      });
+      const existing = page.node.get(PDFName.of("Annots"));
+      if (existing instanceof PDFArray) {
+        existing.push(link);
+      } else {
+        page.node.set(PDFName.of("Annots"), pdf.context.obj([link]));
+      }
+      const hint = "Klicken zum verbindlichen Annehmen";
+      drawText(hint, bx + (bw - font.widthOfTextAtSize(hint, 8)) / 2, by - 12, { size: 8, color: MUTED });
+    }
+    y = by - 24;
+  }
+
   ensureSpace(40);
   const footerLines = wrap(
     belegArt === "Angebot"
@@ -283,10 +324,14 @@ async function renderBeleg(
   return pdf.save();
 }
 
-export function renderOfferPdf(offer: OfferForPdf, items: ItemForPdf[]): Promise<Uint8Array> {
+export function renderOfferPdf(
+  offer: OfferForPdf,
+  items: ItemForPdf[],
+  acceptUrl?: string | null,
+): Promise<Uint8Array> {
   const created = new Date(offer.created_at);
   const gueltigBis = new Date(created.getTime() + 21 * 24 * 3600 * 1000);
-  return renderBeleg("Angebot", offer.angebot_nr, created, gueltigBis, offer, items);
+  return renderBeleg("Angebot", offer.angebot_nr, created, gueltigBis, offer, items, undefined, acceptUrl, !!offer.accepted_at);
 }
 
 export function renderInvoicePdf(

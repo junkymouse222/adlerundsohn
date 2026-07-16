@@ -1,4 +1,4 @@
-// Server-only: rendert Angebot als HTML und sendet via Resend Connector Gateway.
+// Server-only: rendert Angebot als HTML (mit Annahme-Button) und sendet via Resend Connector Gateway.
 
 const fmtEUR = (n: number) =>
   new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(Number(n));
@@ -19,6 +19,8 @@ type OfferRow = {
   mwst: number | string;
   total: number | string;
   lieferkosten: number | string;
+  accept_token?: string | null;
+  accepted_at?: string | null;
 };
 
 type ItemRow = {
@@ -32,86 +34,150 @@ type ItemRow = {
   position_total: number | string;
 };
 
+export function siteBaseUrl(): string {
+  return (
+    process.env.PUBLIC_SITE_URL ||
+    process.env.SITE_URL ||
+    "https://adlerundsohn.lovable.app"
+  ).replace(/\/$/, "");
+}
+
+export function offerAcceptUrl(token: string | null | undefined): string | null {
+  if (!token) return null;
+  return `${siteBaseUrl()}/api/public/hooks/accept-offer?token=${encodeURIComponent(token)}`;
+}
+
 export function renderOfferHtml(offer: OfferRow, items: ItemRow[]): string {
   const gueltigBis = new Date(new Date(offer.created_at).getTime() + 21 * 24 * 3600 * 1000)
     .toLocaleDateString("de-DE");
   const datum = new Date(offer.created_at).toLocaleDateString("de-DE");
+  const acceptUrl = offerAcceptUrl(offer.accept_token);
+  const alreadyAccepted = !!offer.accepted_at;
 
   const rows = items
     .sort((a, b) => a.pos - b.pos)
     .map(
       (it, idx) => `
         <tr>
-          <td style="padding:8px 6px;border-bottom:1px solid #eee;color:#666;">${idx + 1}</td>
-          <td style="padding:8px 6px;border-bottom:1px solid #eee;color:#666;">${it.artikel}</td>
-          <td style="padding:8px 6px;border-bottom:1px solid #eee;">
-            <div style="font-weight:600;color:#111;">${escapeHtml(it.name)}</div>
-            ${it.beschreibung ? `<div style="color:#666;font-size:12px;">${escapeHtml(it.beschreibung)}</div>` : ""}
+          <td style="padding:10px 6px;border-bottom:1px solid #ece8de;color:#8a8578;font-size:12px;">${idx + 1}</td>
+          <td style="padding:10px 6px;border-bottom:1px solid #ece8de;">
+            <div style="font-weight:600;color:#0f2740;font-family:Georgia,serif;">${escapeHtml(it.name)}</div>
+            ${it.beschreibung ? `<div style="color:#6b6656;font-size:12px;margin-top:2px;">${escapeHtml(it.beschreibung)}</div>` : ""}
           </td>
-          <td style="padding:8px 6px;border-bottom:1px solid #eee;text-align:right;">${it.menge} ${escapeHtml(it.einheit)}</td>
-          <td style="padding:8px 6px;border-bottom:1px solid #eee;text-align:right;">${fmtEUR(Number(it.einzelpreis))}</td>
-          <td style="padding:8px 6px;border-bottom:1px solid #eee;text-align:right;font-weight:600;">${fmtEUR(Number(it.position_total))}</td>
+          <td style="padding:10px 6px;border-bottom:1px solid #ece8de;text-align:right;color:#4a4638;">${it.menge} ${escapeHtml(it.einheit)}</td>
+          <td style="padding:10px 6px;border-bottom:1px solid #ece8de;text-align:right;color:#4a4638;">${fmtEUR(Number(it.einzelpreis))}</td>
+          <td style="padding:10px 6px;border-bottom:1px solid #ece8de;text-align:right;font-weight:600;color:#0f2740;">${fmtEUR(Number(it.position_total))}</td>
         </tr>`,
     )
     .join("");
 
+  const acceptBlock = acceptUrl
+    ? alreadyAccepted
+      ? `<div style="background:#f5f3ee;border:1px solid #c9a55c;padding:20px;text-align:center;margin:32px 0;">
+           <div style="font-family:Georgia,serif;font-size:16px;color:#0f2740;">Angebot bereits angenommen</div>
+           <div style="font-size:12px;color:#6b6656;margin-top:6px;">Vielen Dank. Wir kümmern uns um die Abwicklung.</div>
+         </div>`
+      : `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:32px auto;">
+           <tr>
+             <td style="background:#0f2740;padding:0;">
+               <a href="${acceptUrl}"
+                  style="display:inline-block;padding:16px 42px;font-family:Georgia,serif;font-size:15px;letter-spacing:2px;text-transform:uppercase;color:#f5f3ee;text-decoration:none;border:1px solid #0f2740;">
+                 Angebot annehmen
+               </a>
+             </td>
+           </tr>
+           <tr>
+             <td style="text-align:center;padding-top:10px;font-size:11px;color:#8a8578;letter-spacing:1px;text-transform:uppercase;">
+               Ein Klick genügt · rechtsverbindlich
+             </td>
+           </tr>
+         </table>`
+    : "";
+
   return `<!doctype html>
 <html lang="de"><head><meta charset="utf-8"><title>Angebot ${offer.angebot_nr}</title></head>
-<body style="margin:0;padding:0;background:#f5f3ee;font-family:'Helvetica Neue',Arial,sans-serif;color:#111;">
-  <div style="max-width:720px;margin:0 auto;padding:24px;background:#fff;">
-    <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
-      <tr>
-        <td>
-          <div style="font-family:Georgia,serif;font-size:28px;color:#0f2740;">Rechtsanwaltskanzlei Adler und Sohn</div>
-          <div style="height:2px;width:60px;background:#c9a55c;margin-top:8px;"></div>
-          <div style="font-size:12px;color:#666;margin-top:8px;">Strandstraße 14 · 25980 Westerland/Sylt</div>
-          <div style="font-size:12px;color:#666;">info@adlerundsohn.com</div>
-        </td>
-        <td style="text-align:right;vertical-align:top;font-family:'Courier New',monospace;">
-          <div style="font-size:12px;color:#666;letter-spacing:1px;">ANGEBOT</div>
-          <div style="font-size:20px;font-weight:600;">${offer.angebot_nr}</div>
-          <div style="font-size:12px;color:#666;margin-top:8px;">Datum: ${datum}</div>
-          <div style="font-size:12px;color:#666;">Gültig bis: ${gueltigBis}</div>
-        </td>
-      </tr>
-    </table>
+<body style="margin:0;padding:0;background:#efece4;font-family:'Helvetica Neue',Arial,sans-serif;color:#1a1a1a;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#efece4;padding:32px 12px;">
+    <tr><td align="center">
+      <table role="presentation" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;background:#ffffff;border-top:4px solid #c9a55c;">
 
-    <div style="margin-bottom:16px;">
-      <div style="font-size:11px;letter-spacing:2px;color:#666;text-transform:uppercase;">Kunde</div>
-      <div style="font-weight:600;margin-top:4px;">${escapeHtml(offer.customer_company || offer.customer_name)}</div>
-      ${offer.customer_company ? `<div>${escapeHtml(offer.customer_name)}</div>` : ""}
-      <div style="white-space:pre-line;color:#333;">${escapeHtml(offer.customer_address)}</div>
-      ${offer.customer_ust_id ? `<div style="color:#666;font-size:12px;">USt-IdNr.: ${escapeHtml(offer.customer_ust_id)}</div>` : ""}
-    </div>
+        <tr><td style="padding:36px 40px 8px 40px;">
+          <div style="font-family:Georgia,serif;font-size:22px;color:#0f2740;letter-spacing:0.5px;">Rechtsanwaltskanzlei</div>
+          <div style="font-family:Georgia,serif;font-size:28px;color:#0f2740;font-weight:600;margin-top:2px;">Adler und Sohn</div>
+          <div style="height:2px;width:56px;background:#c9a55c;margin-top:12px;"></div>
+        </td></tr>
 
-    <table style="width:100%;border-collapse:collapse;margin-top:16px;font-size:13px;">
-      <thead>
-        <tr style="background:#0f2740;color:#fff;">
-          <th style="padding:10px 6px;text-align:left;">Pos.</th>
-          <th style="padding:10px 6px;text-align:left;">Artikel</th>
-          <th style="padding:10px 6px;text-align:left;">Bezeichnung</th>
-          <th style="padding:10px 6px;text-align:right;">Menge</th>
-          <th style="padding:10px 6px;text-align:right;">Einzelpreis</th>
-          <th style="padding:10px 6px;text-align:right;">Gesamt</th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>
+        <tr><td style="padding:24px 40px 0 40px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="vertical-align:top;">
+                <div style="font-size:11px;letter-spacing:2px;color:#8a8578;text-transform:uppercase;">Für</div>
+                <div style="font-family:Georgia,serif;font-size:15px;color:#0f2740;margin-top:6px;">${escapeHtml(offer.customer_company || offer.customer_name)}</div>
+                ${offer.customer_company ? `<div style="font-size:13px;color:#4a4638;">${escapeHtml(offer.customer_name)}</div>` : ""}
+              </td>
+              <td style="vertical-align:top;text-align:right;">
+                <div style="font-family:'Courier New',monospace;font-size:11px;letter-spacing:2px;color:#8a8578;text-transform:uppercase;">Angebot</div>
+                <div style="font-family:'Courier New',monospace;font-size:20px;color:#0f2740;margin-top:2px;">${offer.angebot_nr}</div>
+                <div style="font-size:11px;color:#8a8578;margin-top:6px;">Datum: ${datum}</div>
+                <div style="font-size:11px;color:#8a8578;">Gültig bis: ${gueltigBis}</div>
+              </td>
+            </tr>
+          </table>
+        </td></tr>
 
-    <table style="width:100%;margin-top:24px;font-size:13px;">
-      <tr><td style="text-align:right;color:#666;padding:4px 6px;">Zwischensumme</td><td style="text-align:right;padding:4px 6px;width:140px;">${fmtEUR(Number(offer.subtotal))}</td></tr>
-      ${Number(offer.lieferkosten) > 0 ? `<tr><td style="text-align:right;color:#666;padding:4px 6px;">Lieferkosten</td><td style="text-align:right;padding:4px 6px;">${fmtEUR(Number(offer.lieferkosten))}</td></tr>` : ""}
-      <tr><td style="text-align:right;color:#666;padding:4px 6px;">zzgl. ${Number(offer.mwst_rate)}% MwSt.</td><td style="text-align:right;padding:4px 6px;">${fmtEUR(Number(offer.mwst))}</td></tr>
-      <tr style="border-top:2px solid #0f2740;"><td style="text-align:right;font-weight:600;padding:8px 6px;">Gesamtbetrag</td><td style="text-align:right;font-weight:600;padding:8px 6px;font-size:16px;">${fmtEUR(Number(offer.total))}</td></tr>
-    </table>
+        <tr><td style="padding:28px 40px 8px 40px;">
+          <p style="margin:0 0 12px 0;font-family:Georgia,serif;font-size:16px;color:#0f2740;">Sehr geehrte Damen und Herren,</p>
+          <p style="margin:0;font-size:14px;line-height:1.7;color:#3a352b;">
+            vielen Dank für Ihre Anfrage. Anbei finden Sie unser unverbindliches Angebot ${offer.angebot_nr}
+            zusammen mit dem PDF-Dokument im Anhang. Sie können das Angebot mit einem Klick direkt annehmen.
+          </p>
+        </td></tr>
 
-    ${offer.message ? `<div style="margin-top:24px;padding:12px;background:#f5f3ee;border-left:3px solid #c9a55c;font-size:13px;"><strong>Ihre Nachricht:</strong><br>${escapeHtml(offer.message)}</div>` : ""}
+        <tr><td style="padding:0 40px;">${acceptBlock}</td></tr>
 
-    <div style="margin-top:32px;padding-top:16px;border-top:1px solid #eee;font-size:12px;color:#666;line-height:1.6;">
-      <p>Vielen Dank für Ihre Anfrage. Dieses Angebot ist 21 Tage gültig. Alle Positionen aus laufender Verwertung. Lieferung ab Bestellwert 3.000 € netto kostenfrei innerhalb des Liefergebiets. Zwischenverkauf vorbehalten.</p>
-      <p>Bei Fragen erreichen Sie uns unter <a href="mailto:info@adlerundsohn.com" style="color:#0f2740;">info@adlerundsohn.com</a>.</p>
-    </div>
-  </div>
+        <tr><td style="padding:8px 40px 0 40px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:13px;">
+            <thead>
+              <tr>
+                <th style="padding:10px 6px;text-align:left;font-family:Georgia,serif;font-weight:normal;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#8a8578;border-bottom:2px solid #0f2740;">Pos.</th>
+                <th style="padding:10px 6px;text-align:left;font-family:Georgia,serif;font-weight:normal;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#8a8578;border-bottom:2px solid #0f2740;">Bezeichnung</th>
+                <th style="padding:10px 6px;text-align:right;font-family:Georgia,serif;font-weight:normal;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#8a8578;border-bottom:2px solid #0f2740;">Menge</th>
+                <th style="padding:10px 6px;text-align:right;font-family:Georgia,serif;font-weight:normal;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#8a8578;border-bottom:2px solid #0f2740;">Preis</th>
+                <th style="padding:10px 6px;text-align:right;font-family:Georgia,serif;font-weight:normal;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#8a8578;border-bottom:2px solid #0f2740;">Summe</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </td></tr>
+
+        <tr><td style="padding:16px 40px 0 40px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;">
+            <tr><td style="text-align:right;color:#6b6656;padding:4px 6px;">Zwischensumme</td><td style="text-align:right;padding:4px 6px;width:140px;color:#3a352b;">${fmtEUR(Number(offer.subtotal))}</td></tr>
+            ${Number(offer.lieferkosten) > 0 ? `<tr><td style="text-align:right;color:#6b6656;padding:4px 6px;">Lieferkosten</td><td style="text-align:right;padding:4px 6px;color:#3a352b;">${fmtEUR(Number(offer.lieferkosten))}</td></tr>` : ""}
+            <tr><td style="text-align:right;color:#6b6656;padding:4px 6px;">zzgl. ${Number(offer.mwst_rate)}% MwSt.</td><td style="text-align:right;padding:4px 6px;color:#3a352b;">${fmtEUR(Number(offer.mwst))}</td></tr>
+            <tr><td colspan="2" style="padding:0;"><div style="height:2px;background:#0f2740;margin:6px 0;"></div></td></tr>
+            <tr><td style="text-align:right;font-family:Georgia,serif;font-weight:600;padding:6px;color:#0f2740;font-size:15px;">Gesamtbetrag</td><td style="text-align:right;font-weight:600;padding:6px;font-size:17px;color:#0f2740;font-family:Georgia,serif;">${fmtEUR(Number(offer.total))}</td></tr>
+          </table>
+        </td></tr>
+
+        ${offer.message ? `<tr><td style="padding:24px 40px 0 40px;"><div style="border-left:3px solid #c9a55c;background:#f5f3ee;padding:14px 18px;font-size:13px;color:#3a352b;"><div style="font-family:Georgia,serif;color:#0f2740;margin-bottom:4px;">Ihre Nachricht</div>${escapeHtml(offer.message)}</div></td></tr>` : ""}
+
+        <tr><td style="padding:32px 40px 40px 40px;border-top:1px solid #ece8de;margin-top:24px;">
+          <p style="margin:0 0 8px 0;font-family:Georgia,serif;font-size:14px;color:#0f2740;">Mit besten Grüßen</p>
+          <p style="margin:0;font-family:Georgia,serif;font-size:14px;color:#0f2740;">Kanzlei Adler und Sohn</p>
+          <div style="height:1px;background:#ece8de;margin:20px 0;"></div>
+          <p style="margin:0;font-size:11px;color:#8a8578;line-height:1.6;">
+            Dieses Angebot ist 21 Tage gültig. Alle Positionen aus laufender Verwertung.
+            Lieferung ab Bestellwert 3.000 € netto kostenfrei innerhalb des Liefergebiets. Zwischenverkauf vorbehalten.
+          </p>
+          <p style="margin:12px 0 0 0;font-size:11px;color:#8a8578;">
+            Rechtsanwaltskanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt · <a href="mailto:info@adlerundsohn.com" style="color:#0f2740;text-decoration:none;">info@adlerundsohn.com</a>
+          </p>
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
 </body></html>`;
 }
 
@@ -169,4 +235,3 @@ export async function sendOfferEmail(params: {
   const data = (await res.json()) as { id?: string };
   return { ok: true, messageId: data.id ?? "" };
 }
-
