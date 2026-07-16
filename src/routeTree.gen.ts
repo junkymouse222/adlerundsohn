@@ -18,6 +18,7 @@ import { Route as FileuploadRouteImport } from './routes/fileupload'
 import { Route as FachgebieteRouteImport } from './routes/fachgebiete'
 import { Route as DatenschutzRouteImport } from './routes/datenschutz'
 import { Route as AnwaelteRouteImport } from './routes/anwaelte'
+import { Route as AngebotAnfordernRouteImport } from './routes/angebot-anfordern'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as JuliAngeboteFilenameRouteImport } from './routes/juli.angebote.$filename'
 
@@ -66,6 +67,11 @@ const AnwaelteRoute = AnwaelteRouteImport.update({
   path: '/anwaelte',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AngebotAnfordernRoute = AngebotAnfordernRouteImport.update({
+  id: '/angebot-anfordern',
+  path: '/angebot-anfordern',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -79,6 +85,7 @@ const JuliAngeboteFilenameRoute = JuliAngeboteFilenameRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/angebot-anfordern': typeof AngebotAnfordernRoute
   '/anwaelte': typeof AnwaelteRoute
   '/datenschutz': typeof DatenschutzRoute
   '/fachgebiete': typeof FachgebieteRoute
@@ -92,6 +99,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/angebot-anfordern': typeof AngebotAnfordernRoute
   '/anwaelte': typeof AnwaelteRoute
   '/datenschutz': typeof DatenschutzRoute
   '/fachgebiete': typeof FachgebieteRoute
@@ -106,6 +114,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/angebot-anfordern': typeof AngebotAnfordernRoute
   '/anwaelte': typeof AnwaelteRoute
   '/datenschutz': typeof DatenschutzRoute
   '/fachgebiete': typeof FachgebieteRoute
@@ -121,6 +130,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/angebot-anfordern'
     | '/anwaelte'
     | '/datenschutz'
     | '/fachgebiete'
@@ -134,6 +144,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/angebot-anfordern'
     | '/anwaelte'
     | '/datenschutz'
     | '/fachgebiete'
@@ -147,6 +158,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/angebot-anfordern'
     | '/anwaelte'
     | '/datenschutz'
     | '/fachgebiete'
@@ -161,6 +173,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AngebotAnfordernRoute: typeof AngebotAnfordernRoute
   AnwaelteRoute: typeof AnwaelteRoute
   DatenschutzRoute: typeof DatenschutzRoute
   FachgebieteRoute: typeof FachgebieteRoute
@@ -238,6 +251,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnwaelteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/angebot-anfordern': {
+      id: '/angebot-anfordern'
+      path: '/angebot-anfordern'
+      fullPath: '/angebot-anfordern'
+      preLoaderRoute: typeof AngebotAnfordernRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -257,6 +277,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AngebotAnfordernRoute: AngebotAnfordernRoute,
   AnwaelteRoute: AnwaelteRoute,
   DatenschutzRoute: DatenschutzRoute,
   FachgebieteRoute: FachgebieteRoute,
