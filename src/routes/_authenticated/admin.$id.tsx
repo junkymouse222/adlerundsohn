@@ -26,6 +26,11 @@ function AdminDetailPage() {
   const [resending, setResending] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [sendResult, setSendResult] = useState<{ ok: boolean; msg: string } | null>(null);
+  const [invoicing, setInvoicing] = useState(false);
+  const [invoiceConfirmOpen, setInvoiceConfirmOpen] = useState(false);
+  const [faelligTage, setFaelligTage] = useState(14);
+  const [invoiceResult, setInvoiceResult] = useState<{ ok: boolean; msg: string } | null>(null);
+
 
   async function load() {
     setLoading(true);
