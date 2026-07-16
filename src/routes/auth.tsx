@@ -25,15 +25,36 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const { next } = Route.useSearch();
   const navigate = useNavigate();
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setInfo(null);
+    if (mode === "signup") {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: window.location.origin + "/auth" },
+      });
+      setLoading(false);
+      if (error) {
+        setError(error.message);
+        return;
+      }
+      if (data.session) {
+        navigate({ to: next || "/admin" });
+      } else {
+        setInfo("Registrierung erfolgreich. Bitte prüfen Sie Ihre E-Mails zur Bestätigung.");
+      }
+      return;
+    }
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
@@ -47,7 +68,7 @@ function AuthPage() {
     <section className="container-prose grid place-items-center py-24 md:py-32">
       <form onSubmit={handleSubmit} className="w-full max-w-md border border-border bg-parchment p-10">
         <p className="eyebrow">Interner Bereich</p>
-        <h1 className="mt-4 text-3xl">Anmelden</h1>
+        <h1 className="mt-4 text-3xl">{mode === "signin" ? "Anmelden" : "Registrieren"}</h1>
         <span className="rule-gold mt-4" />
 
         <label className="mt-8 block">
@@ -65,6 +86,7 @@ function AuthPage() {
           <input
             type="password"
             required
+            minLength={8}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="mt-1 block w-full border border-border bg-white px-3 py-2"
@@ -72,13 +94,26 @@ function AuthPage() {
         </label>
 
         {error && <p className="mt-4 text-sm text-red-700">{error}</p>}
+        {info && <p className="mt-4 text-sm text-green-800">{info}</p>}
 
         <button
           type="submit"
           disabled={loading}
           className="mt-6 w-full bg-primary px-6 py-4 text-xs uppercase tracking-[0.2em] text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
         >
-          {loading ? "Anmelden …" : "Anmelden"}
+          {loading ? "…" : mode === "signin" ? "Anmelden" : "Registrieren"}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setMode(mode === "signin" ? "signup" : "signin");
+            setError(null);
+            setInfo(null);
+          }}
+          className="mt-4 w-full text-xs uppercase tracking-widest text-muted-foreground underline"
+        >
+          {mode === "signin" ? "Noch kein Konto? Registrieren" : "Bereits registriert? Anmelden"}
         </button>
       </form>
     </section>
