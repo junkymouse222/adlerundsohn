@@ -28,6 +28,7 @@ import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authentic
 import { Route as JuliAngeboteFilenameRouteImport } from './routes/juli.angebote.$filename'
 import { Route as AuthenticatedAdminIdRouteImport } from './routes/_authenticated/admin.$id'
 import { Route as ApiPublicHooksSendScheduledOffersRouteImport } from './routes/api/public/hooks/send-scheduled-offers'
+import { Route as ApiPublicHooksAcceptOfferRouteImport } from './routes/api/public/hooks/accept-offer'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -124,6 +125,12 @@ const ApiPublicHooksSendScheduledOffersRoute =
     path: '/api/public/hooks/send-scheduled-offers',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksAcceptOfferRoute =
+  ApiPublicHooksAcceptOfferRouteImport.update({
+    id: '/api/public/hooks/accept-offer',
+    path: '/api/public/hooks/accept-offer',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -143,6 +150,7 @@ export interface FileRoutesByFullPath {
   '/admin/$id': typeof AuthenticatedAdminIdRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/api/public/hooks/accept-offer': typeof ApiPublicHooksAcceptOfferRoute
   '/api/public/hooks/send-scheduled-offers': typeof ApiPublicHooksSendScheduledOffersRoute
 }
 export interface FileRoutesByTo {
@@ -162,6 +170,7 @@ export interface FileRoutesByTo {
   '/admin/$id': typeof AuthenticatedAdminIdRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/api/public/hooks/accept-offer': typeof ApiPublicHooksAcceptOfferRoute
   '/api/public/hooks/send-scheduled-offers': typeof ApiPublicHooksSendScheduledOffersRoute
 }
 export interface FileRoutesById {
@@ -184,6 +193,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/$id': typeof AuthenticatedAdminIdRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/api/public/hooks/accept-offer': typeof ApiPublicHooksAcceptOfferRoute
   '/api/public/hooks/send-scheduled-offers': typeof ApiPublicHooksSendScheduledOffersRoute
 }
 export interface FileRouteTypes {
@@ -206,6 +216,7 @@ export interface FileRouteTypes {
     | '/admin/$id'
     | '/juli/angebote/$filename'
     | '/admin/'
+    | '/api/public/hooks/accept-offer'
     | '/api/public/hooks/send-scheduled-offers'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -225,6 +236,7 @@ export interface FileRouteTypes {
     | '/admin/$id'
     | '/juli/angebote/$filename'
     | '/admin'
+    | '/api/public/hooks/accept-offer'
     | '/api/public/hooks/send-scheduled-offers'
   id:
     | '__root__'
@@ -246,6 +258,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/$id'
     | '/juli/angebote/$filename'
     | '/_authenticated/admin/'
+    | '/api/public/hooks/accept-offer'
     | '/api/public/hooks/send-scheduled-offers'
   fileRoutesById: FileRoutesById
 }
@@ -264,6 +277,7 @@ export interface RootRouteChildren {
   RechnungRoute: typeof RechnungRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   JuliAngeboteFilenameRoute: typeof JuliAngeboteFilenameRoute
+  ApiPublicHooksAcceptOfferRoute: typeof ApiPublicHooksAcceptOfferRoute
   ApiPublicHooksSendScheduledOffersRoute: typeof ApiPublicHooksSendScheduledOffersRoute
 }
 
@@ -402,6 +416,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksSendScheduledOffersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/accept-offer': {
+      id: '/api/public/hooks/accept-offer'
+      path: '/api/public/hooks/accept-offer'
+      fullPath: '/api/public/hooks/accept-offer'
+      preLoaderRoute: typeof ApiPublicHooksAcceptOfferRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -455,6 +476,7 @@ const rootRouteChildren: RootRouteChildren = {
   RechnungRoute: RechnungRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   JuliAngeboteFilenameRoute: JuliAngeboteFilenameRoute,
+  ApiPublicHooksAcceptOfferRoute: ApiPublicHooksAcceptOfferRoute,
   ApiPublicHooksSendScheduledOffersRoute:
     ApiPublicHooksSendScheduledOffersRoute,
 }
