@@ -23,6 +23,8 @@ export type OfferForPdf = {
   mwst: number | string;
   total: number | string;
   lieferkosten: number | string;
+  accept_token?: string | null;
+  accepted_at?: string | null;
 };
 
 export type ItemForPdf = {
