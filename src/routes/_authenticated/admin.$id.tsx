@@ -61,6 +61,7 @@ function AdminDetailPage() {
       setSendResult({ ok: false, msg: e instanceof Error ? e.message : "Fehler beim Senden." });
     } finally {
       setResending(false);
+    }
   }
 
   async function handleInvoiceConfirmed() {
@@ -78,7 +79,6 @@ function AdminDetailPage() {
     }
   }
 
-  }
 
   if (loading) return <section className="container-prose py-16 text-sm text-muted-foreground">Lade …</section>;
   if (error) return <section className="container-prose py-16 text-sm text-red-700">{error}</section>;
