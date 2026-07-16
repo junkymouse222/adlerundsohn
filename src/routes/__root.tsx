@@ -191,7 +191,8 @@ function Footer() {
             <li>Friedrichstraße 112</li>
             <li>10117 Berlin</li>
             <li>+49 6591 6659636</li>
-            <li>info@kanzlei-goldmann.de · info@goldmann-ra.de</li>
+            <li>info@kanzlei-goldmann.de</li>
+            <li>Verkauf & Verwertung: info@goldmann-ra.de</li>
           </ul>
         </div>
         <div>

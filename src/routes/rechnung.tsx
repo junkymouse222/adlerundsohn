@@ -404,7 +404,7 @@ function RechnungPage() {
             <div className="mt-4 text-xs leading-relaxed text-muted-foreground">
               Kanzlei Goldmann · Friedrichstraße 112 · 10117 Berlin
               <br />
-              Telefon +49 6591 6659636 · info@kanzlei-goldmann.de · info@goldmann-ra.de
+              Telefon +49 6591 6659636 · info@goldmann-ra.de
             </div>
           </div>
           <div className="text-right">
@@ -569,7 +569,7 @@ function RechnungPage() {
         )}
 
         <div className="beleg-footer mt-10 border-t border-border pt-4 text-[0.65rem] uppercase tracking-[0.15em] text-muted-foreground">
-          Kanzlei Goldmann · Friedrichstraße 112 · 10117 Berlin · +49 6591 6659636 · info@kanzlei-goldmann.de · info@goldmann-ra.de · USt-IdNr. DE271552088
+          Kanzlei Goldmann · Friedrichstraße 112 · 10117 Berlin · +49 6591 6659636 · info@goldmann-ra.de · USt-IdNr. DE271552088
         </div>
       </article>
 
