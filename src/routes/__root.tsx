@@ -206,7 +206,7 @@ function Footer() {
       <div className="border-t border-primary-foreground/10">
         <div className="container-prose flex flex-col items-start justify-between gap-3 py-6 text-xs text-primary-foreground/50 md:flex-row md:items-center">
           <span>© {new Date().getFullYear()} Rechtsanwaltskanzlei Adler und Sohn · adlerundsohn.com</span>
-          <span>Mitglied der Rechtsanwaltskammer Berlin</span>
+          <span>Mitglied der Rechtsanwaltskammer Schleswig-Holstein</span>
         </div>
       </div>
     </footer>

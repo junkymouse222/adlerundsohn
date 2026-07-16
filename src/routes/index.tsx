@@ -22,7 +22,7 @@ export const Route = createFileRoute("/")({
         address: {
           "@type": "PostalAddress",
           streetAddress: "Strandstraße 14",
-          addressLocality: "Berlin",
+          addressLocality: "Westerland",
           postalCode: "10117",
           addressCountry: "DE",
         },
@@ -51,7 +51,7 @@ function Index() {
 
         <div className="container-prose py-32 md:py-48">
           <p className="text-[0.72rem] uppercase tracking-[0.28em] text-gold">
-            Seit 1998 · Berlin
+            Seit 1998 · Sylt
           </p>
           <h1 className="mt-6 max-w-3xl font-serif text-5xl leading-[1.05] text-primary-foreground md:text-7xl">
             Insolvenz&shy;recht mit
@@ -145,7 +145,7 @@ function Index() {
             </p>
             <p className="mt-6 text-sm leading-relaxed text-primary-foreground/60">
               Fachanwalt für Insolvenzrecht · Bestellter Insolvenzverwalter
-              an den Amtsgerichten Berlin-Charlottenburg und Potsdam · Mitglied
+              an den Amtsgerichten Niebüll und Flensburg · Mitglied
               des VID Verband Insolvenzverwalter Deutschlands e.V.
             </p>
             <Link to="/anwaelte" className="mt-10 inline-block border-b border-gold pb-1 text-xs uppercase tracking-[0.22em] text-gold hover:text-gold-soft">

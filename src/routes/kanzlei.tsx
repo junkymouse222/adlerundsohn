@@ -48,7 +48,7 @@ function KanzleiPage() {
           <p>
             Unsere Anwältinnen und Anwälte werden regelmäßig als
             Insolvenzverwalter, Sachwalter und Treuhänder von den
-            Amtsgerichten Berlin-Charlottenburg, Potsdam und Frankfurt (Oder)
+            Amtsgerichten Niebüll, Flensburg und Husum
             bestellt.
           </p>
         </div>
@@ -98,7 +98,7 @@ function KanzleiPage() {
           <div className="space-y-10">
             {[
               ["1998", "Gründung der Einzelkanzlei durch Dr. Friedrich Adler in Westerland auf Sylt."],
-              ["2003", "Erste Bestellung als Insolvenzverwalter am Amtsgericht Berlin-Charlottenburg."],
+              ["2003", "Erste Bestellung als Insolvenzverwalter am Amtsgericht Niebüll."],
               ["2011", "Erweiterung um Anwältin Dr. Katharina Weber, Schwerpunkt Sanierungs- und Restrukturierungsrecht."],
               ["2017", "Aufnahme in den VID Verband Insolvenzverwalter Deutschlands e.V."],
               ["2020", "Eintritt von Marcus Hartmann, Fachanwalt für Handels- und Gesellschaftsrecht."],

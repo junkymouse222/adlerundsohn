@@ -4,7 +4,7 @@ import { useState } from "react";
 export const Route = createFileRoute("/kontakt")({
   head: () => ({
     meta: [
-      { title: "Kontakt — Rechtsanwaltskanzlei Adler und Sohn Berlin" },
+      { title: "Kontakt — Rechtsanwaltskanzlei Adler und Sohn Sylt" },
       { name: "description", content: "Kontakt zur Rechtsanwaltskanzlei Adler und Sohn auf Sylt. Vertrauliches Erstgespräch, Termin nach Vereinbarung." },
       { property: "og:title", content: "Kontakt — Kanzlei Adler und Sohn" },
       { property: "og:description", content: "Vertrauliches Erstgespräch, Termin nach Vereinbarung." },

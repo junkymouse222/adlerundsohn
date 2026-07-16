@@ -399,7 +399,7 @@ function RechnungPage() {
           <div>
             <div className="text-2xl font-serif tracking-widest">G O L D M A N N</div>
             <div className="mt-1 text-[0.65rem] uppercase tracking-[0.25em] text-muted-foreground">
-              Rechtsanwaltskanzlei · Berlin
+              Rechtsanwaltskanzlei · Sylt
             </div>
             <div className="mt-4 text-xs leading-relaxed text-muted-foreground">
               Kanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt

@@ -77,7 +77,7 @@ function ImpressumPage() {
               Zur außergerichtlichen Beilegung von Streitigkeiten zwischen
               Mandanten und Rechtsanwälten besteht auf Antrag die Möglichkeit
               der Schlichtung bei der Schlichtungsstelle der Rechtsanwaltschaft
-              (Neue Grünstraße 17, 10179 Berlin).
+              (Gottorfstraße 13, 24837 Schleswig).
             </p>
             <p className="mt-4">
               Wir sind nicht bereit oder verpflichtet, an einem

@@ -31,7 +31,7 @@ const bereiche = [
   {
     kennung: "II",
     title: "Insolvenzverwaltung",
-    intro: "Als bestellte Insolvenzverwalter, Sachwalter und Treuhänder arbeiten wir mit den Amtsgerichten Berlin-Charlottenburg, Potsdam und Frankfurt (Oder) zusammen.",
+    intro: "Als bestellte Insolvenzverwalter, Sachwalter und Treuhänder arbeiten wir mit den Amtsgerichten Niebüll, Flensburg und Husum zusammen.",
     leistungen: [
       "Übernahme der Verwaltungs- und Verfügungsbefugnis",
       "Fortführungs- und Verwertungskonzepte",

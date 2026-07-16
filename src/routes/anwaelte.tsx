@@ -23,13 +23,13 @@ const anwaelte = [
     role: "Gründungspartner · Insolvenzverwalter",
     img: goldmannImg,
     bio: [
-      "Dr. Friedrich Adler gründete die Kanzlei 1998. Er wird seit 2003 regelmäßig als Insolvenzverwalter, Sachwalter und Treuhänder an den Amtsgerichten Berlin-Charlottenburg und Potsdam bestellt und hat in dieser Funktion Verfahren von mittelständischen Produktionsbetrieben bis zu international vernetzten Handelsgesellschaften geführt.",
-      "Er promovierte an der Humboldt-Universität zu Berlin über die Reform der Restschuldbefreiung und veröffentlicht regelmäßig in der ZInsO und der NZI.",
+      "Dr. Friedrich Adler gründete die Kanzlei 1998. Er wird seit 2003 regelmäßig als Insolvenzverwalter, Sachwalter und Treuhänder an den Amtsgerichten Niebüll und Flensburg bestellt und hat in dieser Funktion Verfahren von mittelständischen Produktionsbetrieben bis zu international vernetzten Handelsgesellschaften geführt.",
+      "Er promovierte an der Christian-Albrechts-Universität zu Kiel über die Reform der Restschuldbefreiung und veröffentlicht regelmäßig in der ZInsO und der NZI.",
     ],
     schwerpunkte: ["Regelinsolvenzverfahren", "Eigenverwaltung", "Konzerninsolvenzen", "Sanierungsberatung"],
     ausbildung: [
-      "Studium der Rechtswissenschaften, Freie Universität Berlin",
-      "Promotion, Humboldt-Universität zu Berlin (2001)",
+      "Studium der Rechtswissenschaften, Christian-Albrechts-Universität zu Kiel",
+      "Promotion, Christian-Albrechts-Universität zu Kiel (2001)",
       "Fachanwalt für Insolvenzrecht (seit 2005)",
     ],
     kontakt: "f.adler@adlerundsohn.com",
