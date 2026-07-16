@@ -24,6 +24,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AngebotAnfordernDankeRouteImport } from './routes/angebot-anfordern.danke'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as JuliAngeboteFilenameRouteImport } from './routes/juli.angebote.$filename'
 import { Route as AuthenticatedAdminIdRouteImport } from './routes/_authenticated/admin.$id'
 import { Route as ApiPublicHooksSendScheduledOffersRouteImport } from './routes/api/public/hooks/send-scheduled-offers'
@@ -102,6 +103,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const JuliAngeboteFilenameRoute = JuliAngeboteFilenameRouteImport.update({
   id: '/juli/angebote/$filename',
   path: '/juli/angebote/$filename',
@@ -136,6 +142,7 @@ export interface FileRoutesByFullPath {
   '/angebot-anfordern/danke': typeof AngebotAnfordernDankeRoute
   '/admin/$id': typeof AuthenticatedAdminIdRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
+  '/admin/': typeof AuthenticatedAdminIndexRoute
   '/api/public/hooks/send-scheduled-offers': typeof ApiPublicHooksSendScheduledOffersRoute
 }
 export interface FileRoutesByTo {
@@ -151,10 +158,10 @@ export interface FileRoutesByTo {
   '/kontakt': typeof KontaktRoute
   '/rechnung': typeof RechnungRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/angebot-anfordern/danke': typeof AngebotAnfordernDankeRoute
   '/admin/$id': typeof AuthenticatedAdminIdRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
+  '/admin': typeof AuthenticatedAdminIndexRoute
   '/api/public/hooks/send-scheduled-offers': typeof ApiPublicHooksSendScheduledOffersRoute
 }
 export interface FileRoutesById {
@@ -176,6 +183,7 @@ export interface FileRoutesById {
   '/angebot-anfordern/danke': typeof AngebotAnfordernDankeRoute
   '/_authenticated/admin/$id': typeof AuthenticatedAdminIdRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
+  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/api/public/hooks/send-scheduled-offers': typeof ApiPublicHooksSendScheduledOffersRoute
 }
 export interface FileRouteTypes {
@@ -197,6 +205,7 @@ export interface FileRouteTypes {
     | '/angebot-anfordern/danke'
     | '/admin/$id'
     | '/juli/angebote/$filename'
+    | '/admin/'
     | '/api/public/hooks/send-scheduled-offers'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -212,10 +221,10 @@ export interface FileRouteTypes {
     | '/kontakt'
     | '/rechnung'
     | '/sitemap.xml'
-    | '/admin'
     | '/angebot-anfordern/danke'
     | '/admin/$id'
     | '/juli/angebote/$filename'
+    | '/admin'
     | '/api/public/hooks/send-scheduled-offers'
   id:
     | '__root__'
@@ -236,6 +245,7 @@ export interface FileRouteTypes {
     | '/angebot-anfordern/danke'
     | '/_authenticated/admin/$id'
     | '/juli/angebote/$filename'
+    | '/_authenticated/admin/'
     | '/api/public/hooks/send-scheduled-offers'
   fileRoutesById: FileRoutesById
 }
@@ -364,6 +374,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/': {
+      id: '/_authenticated/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/juli/angebote/$filename': {
       id: '/juli/angebote/$filename'
       path: '/juli/angebote/$filename'
@@ -390,10 +407,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminIdRoute: typeof AuthenticatedAdminIdRoute
+  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminIdRoute: AuthenticatedAdminIdRoute,
+  AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 
 const AuthenticatedAdminRouteWithChildren =
