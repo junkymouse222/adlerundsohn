@@ -22,6 +22,7 @@ import { Route as AngebotAnfordernRouteImport } from './routes/angebot-anfordern
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AngebotAnfordernDankeRouteImport } from './routes/angebot-anfordern.danke'
 import { Route as JuliAngeboteFilenameRouteImport } from './routes/juli.angebote.$filename'
+import { Route as ApiPublicHooksSendScheduledOffersRouteImport } from './routes/api/public/hooks/send-scheduled-offers'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -88,6 +89,12 @@ const JuliAngeboteFilenameRoute = JuliAngeboteFilenameRouteImport.update({
   path: '/juli/angebote/$filename',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksSendScheduledOffersRoute =
+  ApiPublicHooksSendScheduledOffersRouteImport.update({
+    id: '/api/public/hooks/send-scheduled-offers',
+    path: '/api/public/hooks/send-scheduled-offers',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -103,6 +110,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/angebot-anfordern/danke': typeof AngebotAnfordernDankeRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
+  '/api/public/hooks/send-scheduled-offers': typeof ApiPublicHooksSendScheduledOffersRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -118,6 +126,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/angebot-anfordern/danke': typeof AngebotAnfordernDankeRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
+  '/api/public/hooks/send-scheduled-offers': typeof ApiPublicHooksSendScheduledOffersRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -134,6 +143,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/angebot-anfordern/danke': typeof AngebotAnfordernDankeRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
+  '/api/public/hooks/send-scheduled-offers': typeof ApiPublicHooksSendScheduledOffersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -151,6 +161,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/angebot-anfordern/danke'
     | '/juli/angebote/$filename'
+    | '/api/public/hooks/send-scheduled-offers'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -166,6 +177,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/angebot-anfordern/danke'
     | '/juli/angebote/$filename'
+    | '/api/public/hooks/send-scheduled-offers'
   id:
     | '__root__'
     | '/'
@@ -181,6 +193,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/angebot-anfordern/danke'
     | '/juli/angebote/$filename'
+    | '/api/public/hooks/send-scheduled-offers'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -196,6 +209,7 @@ export interface RootRouteChildren {
   RechnungRoute: typeof RechnungRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   JuliAngeboteFilenameRoute: typeof JuliAngeboteFilenameRoute
+  ApiPublicHooksSendScheduledOffersRoute: typeof ApiPublicHooksSendScheduledOffersRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -291,6 +305,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JuliAngeboteFilenameRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/send-scheduled-offers': {
+      id: '/api/public/hooks/send-scheduled-offers'
+      path: '/api/public/hooks/send-scheduled-offers'
+      fullPath: '/api/public/hooks/send-scheduled-offers'
+      preLoaderRoute: typeof ApiPublicHooksSendScheduledOffersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -318,6 +339,8 @@ const rootRouteChildren: RootRouteChildren = {
   RechnungRoute: RechnungRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   JuliAngeboteFilenameRoute: JuliAngeboteFilenameRoute,
+  ApiPublicHooksSendScheduledOffersRoute:
+    ApiPublicHooksSendScheduledOffersRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
