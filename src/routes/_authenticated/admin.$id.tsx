@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { getOfferRequest, resendOfferNow, type OfferDetail } from "@/lib/admin.functions";
+import { getOfferRequest, resendOfferNow, sendInvoiceNow, type OfferDetail } from "@/lib/admin.functions";
+
 
 export const Route = createFileRoute("/_authenticated/admin/$id")({
   head: () => ({
