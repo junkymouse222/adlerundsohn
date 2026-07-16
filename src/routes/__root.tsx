@@ -70,11 +70,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Adler und Sohn— Insolvenzrecht & Insolvenzverwaltung" },
       { name: "description", content: "Spezialisierte Kanzlei für Insolvenzrecht und Insolvenzverwaltung. Persönliche Beratung von Unternehmen, Gläubigern und Privatpersonen." },
-      { name: "author", content: "Rechtsanwaltskanzlei Goldmann" },
+      { name: "author", content: "Rechtsanwaltskanzlei Adler und Sohn" },
       { property: "og:title", content: "Adler und Sohn— Insolvenzrecht & Insolvenzverwaltung" },
       { property: "og:description", content: "Spezialisierte Kanzlei für Insolvenzrecht und Insolvenzverwaltung. Persönliche Beratung von Unternehmen, Gläubigern und Privatpersonen." },
       { property: "og:type", content: "website" },
-      { property: "og:site_name", content: "Rechtsanwaltskanzlei Goldmann" },
+      { property: "og:site_name", content: "Rechtsanwaltskanzlei Adler und Sohn" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Adler und Sohn— Insolvenzrecht & Insolvenzverwaltung" },
       { name: "twitter:description", content: "Spezialisierte Kanzlei für Insolvenzrecht und Insolvenzverwaltung. Persönliche Beratung von Unternehmen, Gläubigern und Privatpersonen." },
@@ -122,7 +122,7 @@ function Header() {
     <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur">
       <div className="container-prose flex items-center justify-between py-5">
         <Link to="/" className="group flex items-baseline gap-3" onClick={() => setOpen(false)}>
-          <span className="font-serif text-2xl leading-none text-primary">Goldmann</span>
+          <span className="font-serif text-2xl leading-none text-primary">Adler und Sohn</span>
           <span className="hidden text-[0.65rem] uppercase tracking-[0.28em] text-muted-foreground sm:inline">
             Rechtsanwälte
           </span>
@@ -178,7 +178,7 @@ function Footer() {
     <footer className="mt-32 border-t border-border bg-primary text-primary-foreground">
       <div className="container-prose grid gap-12 py-16 md:grid-cols-4">
         <div className="md:col-span-2">
-          <p className="font-serif text-2xl">Rechtsanwaltskanzlei Goldmann</p>
+          <p className="font-serif text-2xl">Rechtsanwaltskanzlei Adler und Sohn</p>
           <span className="rule-gold mt-4" />
           <p className="mt-6 max-w-sm text-sm leading-relaxed text-primary-foreground/70">
             Spezialisiert auf Insolvenzrecht und Insolvenzverwaltung.
@@ -188,11 +188,11 @@ function Footer() {
           <div>
           <p className="text-[0.7rem] uppercase tracking-[0.24em] text-gold">Kontakt</p>
           <ul className="mt-4 space-y-2 text-sm text-primary-foreground/80">
-            <li>Friedrichstraße 112</li>
-            <li>10117 Berlin</li>
+            <li>Strandstraße 14</li>
+            <li>25980 Westerland/Sylt</li>
             <li>+49 6591 6659636</li>
-            <li>info@kanzlei-goldmann.de</li>
-            <li>Verkauf & Verwertung: info@goldmann-ra.de</li>
+            <li>info@adlerundsohn.com</li>
+            <li>Verkauf & Verwertung: info@adlerundsohn.com</li>
           </ul>
         </div>
         <div>
@@ -205,8 +205,8 @@ function Footer() {
       </div>
       <div className="border-t border-primary-foreground/10">
         <div className="container-prose flex flex-col items-start justify-between gap-3 py-6 text-xs text-primary-foreground/50 md:flex-row md:items-center">
-          <span>© {new Date().getFullYear()} Rechtsanwaltskanzlei Goldmann · kanzlei-goldmann.de</span>
-          <span>Mitglied der Rechtsanwaltskammer Berlin</span>
+          <span>© {new Date().getFullYear()} Rechtsanwaltskanzlei Adler und Sohn · adlerundsohn.com</span>
+          <span>Mitglied der Rechtsanwaltskammer Schleswig-Holstein</span>
         </div>
       </div>
     </footer>

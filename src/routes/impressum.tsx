@@ -3,12 +3,12 @@ import { createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/impressum")({
   head: () => ({
     meta: [
-      { title: "Impressum — Rechtsanwaltskanzlei Goldmann" },
-      { name: "description", content: "Impressum und Angaben gemäß § 5 TMG der Rechtsanwaltskanzlei Goldmann." },
+      { title: "Impressum — Rechtsanwaltskanzlei Adler und Sohn" },
+      { name: "description", content: "Impressum und Angaben gemäß § 5 TMG der Rechtsanwaltskanzlei Adler und Sohn." },
       { name: "robots", content: "noindex" },
-      { property: "og:url", content: "https://kanzlei-goldmann.de/impressum" },
+      { property: "og:url", content: "https://adlerundsohn.com/impressum" },
     ],
-    links: [{ rel: "canonical", href: "https://kanzlei-goldmann.de/impressum" }],
+    links: [{ rel: "canonical", href: "https://adlerundsohn.com/impressum" }],
   }),
   component: ImpressumPage,
 });
@@ -24,11 +24,11 @@ function ImpressumPage() {
         <div className="space-y-10 text-sm leading-relaxed text-foreground/85">
           <div>
             <p className="text-[0.7rem] uppercase tracking-[0.22em] text-muted-foreground">Anbieter</p>
-            <p className="mt-3">Rechtsanwaltskanzlei Goldmann<br />Dr. Friedrich Goldmann<br />Friedrichstraße 112<br />10117 Berlin</p>
+            <p className="mt-3">Rechtsanwaltskanzlei Adler und Sohn<br />Dr. Friedrich Adler<br />Strandstraße 14<br />25980 Westerland/Sylt</p>
           </div>
           <div>
             <p className="text-[0.7rem] uppercase tracking-[0.22em] text-muted-foreground">Kontakt</p>
-            <p className="mt-3">Telefon: +49 6591 6659636<br />Telefax: +49 (0)30 40 55 12 91<br />E-Mail: info@kanzlei-goldmann.de · info@goldmann-ra.de</p>
+            <p className="mt-3">Telefon: +49 6591 6659636<br />Telefax: +49 (0)30 40 55 12 91<br />E-Mail: info@adlerundsohn.com · info@adlerundsohn.com</p>
           </div>
           <div>
             <p className="text-[0.7rem] uppercase tracking-[0.22em] text-muted-foreground">USt-IdNr.</p>
@@ -42,7 +42,7 @@ function ImpressumPage() {
             <p className="mt-4">
               Die in der Kanzlei tätigen Rechtsanwältinnen und Rechtsanwälte
               sind in der Bundesrepublik Deutschland zugelassen und Mitglieder
-              der Rechtsanwaltskammer Berlin, Littenstraße 9, 10179 Berlin.
+              der Rechtsanwaltskammer Schleswig-Holstein, Gottorfstraße 13, 24837 Schleswig.
             </p>
             <p className="mt-4">Es gelten folgende berufsrechtliche Regelungen:</p>
             <ul className="mt-3 space-y-1 pl-4">
@@ -68,7 +68,7 @@ function ImpressumPage() {
 
           <div>
             <h2 className="text-2xl">Verantwortlich i. S. d. § 18 Abs. 2 MStV</h2>
-            <p className="mt-4">Dr. Friedrich Goldmann, Anschrift wie oben.</p>
+            <p className="mt-4">Dr. Friedrich Adler, Anschrift wie oben.</p>
           </div>
 
           <div>
@@ -77,7 +77,7 @@ function ImpressumPage() {
               Zur außergerichtlichen Beilegung von Streitigkeiten zwischen
               Mandanten und Rechtsanwälten besteht auf Antrag die Möglichkeit
               der Schlichtung bei der Schlichtungsstelle der Rechtsanwaltschaft
-              (Neue Grünstraße 17, 10179 Berlin).
+              (Gottorfstraße 13, 24837 Schleswig).
             </p>
             <p className="mt-4">
               Wir sind nicht bereit oder verpflichtet, an einem

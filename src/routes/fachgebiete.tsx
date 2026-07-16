@@ -3,13 +3,13 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 export const Route = createFileRoute("/fachgebiete")({
   head: () => ({
     meta: [
-      { title: "Fachgebiete — Insolvenzrecht & Insolvenzverwaltung | Kanzlei Goldmann" },
+      { title: "Fachgebiete — Insolvenzrecht & Insolvenzverwaltung | Kanzlei Adler und Sohn" },
       { name: "description", content: "Regelinsolvenzverfahren, Eigenverwaltung, Schutzschirm, Gläubigervertretung, Verbraucherinsolvenz und Insolvenzverwaltung — spezialisiert seit 1998." },
-      { property: "og:title", content: "Fachgebiete — Kanzlei Goldmann" },
+      { property: "og:title", content: "Fachgebiete — Kanzlei Adler und Sohn" },
       { property: "og:description", content: "Alle Bereiche des Insolvenzrechts unter einem Dach." },
-      { property: "og:url", content: "https://kanzlei-goldmann.de/fachgebiete" },
+      { property: "og:url", content: "https://adlerundsohn.com/fachgebiete" },
     ],
-    links: [{ rel: "canonical", href: "https://kanzlei-goldmann.de/fachgebiete" }],
+    links: [{ rel: "canonical", href: "https://adlerundsohn.com/fachgebiete" }],
   }),
   component: FachgebietePage,
 });
@@ -31,7 +31,7 @@ const bereiche = [
   {
     kennung: "II",
     title: "Insolvenzverwaltung",
-    intro: "Als bestellte Insolvenzverwalter, Sachwalter und Treuhänder arbeiten wir mit den Amtsgerichten Berlin-Charlottenburg, Potsdam und Frankfurt (Oder) zusammen.",
+    intro: "Als bestellte Insolvenzverwalter, Sachwalter und Treuhänder arbeiten wir mit den Amtsgerichten Niebüll, Flensburg und Husum zusammen.",
     leistungen: [
       "Übernahme der Verwaltungs- und Verfügungsbefugnis",
       "Fortführungs- und Verwertungskonzepte",

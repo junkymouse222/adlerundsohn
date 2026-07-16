@@ -1,4 +1,4 @@
-// Produktkatalog – Verkaufskatalog Kanzlei Goldmann (Bestandsliste 13.07.2026)
+// Produktkatalog – Verkaufskatalog Kanzlei Adler und Sohn (Bestandsliste 13.07.2026)
 export type Produkt = {
   pos: number;
   artikel: string;

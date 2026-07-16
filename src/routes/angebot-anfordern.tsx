@@ -11,8 +11,8 @@ const fmtEUR = (n: number) =>
 export const Route = createFileRoute("/angebot-anfordern")({
   head: () => ({
     meta: [
-      { title: "Angebot anfordern — Kanzlei Goldmann" },
-      { name: "description", content: "Fordern Sie ein individuelles Angebot aus dem aktuellen Verwertungskatalog an. Wir melden uns per E-Mail innerhalb weniger Minuten." },
+      { title: "Angebot anfordern — Kanzlei Adler und Sohn" },
+      { name: "description", content: "Fordern Sie ein individuelles Angebot aus dem aktuellen Verwertungskatalog an. Wir melden uns per E-Mail innerhalb weniger Stunden." },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -126,7 +126,7 @@ function AngebotAnfordernPage() {
           <p className="mt-6 max-w-2xl text-base leading-relaxed text-foreground/75">
             Wählen Sie die gewünschten Positionen aus dem Katalog und übermitteln
             Sie Ihre Kontaktdaten. Sie erhalten Ihr individuelles Angebot per
-            E-Mail — in der Regel innerhalb weniger Minuten während unserer
+            E-Mail — in der Regel innerhalb weniger Stunden während unserer
             Geschäftszeiten (Mo–Fr 07:00–19:00).
           </p>
         </div>

@@ -3,12 +3,12 @@ import { createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/datenschutz")({
   head: () => ({
     meta: [
-      { title: "Datenschutz — Rechtsanwaltskanzlei Goldmann" },
-      { name: "description", content: "Datenschutzerklärung der Rechtsanwaltskanzlei Goldmann." },
+      { title: "Datenschutz — Rechtsanwaltskanzlei Adler und Sohn" },
+      { name: "description", content: "Datenschutzerklärung der Rechtsanwaltskanzlei Adler und Sohn." },
       { name: "robots", content: "noindex" },
-      { property: "og:url", content: "https://kanzlei-goldmann.de/datenschutz" },
+      { property: "og:url", content: "https://adlerundsohn.com/datenschutz" },
     ],
-    links: [{ rel: "canonical", href: "https://kanzlei-goldmann.de/datenschutz" }],
+    links: [{ rel: "canonical", href: "https://adlerundsohn.com/datenschutz" }],
   }),
   component: DatenschutzPage,
 });
@@ -25,7 +25,7 @@ function DatenschutzPage() {
           <h2 className="text-2xl">1. Verantwortlicher</h2>
           <p className="mt-4">
             Verantwortlich für die Datenverarbeitung auf dieser Website ist die
-            Rechtsanwaltskanzlei Goldmann, Friedrichstraße 112, 10117 Berlin
+            Rechtsanwaltskanzlei Adler und Sohn, Strandstraße 14, 25980 Westerland/Sylt
             (Kontaktdaten siehe Impressum).
           </p>
         </div>
