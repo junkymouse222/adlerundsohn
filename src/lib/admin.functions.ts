@@ -28,6 +28,8 @@ export type OfferListRow = {
   subtotal: number;
   total: number;
   error_message: string | null;
+  accepted_at: string | null;
+  rechnung_status: string | null;
 };
 
 export type OfferDetail = {
