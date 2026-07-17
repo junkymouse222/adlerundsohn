@@ -1,5 +1,8 @@
 // Server-only: rendert Angebot/Rechnung als PDF im Stil des internen Beleg-Generators.
-import { PDFDocument, StandardFonts, rgb, PDFFont, PDFPage, PDFName, PDFString, PDFArray } from "pdf-lib";
+// Wichtig: die gebündelte ESM-Datei von pdf-lib enthält die TS-Helper inline.
+// Der normale Package-Entry importiert `tslib` und kann im Worker beim PDF-Rendern
+// mit `__extends`/CJS-Interop brechen.
+import { PDFDocument, StandardFonts, rgb, PDFFont, PDFPage, PDFName, PDFString, PDFArray } from "pdf-lib/dist/pdf-lib.esm.js";
 
 const fmtEUR = (n: number) =>
   new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(Number(n));
