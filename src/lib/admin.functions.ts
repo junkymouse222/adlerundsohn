@@ -341,6 +341,7 @@ export const previewInvoicePdf = createServerFn({ method: "POST" })
     await assertAdmin(context.supabase as never, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { renderInvoicePdf, toBase64 } = await import("@/lib/pdf.server");
+    const { invoicePayUrl } = await import("@/lib/offer-email.server");
     const admin = supabaseAdmin as any;
     const { data: offer } = await admin.from("offer_requests").select("*").eq("id", data.id).maybeSingle();
     if (!offer) throw new Error("Anfrage nicht gefunden.");
@@ -362,6 +363,8 @@ export const previewInvoicePdf = createServerFn({ method: "POST" })
       bank_name: data.bank_name || (offer.bank_name as string | null) || process.env.BANK_NAME || "Sparkasse Trier",
       bank_iban: data.bank_iban || (offer.bank_iban as string | null) || process.env.BANK_IBAN || "DE00 0000 0000 0000 0000 00",
       bank_bic: data.bank_bic || (offer.bank_bic as string | null) || process.env.BANK_BIC || "TRISDE55XXX",
+      pay_url: invoicePayUrl(offer.pay_token as string | null),
+      paid: !!offer.paid_at,
     };
     const bytes = await renderInvoicePdf(offer as never, (items ?? []) as never, invoice);
     return { base64: toBase64(bytes), filename: `Rechnung-${rechnung_nr}.pdf`, rechnung_nr };
