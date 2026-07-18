@@ -1,4 +1,5 @@
 // Server-only: rendert Angebot als HTML (mit Annahme-Button) und sendet via Resend Connector Gateway.
+import logoAsset from "@/assets/kanzlei-logo.png.asset.json";
 
 const fmtEUR = (n: number) =>
   new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(Number(n));
