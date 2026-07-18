@@ -49,6 +49,8 @@ export type InvoiceMeta = {
   bank_name: string;
   bank_iban: string;
   bank_bic: string;
+  pay_url?: string | null;
+  paid?: boolean;
 };
 
 const A4 = { w: 595.28, h: 841.89 };
@@ -290,7 +292,6 @@ async function renderBeleg(
       const label = "ANGEBOT ANNEHMEN";
       const lw = bold.widthOfTextAtSize(label, 11);
       drawText(label, bx + (bw - lw) / 2, by + 12, { font: bold, size: 11, color: rgb(0.96, 0.95, 0.91) });
-      // Link-Annotation
       const link = pdf.context.obj({
         Type: "Annot",
         Subtype: "Link",
@@ -299,16 +300,47 @@ async function renderBeleg(
         A: { Type: "Action", S: "URI", URI: PDFString.of(acceptUrl) },
       });
       const existing = page.node.get(PDFName.of("Annots"));
-      if (existing instanceof PDFArray) {
-        existing.push(link);
-      } else {
-        page.node.set(PDFName.of("Annots"), pdf.context.obj([link]));
-      }
+      if (existing instanceof PDFArray) existing.push(link);
+      else page.node.set(PDFName.of("Annots"), pdf.context.obj([link]));
       const hint = "Klicken zum verbindlichen Annehmen";
       drawText(hint, bx + (bw - font.widthOfTextAtSize(hint, 8)) / 2, by - 12, { size: 8, color: MUTED });
     }
     y = by - 24;
   }
+
+  // ============ ZAHLUNGS-BUTTON (nur Rechnung, mit URL) ============
+  if (belegArt === "Rechnung" && invoice?.pay_url) {
+    ensureSpace(80);
+    const bw = 240;
+    const bh = 34;
+    const bx = (A4.w - bw) / 2;
+    const by = y - bh - 4;
+    if (invoice.paid) {
+      page.drawRectangle({ x: bx, y: by, width: bw, height: bh, color: rgb(0.96, 0.95, 0.91), borderColor: GOLD, borderWidth: 1 });
+      const label = "Zahlung bereits bestätigt";
+      const lw = font.widthOfTextAtSize(label, 11);
+      drawText(label, bx + (bw - lw) / 2, by + 12, { size: 11, color: NAVY });
+    } else {
+      page.drawRectangle({ x: bx, y: by, width: bw, height: bh, color: NAVY });
+      const label = "ZAHLUNG BESTÄTIGEN";
+      const lw = bold.widthOfTextAtSize(label, 11);
+      drawText(label, bx + (bw - lw) / 2, by + 12, { font: bold, size: 11, color: rgb(0.96, 0.95, 0.91) });
+      const link = pdf.context.obj({
+        Type: "Annot",
+        Subtype: "Link",
+        Rect: [bx, by, bx + bw, by + bh],
+        Border: [0, 0, 0],
+        A: { Type: "Action", S: "URI", URI: PDFString.of(invoice.pay_url) },
+      });
+      const existing = page.node.get(PDFName.of("Annots"));
+      if (existing instanceof PDFArray) existing.push(link);
+      else page.node.set(PDFName.of("Annots"), pdf.context.obj([link]));
+      const hint = "Klicken sobald überwiesen";
+      drawText(hint, bx + (bw - font.widthOfTextAtSize(hint, 8)) / 2, by - 12, { size: 8, color: MUTED });
+    }
+    y = by - 24;
+  }
+
 
   ensureSpace(40);
   const footerLines = wrap(

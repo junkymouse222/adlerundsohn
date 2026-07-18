@@ -28,6 +28,7 @@ import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authentic
 import { Route as JuliAngeboteFilenameRouteImport } from './routes/juli.angebote.$filename'
 import { Route as AuthenticatedAdminIdRouteImport } from './routes/_authenticated/admin.$id'
 import { Route as ApiPublicHooksSendScheduledOffersRouteImport } from './routes/api/public/hooks/send-scheduled-offers'
+import { Route as ApiPublicHooksMarkPaidRouteImport } from './routes/api/public/hooks/mark-paid'
 import { Route as ApiPublicHooksAcceptOfferRouteImport } from './routes/api/public/hooks/accept-offer'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -125,6 +126,11 @@ const ApiPublicHooksSendScheduledOffersRoute =
     path: '/api/public/hooks/send-scheduled-offers',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksMarkPaidRoute = ApiPublicHooksMarkPaidRouteImport.update({
+  id: '/api/public/hooks/mark-paid',
+  path: '/api/public/hooks/mark-paid',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksAcceptOfferRoute =
   ApiPublicHooksAcceptOfferRouteImport.update({
     id: '/api/public/hooks/accept-offer',
@@ -151,6 +157,7 @@ export interface FileRoutesByFullPath {
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/api/public/hooks/accept-offer': typeof ApiPublicHooksAcceptOfferRoute
+  '/api/public/hooks/mark-paid': typeof ApiPublicHooksMarkPaidRoute
   '/api/public/hooks/send-scheduled-offers': typeof ApiPublicHooksSendScheduledOffersRoute
 }
 export interface FileRoutesByTo {
@@ -171,6 +178,7 @@ export interface FileRoutesByTo {
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/api/public/hooks/accept-offer': typeof ApiPublicHooksAcceptOfferRoute
+  '/api/public/hooks/mark-paid': typeof ApiPublicHooksMarkPaidRoute
   '/api/public/hooks/send-scheduled-offers': typeof ApiPublicHooksSendScheduledOffersRoute
 }
 export interface FileRoutesById {
@@ -194,6 +202,7 @@ export interface FileRoutesById {
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/api/public/hooks/accept-offer': typeof ApiPublicHooksAcceptOfferRoute
+  '/api/public/hooks/mark-paid': typeof ApiPublicHooksMarkPaidRoute
   '/api/public/hooks/send-scheduled-offers': typeof ApiPublicHooksSendScheduledOffersRoute
 }
 export interface FileRouteTypes {
@@ -217,6 +226,7 @@ export interface FileRouteTypes {
     | '/juli/angebote/$filename'
     | '/admin/'
     | '/api/public/hooks/accept-offer'
+    | '/api/public/hooks/mark-paid'
     | '/api/public/hooks/send-scheduled-offers'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -237,6 +247,7 @@ export interface FileRouteTypes {
     | '/juli/angebote/$filename'
     | '/admin'
     | '/api/public/hooks/accept-offer'
+    | '/api/public/hooks/mark-paid'
     | '/api/public/hooks/send-scheduled-offers'
   id:
     | '__root__'
@@ -259,6 +270,7 @@ export interface FileRouteTypes {
     | '/juli/angebote/$filename'
     | '/_authenticated/admin/'
     | '/api/public/hooks/accept-offer'
+    | '/api/public/hooks/mark-paid'
     | '/api/public/hooks/send-scheduled-offers'
   fileRoutesById: FileRoutesById
 }
@@ -278,6 +290,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   JuliAngeboteFilenameRoute: typeof JuliAngeboteFilenameRoute
   ApiPublicHooksAcceptOfferRoute: typeof ApiPublicHooksAcceptOfferRoute
+  ApiPublicHooksMarkPaidRoute: typeof ApiPublicHooksMarkPaidRoute
   ApiPublicHooksSendScheduledOffersRoute: typeof ApiPublicHooksSendScheduledOffersRoute
 }
 
@@ -416,6 +429,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksSendScheduledOffersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/mark-paid': {
+      id: '/api/public/hooks/mark-paid'
+      path: '/api/public/hooks/mark-paid'
+      fullPath: '/api/public/hooks/mark-paid'
+      preLoaderRoute: typeof ApiPublicHooksMarkPaidRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/accept-offer': {
       id: '/api/public/hooks/accept-offer'
       path: '/api/public/hooks/accept-offer'
@@ -477,6 +497,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   JuliAngeboteFilenameRoute: JuliAngeboteFilenameRoute,
   ApiPublicHooksAcceptOfferRoute: ApiPublicHooksAcceptOfferRoute,
+  ApiPublicHooksMarkPaidRoute: ApiPublicHooksMarkPaidRoute,
   ApiPublicHooksSendScheduledOffersRoute:
     ApiPublicHooksSendScheduledOffersRoute,
 }
