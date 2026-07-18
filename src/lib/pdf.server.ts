@@ -3,6 +3,21 @@
 // Der normale Package-Entry importiert `tslib` und kann im Worker beim PDF-Rendern
 // mit `__extends`/CJS-Interop brechen.
 import { PDFDocument, StandardFonts, rgb, PDFFont, PDFPage, PDFName, PDFString, PDFArray } from "pdf-lib/dist/pdf-lib.esm.js";
+import logoAsset from "@/assets/kanzlei-logo.png.asset.json";
+
+let cachedLogo: Uint8Array | null = null;
+async function loadLogo(): Promise<Uint8Array | null> {
+  if (cachedLogo) return cachedLogo;
+  try {
+    const base = (process.env.PUBLIC_SITE_URL || process.env.SITE_URL || "https://adlerundsohn.lovable.app").replace(/\/$/, "");
+    const res = await fetch(`${base}${logoAsset.url}`);
+    if (!res.ok) return null;
+    cachedLogo = new Uint8Array(await res.arrayBuffer());
+    return cachedLogo;
+  } catch {
+    return null;
+  }
+}
 
 const fmtEUR = (n: number) =>
   new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(Number(n));
