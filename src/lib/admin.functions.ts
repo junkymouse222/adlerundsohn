@@ -65,6 +65,9 @@ export type OfferDetail = {
     accept_token: string | null;
     accepted_at: string | null;
     accepted_ip: string | null;
+    pay_token: string | null;
+    paid_at: string | null;
+    paid_ip: string | null;
     bank_inhaber: string | null;
     bank_name: string | null;
     bank_iban: string | null;
