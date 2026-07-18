@@ -123,14 +123,8 @@ function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur">
       <div className="container-prose flex items-center justify-between py-5">
-        <Link to="/" className="group flex items-center gap-3" onClick={() => setOpen(false)}>
+        <Link to="/" className="group flex items-center" onClick={() => setOpen(false)} aria-label="Adler und Sohn – Startseite">
           <img src={logoAsset.url} alt="Logo Kanzlei Adler und Sohn" className="h-10 w-auto md:h-12" width={64} height={64} />
-          <span className="flex items-baseline gap-3">
-            <span className="font-serif text-2xl leading-none text-primary">Adler und Sohn</span>
-            <span className="hidden text-[0.65rem] uppercase tracking-[0.28em] text-muted-foreground sm:inline">
-              Rechtsanwälte
-            </span>
-          </span>
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">
