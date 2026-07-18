@@ -242,7 +242,7 @@ export function renderOfferHtml(offer: OfferRow, items: ItemRow[]): string {
           </table>
         </td></tr>
 
-        ${offer.message ? `<tr><td style="padding:24px 40px 0 40px;"><div style="border-left:3px solid #c9a55c;background:#f5f3ee;padding:14px 18px;font-size:13px;color:#3a352b;"><div style="font-family:Georgia,serif;color:#0f2740;margin-bottom:4px;">Ihre Nachricht</div>${escapeHtml(offer.message)}</div></td></tr>` : ""}
+        
 
         <tr><td style="padding:32px 40px 40px 40px;border-top:1px solid #ece8de;margin-top:24px;">
           <p style="margin:0 0 8px 0;font-family:Georgia,serif;font-size:14px;color:#0f2740;">Mit besten Grüßen</p>
