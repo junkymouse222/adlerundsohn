@@ -8,7 +8,7 @@ type Position = { produkt: Produkt; menge: number };
 const fmtEUR = (n: number) =>
   new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(n);
 
-export const Route = createFileRoute("/angebot-anfordern")({
+export const Route = createFileRoute("/angebot-anfordern/")({
   head: () => ({
     meta: [
       { title: "Angebot anfordern — Kanzlei Adler und Sohn" },

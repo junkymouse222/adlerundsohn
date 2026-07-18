@@ -19,9 +19,9 @@ import { Route as FachgebieteRouteImport } from './routes/fachgebiete'
 import { Route as DatenschutzRouteImport } from './routes/datenschutz'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AnwaelteRouteImport } from './routes/anwaelte'
-import { Route as AngebotAnfordernRouteImport } from './routes/angebot-anfordern'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AngebotAnfordernIndexRouteImport } from './routes/angebot-anfordern.index'
 import { Route as AngebotAnfordernDankeRouteImport } from './routes/angebot-anfordern.danke'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
@@ -81,11 +81,6 @@ const AnwaelteRoute = AnwaelteRouteImport.update({
   path: '/anwaelte',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AngebotAnfordernRoute = AngebotAnfordernRouteImport.update({
-  id: '/angebot-anfordern',
-  path: '/angebot-anfordern',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
@@ -95,10 +90,15 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AngebotAnfordernIndexRoute = AngebotAnfordernIndexRouteImport.update({
+  id: '/angebot-anfordern/',
+  path: '/angebot-anfordern/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AngebotAnfordernDankeRoute = AngebotAnfordernDankeRouteImport.update({
-  id: '/danke',
-  path: '/danke',
-  getParentRoute: () => AngebotAnfordernRoute,
+  id: '/angebot-anfordern/danke',
+  path: '/angebot-anfordern/danke',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
@@ -140,7 +140,6 @@ const ApiPublicHooksAcceptOfferRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/angebot-anfordern': typeof AngebotAnfordernRouteWithChildren
   '/anwaelte': typeof AnwaelteRoute
   '/auth': typeof AuthRoute
   '/datenschutz': typeof DatenschutzRoute
@@ -153,6 +152,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/angebot-anfordern/danke': typeof AngebotAnfordernDankeRoute
+  '/angebot-anfordern/': typeof AngebotAnfordernIndexRoute
   '/admin/$id': typeof AuthenticatedAdminIdRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -162,7 +162,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/angebot-anfordern': typeof AngebotAnfordernRouteWithChildren
   '/anwaelte': typeof AnwaelteRoute
   '/auth': typeof AuthRoute
   '/datenschutz': typeof DatenschutzRoute
@@ -174,6 +173,7 @@ export interface FileRoutesByTo {
   '/rechnung': typeof RechnungRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/angebot-anfordern/danke': typeof AngebotAnfordernDankeRoute
+  '/angebot-anfordern': typeof AngebotAnfordernIndexRoute
   '/admin/$id': typeof AuthenticatedAdminIdRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -185,7 +185,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
-  '/angebot-anfordern': typeof AngebotAnfordernRouteWithChildren
   '/anwaelte': typeof AnwaelteRoute
   '/auth': typeof AuthRoute
   '/datenschutz': typeof DatenschutzRoute
@@ -198,6 +197,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/angebot-anfordern/danke': typeof AngebotAnfordernDankeRoute
+  '/angebot-anfordern/': typeof AngebotAnfordernIndexRoute
   '/_authenticated/admin/$id': typeof AuthenticatedAdminIdRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -209,7 +209,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/angebot-anfordern'
     | '/anwaelte'
     | '/auth'
     | '/datenschutz'
@@ -222,6 +221,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/admin'
     | '/angebot-anfordern/danke'
+    | '/angebot-anfordern/'
     | '/admin/$id'
     | '/juli/angebote/$filename'
     | '/admin/'
@@ -231,7 +231,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/angebot-anfordern'
     | '/anwaelte'
     | '/auth'
     | '/datenschutz'
@@ -243,6 +242,7 @@ export interface FileRouteTypes {
     | '/rechnung'
     | '/sitemap.xml'
     | '/angebot-anfordern/danke'
+    | '/angebot-anfordern'
     | '/admin/$id'
     | '/juli/angebote/$filename'
     | '/admin'
@@ -253,7 +253,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
-    | '/angebot-anfordern'
     | '/anwaelte'
     | '/auth'
     | '/datenschutz'
@@ -266,6 +265,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/_authenticated/admin'
     | '/angebot-anfordern/danke'
+    | '/angebot-anfordern/'
     | '/_authenticated/admin/$id'
     | '/juli/angebote/$filename'
     | '/_authenticated/admin/'
@@ -277,7 +277,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
-  AngebotAnfordernRoute: typeof AngebotAnfordernRouteWithChildren
   AnwaelteRoute: typeof AnwaelteRoute
   AuthRoute: typeof AuthRoute
   DatenschutzRoute: typeof DatenschutzRoute
@@ -288,6 +287,8 @@ export interface RootRouteChildren {
   KontaktRoute: typeof KontaktRoute
   RechnungRoute: typeof RechnungRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  AngebotAnfordernDankeRoute: typeof AngebotAnfordernDankeRoute
+  AngebotAnfordernIndexRoute: typeof AngebotAnfordernIndexRoute
   JuliAngeboteFilenameRoute: typeof JuliAngeboteFilenameRoute
   ApiPublicHooksAcceptOfferRoute: typeof ApiPublicHooksAcceptOfferRoute
   ApiPublicHooksMarkPaidRoute: typeof ApiPublicHooksMarkPaidRoute
@@ -366,13 +367,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnwaelteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/angebot-anfordern': {
-      id: '/angebot-anfordern'
-      path: '/angebot-anfordern'
-      fullPath: '/angebot-anfordern'
-      preLoaderRoute: typeof AngebotAnfordernRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_authenticated': {
       id: '/_authenticated'
       path: ''
@@ -387,12 +381,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/angebot-anfordern/': {
+      id: '/angebot-anfordern/'
+      path: '/angebot-anfordern'
+      fullPath: '/angebot-anfordern/'
+      preLoaderRoute: typeof AngebotAnfordernIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/angebot-anfordern/danke': {
       id: '/angebot-anfordern/danke'
-      path: '/danke'
+      path: '/angebot-anfordern/danke'
       fullPath: '/angebot-anfordern/danke'
       preLoaderRoute: typeof AngebotAnfordernDankeRouteImport
-      parentRoute: typeof AngebotAnfordernRoute
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
@@ -470,21 +471,9 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
-interface AngebotAnfordernRouteChildren {
-  AngebotAnfordernDankeRoute: typeof AngebotAnfordernDankeRoute
-}
-
-const AngebotAnfordernRouteChildren: AngebotAnfordernRouteChildren = {
-  AngebotAnfordernDankeRoute: AngebotAnfordernDankeRoute,
-}
-
-const AngebotAnfordernRouteWithChildren =
-  AngebotAnfordernRoute._addFileChildren(AngebotAnfordernRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
-  AngebotAnfordernRoute: AngebotAnfordernRouteWithChildren,
   AnwaelteRoute: AnwaelteRoute,
   AuthRoute: AuthRoute,
   DatenschutzRoute: DatenschutzRoute,
@@ -495,6 +484,8 @@ const rootRouteChildren: RootRouteChildren = {
   KontaktRoute: KontaktRoute,
   RechnungRoute: RechnungRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  AngebotAnfordernDankeRoute: AngebotAnfordernDankeRoute,
+  AngebotAnfordernIndexRoute: AngebotAnfordernIndexRoute,
   JuliAngeboteFilenameRoute: JuliAngeboteFilenameRoute,
   ApiPublicHooksAcceptOfferRoute: ApiPublicHooksAcceptOfferRoute,
   ApiPublicHooksMarkPaidRoute: ApiPublicHooksMarkPaidRoute,
