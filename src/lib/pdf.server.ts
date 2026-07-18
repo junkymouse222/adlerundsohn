@@ -49,6 +49,8 @@ export type InvoiceMeta = {
   bank_name: string;
   bank_iban: string;
   bank_bic: string;
+  pay_url?: string | null;
+  paid?: boolean;
 };
 
 const A4 = { w: 595.28, h: 841.89 };
