@@ -126,6 +126,51 @@ export const getOfferRequest = createServerFn({ method: "GET" })
     };
   });
 
+const OFFER_STATUS = ["pending", "sent", "failed", "accepted"] as const;
+const RECHNUNG_STATUS = ["none", "sent", "failed", "paid"] as const;
+
+const UpdateStatusSchema = z.object({
+  id: z.string().uuid(),
+  status: z.enum(OFFER_STATUS).optional(),
+  rechnung_status: z.enum(RECHNUNG_STATUS).optional(),
+  paid: z.boolean().optional(),
+  accepted: z.boolean().optional(),
+});
+
+export const updateOfferStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => UpdateStatusSchema.parse(input))
+  .handler(async ({ context, data }): Promise<{ ok: true }> => {
+    await assertAdmin(context.supabase as never, context.userId);
+    const client = context.supabase as any;
+    const patch: Record<string, unknown> = {};
+    if (data.status) patch.status = data.status;
+    if (data.rechnung_status) {
+      patch.rechnung_status = data.rechnung_status;
+      if (data.rechnung_status === "paid") {
+        patch.paid_at = new Date().toISOString();
+      }
+    }
+    if (data.paid === true) {
+      patch.paid_at = new Date().toISOString();
+      patch.rechnung_status = "paid";
+    } else if (data.paid === false) {
+      patch.paid_at = null;
+      if (!data.rechnung_status) patch.rechnung_status = "sent";
+    }
+    if (data.accepted === true && !patch.status) {
+      patch.status = "accepted";
+      patch.accepted_at = new Date().toISOString();
+    } else if (data.accepted === false) {
+      patch.accepted_at = null;
+    }
+    if (Object.keys(patch).length === 0) return { ok: true };
+    const { error } = await client.from("offer_requests").update(patch).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+
 export const resendOfferNow = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))

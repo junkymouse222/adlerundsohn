@@ -6,6 +6,7 @@ import {
   sendInvoiceNow,
   previewOfferPdf,
   previewInvoicePdf,
+  updateOfferStatus,
   type OfferDetail,
 } from "@/lib/admin.functions";
 
@@ -299,20 +300,96 @@ function AdminDetailPage() {
         <div className="border border-border p-6">
           <h2 className="text-sm uppercase tracking-widest text-muted-foreground">Status</h2>
           <dl className="mt-4 space-y-2 text-sm">
-            <div className="flex justify-between"><dt className="text-muted-foreground">Status</dt><dd>{offer.status}</dd></div>
+            <div className="flex justify-between items-center gap-2">
+              <dt className="text-muted-foreground">Angebotsstatus</dt>
+              <dd>
+                <select
+                  value={offer.status}
+                  onChange={async (e) => {
+                    const v = e.target.value as "pending" | "sent" | "failed" | "accepted";
+                    try {
+                      await updateOfferStatus({ data: { id, status: v } });
+                      await load();
+                    } catch (err) {
+                      setSendResult({ ok: false, msg: err instanceof Error ? err.message : "Fehler." });
+                    }
+                  }}
+                  className="border border-border bg-background px-2 py-1 text-xs uppercase tracking-widest"
+                >
+                  <option value="pending">Offen</option>
+                  <option value="sent">Gesendet</option>
+                  <option value="accepted">Angenommen</option>
+                  <option value="failed">Fehler</option>
+                </select>
+              </dd>
+            </div>
             <div className="flex justify-between"><dt className="text-muted-foreground">Erstellt</dt><dd>{fmtDate(offer.created_at)}</dd></div>
             <div className="flex justify-between"><dt className="text-muted-foreground">Geplant</dt><dd>{fmtDate(offer.scheduled_send_at)}</dd></div>
             <div className="flex justify-between"><dt className="text-muted-foreground">Gesendet</dt><dd>{fmtDate(offer.sent_at)}</dd></div>
             {offer.accepted_at && <div className="flex justify-between border-t border-border pt-2"><dt className="text-muted-foreground">Angenommen</dt><dd className="text-green-800">{fmtDate(offer.accepted_at)}</dd></div>}
             {offer.rechnung_nr && <div className="flex justify-between border-t border-border pt-2"><dt className="text-muted-foreground">Rechnung</dt><dd className="font-mono text-xs">{offer.rechnung_nr}</dd></div>}
-            {offer.rechnung_status && offer.rechnung_status !== "none" && <div className="flex justify-between"><dt className="text-muted-foreground">Rechnungsstatus</dt><dd>{offer.rechnung_status}</dd></div>}
+            <div className="flex justify-between items-center gap-2">
+              <dt className="text-muted-foreground">Rechnungsstatus</dt>
+              <dd>
+                <select
+                  value={offer.rechnung_status ?? "none"}
+                  onChange={async (e) => {
+                    const v = e.target.value as "none" | "sent" | "failed" | "paid";
+                    try {
+                      await updateOfferStatus({ data: { id, rechnung_status: v } });
+                      await load();
+                    } catch (err) {
+                      setInvoiceResult({ ok: false, msg: err instanceof Error ? err.message : "Fehler." });
+                    }
+                  }}
+                  className="border border-border bg-background px-2 py-1 text-xs uppercase tracking-widest"
+                >
+                  <option value="none">Keine</option>
+                  <option value="sent">Gesendet</option>
+                  <option value="paid">Bezahlt</option>
+                  <option value="failed">Fehler</option>
+                </select>
+              </dd>
+            </div>
             {offer.rechnung_sent_at && <div className="flex justify-between"><dt className="text-muted-foreground">Rechnung gesendet</dt><dd>{fmtDate(offer.rechnung_sent_at)}</dd></div>}
             {offer.rechnung_faellig_am && <div className="flex justify-between"><dt className="text-muted-foreground">Fällig am</dt><dd>{new Date(offer.rechnung_faellig_am).toLocaleDateString("de-DE")}</dd></div>}
             {offer.paid_at && <div className="flex justify-between border-t border-border pt-2"><dt className="text-muted-foreground">Bezahlt</dt><dd className="text-green-800 font-medium">{fmtDate(offer.paid_at)}</dd></div>}
+            <div className="border-t border-border pt-3 flex flex-wrap gap-2">
+              {!offer.paid_at ? (
+                <button
+                  onClick={async () => {
+                    try {
+                      await updateOfferStatus({ data: { id, paid: true } });
+                      await load();
+                    } catch (err) {
+                      setInvoiceResult({ ok: false, msg: err instanceof Error ? err.message : "Fehler." });
+                    }
+                  }}
+                  className="border border-green-700 px-3 py-1.5 text-[0.65rem] uppercase tracking-widest text-green-800 hover:bg-green-50"
+                >
+                  Als bezahlt markieren
+                </button>
+              ) : (
+                <button
+                  onClick={async () => {
+                    try {
+                      await updateOfferStatus({ data: { id, paid: false } });
+                      await load();
+                    } catch (err) {
+                      setInvoiceResult({ ok: false, msg: err instanceof Error ? err.message : "Fehler." });
+                    }
+                  }}
+                  className="border border-border px-3 py-1.5 text-[0.65rem] uppercase tracking-widest text-muted-foreground hover:text-primary"
+                >
+                  Bezahlt-Status entfernen
+                </button>
+              )}
+            </div>
             {offer.rechnung_error && <div className="mt-2 border-t border-border pt-2 text-red-700">{offer.rechnung_error}</div>}
             {offer.error_message && <div className="mt-2 border-t border-border pt-2 text-red-700">{offer.error_message}</div>}
           </dl>
         </div>
+
       </div>
 
       {offer.message && (
