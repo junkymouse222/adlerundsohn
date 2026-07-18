@@ -51,7 +51,7 @@ function AngebotAnfordernPage() {
         p.artikel.toLowerCase().includes(q) ||
         p.beschreibung.toLowerCase().includes(q)
       );
-    }).slice(0, 60);
+    });
   }, [suche, kategorie]);
 
   const subtotal = useMemo(
