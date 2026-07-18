@@ -96,10 +96,8 @@ export function renderInvoiceHtml(
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:32px 12px;"><tr><td align="center">
       <table role="presentation" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;background:#fff;border-top:4px solid #c9a55c;">
         <tr><td style="padding:36px 40px 8px 40px;">
-          <img src="${logoUrl()}" alt="Kanzlei Adler und Sohn" width="72" height="72" style="display:block;margin-bottom:12px;height:72px;width:auto;" />
-          <div style="font-family:Georgia,serif;font-size:22px;color:#0f2740;">Rechtsanwaltskanzlei</div>
-          <div style="font-family:Georgia,serif;font-size:28px;color:#0f2740;font-weight:600;">Adler und Sohn</div>
-          <div style="height:2px;width:56px;background:#c9a55c;margin-top:12px;"></div>
+          <img src="${logoUrl()}" alt="Kanzlei Adler und Sohn" width="96" height="96" style="display:block;height:96px;width:auto;" />
+          <div style="height:2px;width:56px;background:#c9a55c;margin-top:16px;"></div>
         </td></tr>
         <tr><td style="padding:24px 40px;">
           <p style="font-family:Georgia,serif;font-size:16px;color:#0f2740;margin:0 0 12px 0;">Sehr geehrte Damen und Herren,</p>
