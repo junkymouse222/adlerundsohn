@@ -125,18 +125,23 @@ async function renderBeleg(
 
   // ============ HEADER ============
   const logoBytes = await loadLogo();
+  let textX = MARGIN.l;
   if (logoBytes) {
     try {
       const img = await pdf.embedPng(logoBytes);
-      const logoH = 72;
+      const logoH = 64;
       const logoW = (img.width / img.height) * logoH;
       page.drawImage(img, { x: MARGIN.l, y: y - logoH, width: logoW, height: logoH });
-      // Gold-Akzentlinie unter dem Logo
-      page.drawRectangle({ x: MARGIN.l, y: y - logoH - 6, width: 60, height: 1.5, color: GOLD });
+      textX = MARGIN.l + logoW + 16;
     } catch {
       // Falls Embed scheitert, ohne Logo weiter
     }
   }
+  drawText("Rechtsanwaltskanzlei Adler und Sohn", textX, y - 16, { font: serif, size: 18, color: NAVY });
+  page.drawRectangle({ x: textX, y: y - 22, width: 48, height: 1.5, color: GOLD });
+  drawText("Strandstraße 14 · 25980 Westerland/Sylt", textX, y - 36, { size: 9, color: MUTED });
+  drawText("Tel. +49 6591 6659636 · info@adlerundsohn.com", textX, y - 48, { size: 9, color: MUTED });
+  drawText("USt-IdNr. DE000000000", textX, y - 60, { size: 9, color: MUTED });
 
   // Beleg-Info rechts
   const rightX = A4.w - MARGIN.r;
