@@ -271,17 +271,8 @@ async function renderBeleg(
 
   y -= 10;
 
-  // ============ NACHRICHT / BANK / FOOTER ============
-  if (offer.message) {
-    ensureSpace(60);
-    drawText("Ihre Nachricht:", MARGIN.l, y, { font: bold, size: 9 });
-    y -= 12;
-    for (const l of wrap(offer.message, font, 9, A4.w - MARGIN.l - MARGIN.r)) {
-      drawText(l, MARGIN.l, y, { size: 9, color: MUTED });
-      y -= 11;
-    }
-    y -= 8;
-  }
+  // ============ BANK / FOOTER ============
+
 
   if (belegArt === "Rechnung" && invoice) {
     ensureSpace(70);
