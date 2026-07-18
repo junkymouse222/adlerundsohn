@@ -226,13 +226,14 @@ async function renderBeleg(
   const sumRight = A4.w - MARGIN.r;
   const drawSum = (label: string, value: string, opts: { bold?: boolean; big?: boolean; line?: boolean } = {}) => {
     if (opts.line) {
-      page.drawLine({ start: { x: sumRight - 200, y: y + 8 }, end: { x: sumRight, y: y + 8 }, thickness: 1, color: NAVY });
+      y -= 8;
+      page.drawLine({ start: { x: sumRight - 200, y: y + 16 }, end: { x: sumRight, y: y + 16 }, thickness: 1, color: NAVY });
     }
     const f = opts.bold ? bold : font;
     const size = opts.big ? 12 : 10;
     drawText(label, sumRight - 200, y, { font: f, size, color: opts.bold ? TEXT : MUTED });
     drawText(value, sumRight - f.widthOfTextAtSize(value, size), y, { font: f, size });
-    y -= opts.big ? 18 : 14;
+    y -= opts.big ? 20 : 14;
   };
 
   drawSum("Zwischensumme", fmtEUR(Number(offer.subtotal)));
