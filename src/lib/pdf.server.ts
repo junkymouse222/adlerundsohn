@@ -141,7 +141,6 @@ async function renderBeleg(
   page.drawRectangle({ x: textX, y: y - 22, width: 48, height: 1.5, color: GOLD });
   drawText("Strandstraße 14 · 25980 Westerland/Sylt", textX, y - 36, { size: 9, color: MUTED });
   drawText("Tel. +49 6591 6659636 · info@adlerundsohn.com", textX, y - 48, { size: 9, color: MUTED });
-  drawText("USt-IdNr. DE000000000", textX, y - 60, { size: 9, color: MUTED });
 
   // Beleg-Info rechts
   const rightX = A4.w - MARGIN.r;
