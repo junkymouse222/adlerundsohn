@@ -287,9 +287,7 @@ function AngebotAnfordernPage() {
               {submitting ? "Wird gesendet …" : "Angebot verbindlich anfordern"}
             </button>
             <p className="mt-3 text-[0.7rem] leading-relaxed text-muted-foreground">
-              Ihr Angebot wird automatisch erstellt und binnen 15–30 Minuten
-              während der Geschäftszeiten (Mo–Fr 07:00–19:00) an die angegebene
-              E-Mail-Adresse versendet. Es gelten unsere{" "}
+              Es gelten unsere{" "}
               <Link to="/datenschutz" className="underline hover:text-primary">Datenschutzhinweise</Link>.
             </p>
           </div>
