@@ -149,7 +149,7 @@ async function renderBeleg(
   const gueltigStr = `${gueltigLabel}${faelligOderGueltig.toLocaleDateString("de-DE")}`;
   drawText(gueltigStr, rightX - font.widthOfTextAtSize(gueltigStr, 9), y - 60, { size: 9, color: MUTED });
 
-  y -= 90;
+  y -= 100;
 
 
   // ============ KUNDE ============
