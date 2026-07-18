@@ -53,6 +53,10 @@ export function invoicePayUrl(token: string | null | undefined): string | null {
   return `${siteBaseUrl()}/api/public/hooks/mark-paid?token=${encodeURIComponent(token)}`;
 }
 
+export function logoUrl(): string {
+  return `${siteBaseUrl()}${logoAsset.url}`;
+}
+
 export function renderInvoiceHtml(
   offer: OfferRow & {
     rechnung_nr: string;
