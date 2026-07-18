@@ -47,6 +47,75 @@ export function offerAcceptUrl(token: string | null | undefined): string | null 
   return `${siteBaseUrl()}/api/public/hooks/accept-offer?token=${encodeURIComponent(token)}`;
 }
 
+export function invoicePayUrl(token: string | null | undefined): string | null {
+  if (!token) return null;
+  return `${siteBaseUrl()}/api/public/hooks/mark-paid?token=${encodeURIComponent(token)}`;
+}
+
+export function renderInvoiceHtml(
+  offer: OfferRow & {
+    rechnung_nr: string;
+    rechnung_faellig_am?: string | null;
+    pay_token?: string | null;
+    paid_at?: string | null;
+    bank_inhaber: string;
+    bank_name: string;
+    bank_iban: string;
+    bank_bic: string;
+  },
+): string {
+  const faellig = offer.rechnung_faellig_am
+    ? new Date(offer.rechnung_faellig_am).toLocaleDateString("de-DE")
+    : "";
+  const payUrl = invoicePayUrl(offer.pay_token);
+  const paid = !!offer.paid_at;
+  const payBlock = payUrl
+    ? paid
+      ? `<div style="background:#f5f3ee;border:1px solid #c9a55c;padding:20px;text-align:center;margin:28px 0;">
+           <div style="font-family:Georgia,serif;font-size:16px;color:#0f2740;">Zahlung bereits bestätigt</div>
+           <div style="font-size:12px;color:#6b6656;margin-top:6px;">Vielen Dank für Ihre Zahlung.</div>
+         </div>`
+      : `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px auto;">
+           <tr><td style="background:#0f2740;padding:0;">
+             <a href="${payUrl}" style="display:inline-block;padding:16px 42px;font-family:Georgia,serif;font-size:15px;letter-spacing:2px;text-transform:uppercase;color:#f5f3ee;text-decoration:none;border:1px solid #0f2740;">
+               Zahlung bestätigen
+             </a>
+           </td></tr>
+           <tr><td style="text-align:center;padding-top:10px;font-size:11px;color:#8a8578;letter-spacing:1px;text-transform:uppercase;">
+             Klicken sobald überwiesen
+           </td></tr>
+         </table>`
+    : "";
+
+  return `<!doctype html><html lang="de"><body style="margin:0;padding:0;background:#efece4;font-family:'Helvetica Neue',Arial,sans-serif;color:#1a1a1a;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:32px 12px;"><tr><td align="center">
+      <table role="presentation" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;background:#fff;border-top:4px solid #c9a55c;">
+        <tr><td style="padding:36px 40px 8px 40px;">
+          <div style="font-family:Georgia,serif;font-size:22px;color:#0f2740;">Rechtsanwaltskanzlei</div>
+          <div style="font-family:Georgia,serif;font-size:28px;color:#0f2740;font-weight:600;">Adler und Sohn</div>
+          <div style="height:2px;width:56px;background:#c9a55c;margin-top:12px;"></div>
+        </td></tr>
+        <tr><td style="padding:24px 40px;">
+          <p style="font-family:Georgia,serif;font-size:16px;color:#0f2740;margin:0 0 12px 0;">Sehr geehrte Damen und Herren,</p>
+          <p style="margin:0 0 12px 0;font-size:14px;line-height:1.7;">anbei erhalten Sie unsere Rechnung <strong>${escapeHtml(offer.rechnung_nr)}</strong> zu Ihrem Angebot ${escapeHtml(offer.angebot_nr)}.</p>
+          <p style="margin:0 0 8px 0;font-size:14px;line-height:1.7;">Bitte überweisen Sie den Rechnungsbetrag von <strong style="color:#0f2740;">${fmtEUR(Number(offer.total))}</strong> unter Angabe der Rechnungsnummer${faellig ? ` bis zum <strong>${faellig}</strong>` : ""}.</p>
+          ${payBlock}
+          <div style="background:#f5f3ee;border-left:3px solid #c9a55c;padding:14px 18px;font-size:13px;">
+            <div style="font-family:Georgia,serif;color:#0f2740;margin-bottom:6px;">Bankverbindung</div>
+            <div>${escapeHtml(offer.bank_inhaber)}</div>
+            <div>${escapeHtml(offer.bank_name)}</div>
+            <div>IBAN: ${escapeHtml(offer.bank_iban)}</div>
+            <div>BIC: ${escapeHtml(offer.bank_bic)}</div>
+          </div>
+          <p style="margin-top:24px;font-family:Georgia,serif;color:#0f2740;">Mit besten Grüßen<br/>Kanzlei Adler und Sohn</p>
+          <div style="height:1px;background:#ece8de;margin:20px 0;"></div>
+          <p style="margin:0;font-size:11px;color:#8a8578;">Rechtsanwaltskanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt · <a href="mailto:info@adlerundsohn.com" style="color:#0f2740;text-decoration:none;">info@adlerundsohn.com</a></p>
+        </td></tr>
+      </table>
+    </td></tr></table>
+  </body></html>`;
+}
+
 export function renderOfferHtml(offer: OfferRow, items: ItemRow[]): string {
   const gueltigBis = new Date(new Date(offer.created_at).getTime() + 21 * 24 * 3600 * 1000)
     .toLocaleDateString("de-DE");
