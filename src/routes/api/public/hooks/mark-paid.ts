@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import logoAsset from "@/assets/kanzlei-logo.png.asset.json";
 
 // Öffentlicher Endpunkt: Kunde klickt in Rechnungs-Mail/PDF auf "Zahlung bestätigen".
 // Erwartet ?token=<pay_token>. Markiert die Rechnung als bezahlt (idempotent).
@@ -31,6 +32,7 @@ function page(status: "ok" | "already" | "invalid", rechnungNr?: string): Respon
   a.btn{display:inline-block;margin-top:24px;padding:14px 28px;background:#0f2740;color:#f5f3ee;text-decoration:none;font-size:12px;letter-spacing:2px;text-transform:uppercase;font-family:Georgia,serif;}
   .foot{margin-top:24px;font-size:11px;color:#8a8578;}
 </style></head><body><div class="wrap"><div class="card">
+  <img src="${logoAsset.url}" alt="Kanzlei Adler und Sohn" style="height:72px;width:auto;display:block;margin-bottom:16px;" />
   <div class="brand">Rechtsanwaltskanzlei</div>
   <div class="name">Adler und Sohn</div>
   <div class="rule"></div>
