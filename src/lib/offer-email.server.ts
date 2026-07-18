@@ -97,10 +97,9 @@ export function renderInvoiceHtml(
       <table role="presentation" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;background:#fff;border-top:4px solid #c9a55c;">
         <tr><td style="padding:36px 40px 8px 40px;">
           <table role="presentation" cellpadding="0" cellspacing="0"><tr>
-            <td style="vertical-align:middle;padding-right:18px;"><img src="${logoUrl()}" alt="Kanzlei Adler und Sohn" width="72" height="72" style="display:block;height:72px;width:auto;" /></td>
+            <td style="vertical-align:middle;padding-right:18px;"><img src="${logoUrl()}" alt="Kanzlei Adler und Sohn" width="96" height="96" style="display:block;height:96px;width:auto;" /></td>
             <td style="vertical-align:middle;">
-              <div style="font-family:Georgia,serif;font-size:20px;color:#0f2740;font-weight:600;line-height:1.2;">Rechtsanwaltskanzlei Adler und Sohn</div>
-              <div style="height:2px;width:48px;background:#c9a55c;margin:8px 0;"></div>
+              <div style="height:2px;width:48px;background:#c9a55c;margin:0 0 8px 0;"></div>
               <div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;color:#6b6455;line-height:1.5;">Strandstraße 14 · 25980 Westerland/Sylt<br/>Tel. +49 6591 6659636 · info@adlerundsohn.com</div>
             </td>
           </tr></table>
@@ -182,10 +181,9 @@ export function renderOfferHtml(offer: OfferRow, items: ItemRow[]): string {
 
         <tr><td style="padding:36px 40px 8px 40px;">
           <table role="presentation" cellpadding="0" cellspacing="0"><tr>
-            <td style="vertical-align:middle;padding-right:18px;"><img src="${logoUrl()}" alt="Kanzlei Adler und Sohn" width="72" height="72" style="display:block;height:72px;width:auto;" /></td>
+            <td style="vertical-align:middle;padding-right:18px;"><img src="${logoUrl()}" alt="Kanzlei Adler und Sohn" width="96" height="96" style="display:block;height:96px;width:auto;" /></td>
             <td style="vertical-align:middle;">
-              <div style="font-family:Georgia,serif;font-size:20px;color:#0f2740;font-weight:600;line-height:1.2;">Rechtsanwaltskanzlei Adler und Sohn</div>
-              <div style="height:2px;width:48px;background:#c9a55c;margin:8px 0;"></div>
+              <div style="height:2px;width:48px;background:#c9a55c;margin:0 0 8px 0;"></div>
               <div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;color:#6b6455;line-height:1.5;">Strandstraße 14 · 25980 Westerland/Sylt<br/>Tel. +49 6591 6659636 · info@adlerundsohn.com</div>
             </td>
           </tr></table>
