@@ -96,6 +96,7 @@ export function renderInvoiceHtml(
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:32px 12px;"><tr><td align="center">
       <table role="presentation" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;background:#fff;border-top:4px solid #c9a55c;">
         <tr><td style="padding:36px 40px 8px 40px;">
+          <img src="${logoUrl()}" alt="Kanzlei Adler und Sohn" width="72" height="72" style="display:block;margin-bottom:12px;height:72px;width:auto;" />
           <div style="font-family:Georgia,serif;font-size:22px;color:#0f2740;">Rechtsanwaltskanzlei</div>
           <div style="font-family:Georgia,serif;font-size:28px;color:#0f2740;font-weight:600;">Adler und Sohn</div>
           <div style="height:2px;width:56px;background:#c9a55c;margin-top:12px;"></div>
@@ -176,6 +177,7 @@ export function renderOfferHtml(offer: OfferRow, items: ItemRow[]): string {
       <table role="presentation" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;background:#ffffff;border-top:4px solid #c9a55c;">
 
         <tr><td style="padding:36px 40px 8px 40px;">
+          <img src="${logoUrl()}" alt="Kanzlei Adler und Sohn" width="72" height="72" style="display:block;margin-bottom:12px;height:72px;width:auto;" />
           <div style="font-family:Georgia,serif;font-size:22px;color:#0f2740;letter-spacing:0.5px;">Rechtsanwaltskanzlei</div>
           <div style="font-family:Georgia,serif;font-size:28px;color:#0f2740;font-weight:600;margin-top:2px;">Adler und Sohn</div>
           <div style="height:2px;width:56px;background:#c9a55c;margin-top:12px;"></div>
