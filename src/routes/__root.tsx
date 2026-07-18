@@ -116,15 +116,20 @@ const navItems = [
   { to: "/kontakt", label: "Kontakt" },
 ] as const;
 
+import logoAsset from "@/assets/kanzlei-logo.png.asset.json";
+
 function Header() {
   const [open, setOpen] = useState(false);
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur">
       <div className="container-prose flex items-center justify-between py-5">
-        <Link to="/" className="group flex items-baseline gap-3" onClick={() => setOpen(false)}>
-          <span className="font-serif text-2xl leading-none text-primary">Adler und Sohn</span>
-          <span className="hidden text-[0.65rem] uppercase tracking-[0.28em] text-muted-foreground sm:inline">
-            Rechtsanwälte
+        <Link to="/" className="group flex items-center gap-3" onClick={() => setOpen(false)}>
+          <img src={logoAsset.url} alt="Logo Kanzlei Adler und Sohn" className="h-10 w-auto md:h-12" width={64} height={64} />
+          <span className="flex items-baseline gap-3">
+            <span className="font-serif text-2xl leading-none text-primary">Adler und Sohn</span>
+            <span className="hidden text-[0.65rem] uppercase tracking-[0.28em] text-muted-foreground sm:inline">
+              Rechtsanwälte
+            </span>
           </span>
         </Link>
 
@@ -178,7 +183,10 @@ function Footer() {
     <footer className="mt-32 border-t border-border bg-primary text-primary-foreground">
       <div className="container-prose grid gap-12 py-16 md:grid-cols-4">
         <div className="md:col-span-2">
-          <p className="font-serif text-2xl">Rechtsanwaltskanzlei Adler und Sohn</p>
+          <div className="flex items-center gap-4">
+            <img src={logoAsset.url} alt="Logo Kanzlei Adler und Sohn" className="h-14 w-auto brightness-0 invert" width={96} height={96} />
+            <p className="font-serif text-2xl">Rechtsanwaltskanzlei Adler und Sohn</p>
+          </div>
           <span className="rule-gold mt-4" />
           <p className="mt-6 max-w-sm text-sm leading-relaxed text-primary-foreground/70">
             Spezialisiert auf Insolvenzrecht und Insolvenzverwaltung.

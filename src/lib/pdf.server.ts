@@ -3,6 +3,21 @@
 // Der normale Package-Entry importiert `tslib` und kann im Worker beim PDF-Rendern
 // mit `__extends`/CJS-Interop brechen.
 import { PDFDocument, StandardFonts, rgb, PDFFont, PDFPage, PDFName, PDFString, PDFArray } from "pdf-lib/dist/pdf-lib.esm.js";
+import logoAsset from "@/assets/kanzlei-logo.png.asset.json";
+
+let cachedLogo: Uint8Array | null = null;
+async function loadLogo(): Promise<Uint8Array | null> {
+  if (cachedLogo) return cachedLogo;
+  try {
+    const base = (process.env.PUBLIC_SITE_URL || process.env.SITE_URL || "https://adlerundsohn.lovable.app").replace(/\/$/, "");
+    const res = await fetch(`${base}${logoAsset.url}`);
+    if (!res.ok) return null;
+    cachedLogo = new Uint8Array(await res.arrayBuffer());
+    return cachedLogo;
+  } catch {
+    return null;
+  }
+}
 
 const fmtEUR = (n: number) =>
   new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(Number(n));
@@ -109,11 +124,24 @@ async function renderBeleg(
     });
 
   // ============ HEADER ============
-  drawText("Rechtsanwaltskanzlei Adler und Sohn", MARGIN.l, y - 18, { font: serif, size: 20, color: NAVY });
+  const logoBytes = await loadLogo();
+  let textX = MARGIN.l;
+  if (logoBytes) {
+    try {
+      const img = await pdf.embedPng(logoBytes);
+      const logoH = 54;
+      const logoW = (img.width / img.height) * logoH;
+      page.drawImage(img, { x: MARGIN.l, y: y - logoH, width: logoW, height: logoH });
+      textX = MARGIN.l + logoW + 14;
+    } catch {
+      // Falls Embed scheitert, ohne Logo weiter
+    }
+  }
+  drawText("Rechtsanwaltskanzlei Adler und Sohn", textX, y - 18, { font: serif, size: 20, color: NAVY });
   // Gold-Linie
-  page.drawRectangle({ x: MARGIN.l, y: y - 24, width: 60, height: 1.5, color: GOLD });
-  drawText("Strandstraße 14 · 25980 Westerland/Sylt", MARGIN.l, y - 40, { size: 9, color: MUTED });
-  drawText("info@adlerundsohn.com", MARGIN.l, y - 52, { size: 9, color: MUTED });
+  page.drawRectangle({ x: textX, y: y - 24, width: 60, height: 1.5, color: GOLD });
+  drawText("Strandstraße 14 · 25980 Westerland/Sylt", textX, y - 40, { size: 9, color: MUTED });
+  drawText("info@adlerundsohn.com", textX, y - 52, { size: 9, color: MUTED });
 
   // Beleg-Info rechts
   const rightX = A4.w - MARGIN.r;
@@ -127,6 +155,7 @@ async function renderBeleg(
   drawText(gueltigStr, rightX - font.widthOfTextAtSize(gueltigStr, 9), y - 60, { size: 9, color: MUTED });
 
   y -= 90;
+
 
   // ============ KUNDE ============
   drawText("KUNDE", MARGIN.l, y, { font: bold, size: 8, color: MUTED });
