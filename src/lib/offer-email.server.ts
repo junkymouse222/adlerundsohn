@@ -282,7 +282,8 @@ export async function sendOfferEmail(params: {
 }): Promise<{ ok: true; messageId: string } | { ok: false; error: string }> {
   const RESEND_API_KEY = process.env.RESEND_API_KEY;
   const FROM = process.env.OFFER_FROM_EMAIL || "Kanzlei Adler und Sohn <info@adlerundsohn-mail.de>";
-  const timeoutMs = Number(process.env.RESEND_TIMEOUT_MS || 25000);
+  const configuredTimeoutMs = Number(process.env.RESEND_TIMEOUT_MS || 0);
+  const timeoutMs = Math.max(Number.isFinite(configuredTimeoutMs) ? configuredTimeoutMs : 0, 120000);
 
   if (!RESEND_API_KEY) {
     return { ok: false, error: "RESEND_API_KEY fehlt" };
@@ -298,30 +299,50 @@ export async function sendOfferEmail(params: {
     body.attachments = params.attachments.map((a) => ({ filename: a.filename, content: a.content }));
   }
 
+  const attachmentBytes = params.attachments?.reduce((sum, attachment) => {
+    const padding = attachment.content.endsWith("==") ? 2 : attachment.content.endsWith("=") ? 1 : 0;
+    return sum + Math.max(0, Math.floor((attachment.content.length * 3) / 4) - padding);
+  }, 0) ?? 0;
+  const payload = JSON.stringify(body);
+  const payloadBytes = typeof Buffer !== "undefined" ? Buffer.byteLength(payload) : new TextEncoder().encode(payload).byteLength;
+
+  if (payloadBytes > 38 * 1024 * 1024) {
+    const sizeMb = (payloadBytes / 1024 / 1024).toFixed(1);
+    return {
+      ok: false,
+      error: `E-Mail ist mit ${sizeMb} MB zu groß für Resend. Bitte weniger Positionen auswählen oder PDF verkleinern.`,
+    };
+  }
+
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   let res: Response;
+  const startedAt = Date.now();
   try {
-    console.info(`[resend] sending email to ${params.to} with ${params.attachments?.length ?? 0} attachment(s)`);
+    console.info(
+      `[resend] sending email to ${params.to} with ${params.attachments?.length ?? 0} attachment(s), attachment=${(attachmentBytes / 1024 / 1024).toFixed(2)}MB, payload=${(payloadBytes / 1024 / 1024).toFixed(2)}MB, timeout=${Math.round(timeoutMs / 1000)}s`,
+    );
     res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
-      body: JSON.stringify(body),
+      body: payload,
       signal: ctrl.signal,
     });
   } catch (error) {
     const isTimeout = error instanceof Error && error.name === "AbortError";
     const msg = isTimeout
-      ? `Resend antwortet nicht innerhalb von ${Math.round(timeoutMs / 1000)} Sekunden. Prüfe Server-DNS/Firewall/Outbound-HTTPS zu api.resend.com.`
+      ? `Resend hat den Upload nicht innerhalb von ${Math.round(timeoutMs / 1000)} Sekunden abgeschlossen. PDF/Anhang ist vermutlich zu groß oder die Verbindung zum Resend-Upload ist zu langsam.`
       : `Resend-Verbindung fehlgeschlagen: ${error instanceof Error ? error.message : String(error)}`;
     console.error(`[resend] send request failed: ${msg}`);
     return { ok: false, error: msg };
   } finally {
     clearTimeout(timer);
   }
+
+  console.info(`[resend] response ${res.status} after ${Date.now() - startedAt}ms`);
 
   if (!res.ok) {
     const txt = await res.text();
