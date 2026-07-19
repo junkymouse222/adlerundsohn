@@ -86,12 +86,15 @@ if ! command -v node >/dev/null || [[ "$(node -v)" != v22.* ]]; then
   curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
   apt-get install -y nodejs
 fi
-if ! command -v bun >/dev/null || ! [[ -x /usr/local/bin/bun ]]; then
-  log "Bun installieren (systemweit)…"
+if [[ ! -x /root/.bun/bin/bun ]]; then
+  log "Bun installieren…"
   curl -fsSL https://bun.sh/install | bash
-  # Kopie in /usr/local/bin, damit auch Nicht-Root-User (adler) bun ausführen können
-  install -m 0755 /root/.bun/bin/bun /usr/local/bin/bun
 fi
+# Immer sicherstellen: /usr/local/bin/bun ist eine echte Kopie (kein Symlink in /root),
+# damit auch Nicht-Root-User (adler) bun ausführen können.
+rm -f /usr/local/bin/bun
+install -m 0755 /root/.bun/bin/bun /usr/local/bin/bun
+
 
 
 # ---------- Caddy -----------------------------------------------------------
