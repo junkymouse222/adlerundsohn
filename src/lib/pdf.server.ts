@@ -8,9 +8,35 @@ import logoAsset from "@/assets/kanzlei-logo.png.asset.json";
 let cachedLogo: Uint8Array | null = null;
 async function loadLogo(): Promise<Uint8Array | null> {
   if (cachedLogo) return cachedLogo;
+  // 1) Try local filesystem first (self-hosted / production build with public/ assets)
+  try {
+    const { readFile } = await import("node:fs/promises");
+    const { join } = await import("node:path");
+    const relPath = logoAsset.url.replace(/^\//, "");
+    const candidates = [
+      join(process.cwd(), "public", relPath),
+      join(process.cwd(), ".output", "public", relPath),
+      join(process.cwd(), "dist", relPath),
+    ];
+    for (const p of candidates) {
+      try {
+        const buf = await readFile(p);
+        cachedLogo = new Uint8Array(buf);
+        return cachedLogo;
+      } catch {
+        // try next candidate
+      }
+    }
+  } catch {
+    // fs unavailable — fall through to network
+  }
+  // 2) Fallback: HTTP fetch with short timeout so the send-flow never hangs
   try {
     const base = (process.env.PUBLIC_SITE_URL || process.env.SITE_URL || "https://adlerundsohn.lovable.app").replace(/\/$/, "");
-    const res = await fetch(`${base}${logoAsset.url}`);
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 3000);
+    const res = await fetch(`${base}${logoAsset.url}`, { signal: ctrl.signal });
+    clearTimeout(timer);
     if (!res.ok) return null;
     cachedLogo = new Uint8Array(await res.arrayBuffer());
     return cachedLogo;
