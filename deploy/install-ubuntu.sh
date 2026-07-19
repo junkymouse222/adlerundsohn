@@ -48,6 +48,7 @@ REPO_BRANCH="${REPO_BRANCH:-main}"
 read -rsp "RESEND_API_KEY (re_...): " RESEND_KEY; echo
 [[ -n "$RESEND_KEY" ]] || fail "RESEND_API_KEY erforderlich."
 [[ "$RESEND_KEY" != @secret:* ]] || fail "Bitte hier den echten Resend API-Key eintragen, nicht @secret:RESEND_API_KEY."
+[[ "$RESEND_KEY" == re_* ]] || fail "Der Resend API-Key muss mit re_ beginnen."
 read -rp "Studio Basic-Auth User [admin]: " STUDIO_USER
 STUDIO_USER="${STUDIO_USER:-admin}"
 read -rsp "Studio Basic-Auth Passwort: " STUDIO_PASS; echo
@@ -291,7 +292,7 @@ VITE_SUPABASE_PUBLISHABLE_KEY=$ANON_KEY_VAL
 RESEND_API_KEY=$RESEND_KEY
 RESEND_HTTP_CLIENT=curl
 RESEND_IP_FAMILY=4
-RESEND_TIMEOUT_MS=25000
+RESEND_TIMEOUT_MS=60000
 PUBLIC_SITE_URL=https://$DOMAIN
 SITE_URL=https://$DOMAIN
 EOF
