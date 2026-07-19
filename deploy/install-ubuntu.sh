@@ -335,16 +335,34 @@ STUDIO_HASH="$(caddy hash-password --plaintext "$STUDIO_PASS" 2>/dev/null)"
 cat > /etc/caddy/Caddyfile <<EOF
 {
   email $ADMIN_EMAIL
-  # Nur HTTP/1.1: HTTP/3 (QUIC/UDP:443) oft geblockt; HTTP/2 hängt auf
-  # manchen Provider-Pfaden/RDP-Clients mit ERR_CONNECTION_RESET / Stalls.
+  # HTTP->HTTPS-Redirect aus: manche RDP/VPS-Pfade (z.B. AEZA) brechen TLS ab.
+  # http://$DOMAIN bleibt dann nutzbar; https:// weiter parallel.
+  auto_https disable_redirects
+  # Nur HTTP/1.1: HTTP/3/2 hängen auf manchen Provider-Pfaden.
   servers {
     protocols h1
   }
 }
 
-# --- App ---------------------------------------------------------------
+# --- App (HTTP, für problematische Clients/RDP) ------------------------
+http://$DOMAIN, http://www.$DOMAIN {
+  encode gzip
+  header Alt-Svc "clear"
+
+  @static path /assets/* /kanzlei-logo.png /favicon.ico /robots.txt
+  handle @static {
+    root * $APP_DIR/.output/public
+    header Cache-Control "public, max-age=31536000, immutable"
+    file_server
+  }
+
+  handle {
+    reverse_proxy 127.0.0.1:$APP_PORT
+  }
+}
+
+# --- App (HTTPS) -------------------------------------------------------
 $DOMAIN, www.$DOMAIN {
-  # Nur gzip (kein zstd): weniger Edge-Fälle; Statik direkt von Disk.
   encode gzip
   header Alt-Svc "clear"
 
@@ -362,7 +380,7 @@ $DOMAIN, www.$DOMAIN {
 
 # --- Supabase Studio (Kong routet Studio + REST/Auth/Storage) ----------
 $STUDIO_DOMAIN {
-  encode zstd gzip
+  encode gzip
   header Alt-Svc "clear"
   # Studio-UI schützen; API-Pfade (auth/rest/storage/realtime) offen lassen
   @studio {
