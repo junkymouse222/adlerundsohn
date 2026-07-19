@@ -24,6 +24,7 @@ if [[ -z "${RESEND_API_KEY:-}" ]]; then
 fi
 
 FROM="${OFFER_FROM_EMAIL:-Kanzlei Adler und Sohn <info@adlerundsohn-mail.de>}"
+export TO FROM
 
 node <<'NODE'
 const key = process.env.RESEND_API_KEY;
