@@ -128,7 +128,7 @@ export function renderInvoiceHtml(
 }
 
 export function renderOfferHtml(offer: OfferRow, items: ItemRow[]): string {
-  const gueltigBis = new Date(new Date(offer.created_at).getTime() + 21 * 24 * 3600 * 1000)
+  const gueltigBis = new Date(new Date(offer.created_at).getTime() + 7 * 24 * 3600 * 1000)
     .toLocaleDateString("de-DE");
   const datum = new Date(offer.created_at).toLocaleDateString("de-DE");
   const acceptUrl = offerAcceptUrl(offer.accept_token);
@@ -252,7 +252,7 @@ export function renderOfferHtml(offer: OfferRow, items: ItemRow[]): string {
           <p style="margin:0;font-family:Georgia,serif;font-size:14px;color:#0f2740;">Kanzlei Adler und Sohn</p>
           <div style="height:1px;background:#ece8de;margin:20px 0;"></div>
           <p style="margin:0;font-size:11px;color:#8a8578;line-height:1.6;">
-            Dieses Angebot ist 21 Tage gültig. Alle Positionen aus laufender Verwertung.
+            Dieses Angebot ist 7 Tage gültig. Alle Positionen aus laufender Verwertung.
             Lieferung ab Bestellwert 3.000 € netto kostenfrei innerhalb des Liefergebiets. Zwischenverkauf vorbehalten.
           </p>
           <p style="margin:12px 0 0 0;font-size:11px;color:#8a8578;">
