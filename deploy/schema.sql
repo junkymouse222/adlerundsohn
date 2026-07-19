@@ -219,14 +219,28 @@ CREATE POLICY "Admins can delete offer items"
   USING (public.has_role(auth.uid(), 'admin'));
 
 -- ---------- Storage-Bucket 'angebote' ---------------------------------------
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('angebote', 'angebote', false)
-ON CONFLICT (id) DO NOTHING;
+-- Wird nur ausgeführt, wenn das storage-Schema bereits existiert
+-- (der Supabase-Storage-Container legt es beim ersten Start an).
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables
+             WHERE table_schema = 'storage' AND table_name = 'buckets') THEN
 
--- Optional: Admins können den Bucket verwalten (Object-Policies)
-DROP POLICY IF EXISTS "Admins manage angebote" ON storage.objects;
-CREATE POLICY "Admins manage angebote"
-  ON storage.objects FOR ALL
-  TO authenticated
-  USING (bucket_id = 'angebote' AND public.has_role(auth.uid(), 'admin'))
-  WITH CHECK (bucket_id = 'angebote' AND public.has_role(auth.uid(), 'admin'));
+    INSERT INTO storage.buckets (id, name, public)
+    VALUES ('angebote', 'angebote', false)
+    ON CONFLICT (id) DO NOTHING;
+
+    EXECUTE 'DROP POLICY IF EXISTS "Admins manage angebote" ON storage.objects';
+    EXECUTE $p$
+      CREATE POLICY "Admins manage angebote"
+        ON storage.objects FOR ALL
+        TO authenticated
+        USING (bucket_id = 'angebote' AND public.has_role(auth.uid(), 'admin'))
+        WITH CHECK (bucket_id = 'angebote' AND public.has_role(auth.uid(), 'admin'))
+    $p$;
+
+  ELSE
+    RAISE NOTICE 'storage-Schema noch nicht bereit – Bucket "angebote" wird später via storage-bucket.sql angelegt.';
+  END IF;
+END $$;
+
