@@ -280,13 +280,11 @@ export async function sendOfferEmail(params: {
   html: string;
   attachments?: EmailAttachment[];
 }): Promise<{ ok: true; messageId: string } | { ok: false; error: string }> {
-  const LOVABLE_API_KEY = process.env.LOVABLE_API_KEY;
   const RESEND_API_KEY = process.env.RESEND_API_KEY;
-  const FROM = process.env.OFFER_FROM_EMAIL || "Kanzlei Adler und Sohn <angebote@adlerundsohn.com>";
+  const FROM = process.env.OFFER_FROM_EMAIL || "Kanzlei Adler und Sohn <info@adlerundsohn-mail.de>";
 
-  if (!LOVABLE_API_KEY) return { ok: false, error: "LOVABLE_API_KEY missing" };
   if (!RESEND_API_KEY) {
-    return { ok: false, error: "Resend-Connector nicht verbunden (RESEND_API_KEY fehlt)" };
+    return { ok: false, error: "RESEND_API_KEY fehlt" };
   }
 
   const body: Record<string, unknown> = {
@@ -299,12 +297,11 @@ export async function sendOfferEmail(params: {
     body.attachments = params.attachments.map((a) => ({ filename: a.filename, content: a.content }));
   }
 
-  const res = await fetch("https://connector-gateway.lovable.dev/resend/emails", {
+  const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${LOVABLE_API_KEY}`,
-      "X-Connection-Api-Key": RESEND_API_KEY,
+      Authorization: `Bearer ${RESEND_API_KEY}`,
     },
     body: JSON.stringify(body),
   });
