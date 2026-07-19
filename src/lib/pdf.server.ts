@@ -342,11 +342,12 @@ async function renderBeleg(
 
     y -= rowHeight;
     page.drawLine({
-      start: { x: MARGIN.l, y: y + 4 },
-      end: { x: A4.w - MARGIN.r, y: y + 4 },
+      start: { x: MARGIN.l, y: y - 2 },
+      end: { x: A4.w - MARGIN.r, y: y - 2 },
       thickness: 0.5,
       color: LINE,
     });
+    y -= 8;
   });
 
   y -= 14;
