@@ -365,7 +365,10 @@ async function postResendWithCurl(payload: string, apiKey: string, timeoutMs: nu
     const configLines = [
       "silent",
       "show-error",
+      "verbose",
       "http1.1",
+      "no-buffer",
+      "noproxy = \"*\"",
       "request = POST",
       'url = "https://api.resend.com/emails"',
       `max-time = ${Math.ceil(timeoutMs / 1000)}`,
@@ -385,6 +388,10 @@ async function postResendWithCurl(payload: string, apiKey: string, timeoutMs: nu
     return await new Promise<ResendPostResult>((resolve, reject) => {
       const child = spawn("curl", ["--config", "-", "--write-out", "\n__RESEND_HTTP_STATUS__:%{http_code}"], {
         stdio: ["pipe", "pipe", "pipe"],
+        // Proxy-Env bewusst NICHT weitergeben, sonst hängt curl u.U. an einem kaputten Systemd-Proxy.
+        env: Object.fromEntries(
+          Object.entries(process.env).filter(([k]) => !/^(HTTP|HTTPS|ALL|NO)_PROXY$/i.test(k)),
+        ) as NodeJS.ProcessEnv,
       });
 
       const stdoutChunks: Buffer[] = [];
@@ -405,14 +412,16 @@ async function postResendWithCurl(payload: string, apiKey: string, timeoutMs: nu
         const markerIndex = stdout.lastIndexOf(marker);
 
         if (markerIndex === -1) {
-          reject(new Error(`curl lieferte keinen HTTP-Status${stderr ? `: ${stderr}` : ""}`));
+          if (stderr) console.error(`[resend] curl verbose trace (tail):\n${stderr.split("\n").slice(-40).join("\n")}`);
+          reject(new Error(`curl lieferte keinen HTTP-Status (exit=${code})${stderr ? `: ${stderr.split("\n").pop()}` : ""}`));
           return;
         }
 
         const status = Number(stdout.slice(markerIndex + marker.length).trim());
         const body = stdout.slice(0, markerIndex);
         if (code !== 0 && status === 0) {
-          reject(new Error(stderr || `curl beendet mit Code ${code}`));
+          if (stderr) console.error(`[resend] curl verbose trace (tail):\n${stderr.split("\n").slice(-40).join("\n")}`);
+          reject(new Error(stderr.split("\n").pop() || `curl beendet mit Code ${code}`));
           return;
         }
         resolve({ status, body });
