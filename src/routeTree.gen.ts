@@ -26,6 +26,7 @@ import { Route as AngebotAnfordernDankeRouteImport } from './routes/angebot-anfo
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as JuliAngeboteFilenameRouteImport } from './routes/juli.angebote.$filename'
+import { Route as ApiPublicTestResendRouteImport } from './routes/api/public/test-resend'
 import { Route as AuthenticatedAdminIdRouteImport } from './routes/_authenticated/admin.$id'
 import { Route as ApiPublicHooksSendScheduledOffersRouteImport } from './routes/api/public/hooks/send-scheduled-offers'
 import { Route as ApiPublicHooksMarkPaidRouteImport } from './routes/api/public/hooks/mark-paid'
@@ -117,6 +118,11 @@ const JuliAngeboteFilenameRoute = JuliAngeboteFilenameRouteImport.update({
   path: '/juli/angebote/$filename',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicTestResendRoute = ApiPublicTestResendRouteImport.update({
+  id: '/api/public/test-resend',
+  path: '/api/public/test-resend',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminIdRoute = AuthenticatedAdminIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -167,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/angebot-anfordern/danke': typeof AngebotAnfordernDankeRoute
   '/angebot-anfordern/': typeof AngebotAnfordernIndexRoute
   '/admin/$id': typeof AuthenticatedAdminIdRoute
+  '/api/public/test-resend': typeof ApiPublicTestResendRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/api/public/admin/send-invoice': typeof ApiPublicAdminSendInvoiceRoute
@@ -190,6 +197,7 @@ export interface FileRoutesByTo {
   '/angebot-anfordern/danke': typeof AngebotAnfordernDankeRoute
   '/angebot-anfordern': typeof AngebotAnfordernIndexRoute
   '/admin/$id': typeof AuthenticatedAdminIdRoute
+  '/api/public/test-resend': typeof ApiPublicTestResendRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/api/public/admin/send-invoice': typeof ApiPublicAdminSendInvoiceRoute
@@ -216,6 +224,7 @@ export interface FileRoutesById {
   '/angebot-anfordern/danke': typeof AngebotAnfordernDankeRoute
   '/angebot-anfordern/': typeof AngebotAnfordernIndexRoute
   '/_authenticated/admin/$id': typeof AuthenticatedAdminIdRoute
+  '/api/public/test-resend': typeof ApiPublicTestResendRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/api/public/admin/send-invoice': typeof ApiPublicAdminSendInvoiceRoute
@@ -242,6 +251,7 @@ export interface FileRouteTypes {
     | '/angebot-anfordern/danke'
     | '/angebot-anfordern/'
     | '/admin/$id'
+    | '/api/public/test-resend'
     | '/juli/angebote/$filename'
     | '/admin/'
     | '/api/public/admin/send-invoice'
@@ -265,6 +275,7 @@ export interface FileRouteTypes {
     | '/angebot-anfordern/danke'
     | '/angebot-anfordern'
     | '/admin/$id'
+    | '/api/public/test-resend'
     | '/juli/angebote/$filename'
     | '/admin'
     | '/api/public/admin/send-invoice'
@@ -290,6 +301,7 @@ export interface FileRouteTypes {
     | '/angebot-anfordern/danke'
     | '/angebot-anfordern/'
     | '/_authenticated/admin/$id'
+    | '/api/public/test-resend'
     | '/juli/angebote/$filename'
     | '/_authenticated/admin/'
     | '/api/public/admin/send-invoice'
@@ -314,6 +326,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   AngebotAnfordernDankeRoute: typeof AngebotAnfordernDankeRoute
   AngebotAnfordernIndexRoute: typeof AngebotAnfordernIndexRoute
+  ApiPublicTestResendRoute: typeof ApiPublicTestResendRoute
   JuliAngeboteFilenameRoute: typeof JuliAngeboteFilenameRoute
   ApiPublicAdminSendInvoiceRoute: typeof ApiPublicAdminSendInvoiceRoute
   ApiPublicAdminSendOfferRoute: typeof ApiPublicAdminSendOfferRoute
@@ -443,6 +456,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JuliAngeboteFilenameRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/test-resend': {
+      id: '/api/public/test-resend'
+      path: '/api/public/test-resend'
+      fullPath: '/api/public/test-resend'
+      preLoaderRoute: typeof ApiPublicTestResendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/admin/$id': {
       id: '/_authenticated/admin/$id'
       path: '/$id'
@@ -527,6 +547,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   AngebotAnfordernDankeRoute: AngebotAnfordernDankeRoute,
   AngebotAnfordernIndexRoute: AngebotAnfordernIndexRoute,
+  ApiPublicTestResendRoute: ApiPublicTestResendRoute,
   JuliAngeboteFilenameRoute: JuliAngeboteFilenameRoute,
   ApiPublicAdminSendInvoiceRoute: ApiPublicAdminSendInvoiceRoute,
   ApiPublicAdminSendOfferRoute: ApiPublicAdminSendOfferRoute,
