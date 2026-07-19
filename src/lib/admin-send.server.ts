@@ -1,0 +1,221 @@
+import { createClient } from "@supabase/supabase-js";
+import { z } from "zod";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { offerAcceptUrl, renderInvoiceHtml, renderOfferHtml, sendOfferEmail, invoicePayUrl } from "@/lib/offer-email.server";
+import { renderInvoicePdf, renderOfferPdf, toBase64 } from "@/lib/pdf.server";
+
+type AdminSendResult = { ok: true; messageId?: string; rechnung_nr?: string };
+
+export class AdminSendError extends Error {
+  status: number;
+
+  constructor(message: string, status = 500) {
+    super(message);
+    this.name = "AdminSendError";
+    this.status = status;
+  }
+}
+
+const IdSchema = z.object({ id: z.string().uuid() });
+const InvoiceSchema = IdSchema.extend({
+  faellig_tage: z.number().int().min(1).max(120).optional(),
+  bank_inhaber: z.string().trim().min(1).max(200).optional(),
+  bank_name: z.string().trim().min(1).max(200).optional(),
+  bank_iban: z.string().trim().min(4).max(64).optional(),
+  bank_bic: z.string().trim().min(4).max(32).optional(),
+});
+
+function extractBearer(request: Request): string {
+  const auth = request.headers.get("authorization") ?? "";
+  const match = auth.match(/^Bearer\s+(.+)$/i);
+  if (!match?.[1]) throw new AdminSendError("Bitte neu anmelden.", 401);
+  return match[1];
+}
+
+function serverUserClient(accessToken: string) {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY;
+  if (!url || !key) throw new AdminSendError("Backend-Konfiguration fehlt.", 500);
+
+  return createClient(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: {
+      fetch: (input, init) => {
+        const headers = new Headers(init?.headers);
+        if (key.startsWith("sb_") && headers.get("Authorization") === `Bearer ${key}`) {
+          headers.delete("Authorization");
+        }
+        headers.set("apikey", key);
+        headers.set("Authorization", `Bearer ${accessToken}`);
+        return fetch(input, { ...init, headers });
+      },
+    },
+  });
+}
+
+async function assertAdminRequest(request: Request) {
+  const token = extractBearer(request);
+  const client = serverUserClient(token) as any;
+  const { data: userData, error: userError } = await client.auth.getUser(token);
+  if (userError || !userData?.user) throw new AdminSendError("Sitzung abgelaufen. Bitte neu anmelden.", 401);
+
+  const { data: role, error: roleError } = await client
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userData.user.id)
+    .eq("role", "admin")
+    .maybeSingle();
+  if (roleError) throw new AdminSendError(roleError.message, 500);
+  if (!role) throw new AdminSendError("Nicht berechtigt.", 403);
+}
+
+function nextRechnungNr(): string {
+  const year = new Date().getFullYear();
+  const rnd = Math.floor(Math.random() * 9000) + 1000;
+  return `R-${year}-${rnd}`;
+}
+
+function errMsg(error: unknown): string {
+  return error instanceof Error ? error.message : String(error || "Unbekannter Fehler");
+}
+
+export async function sendOfferFromAdmin(request: Request, input: unknown): Promise<AdminSendResult> {
+  await assertAdminRequest(request);
+  const { id } = IdSchema.parse(input);
+  const admin = supabaseAdmin as any;
+
+  const { data: offer, error: offerErr } = await admin.from("offer_requests").select("*").eq("id", id).maybeSingle();
+  if (offerErr) throw new AdminSendError(offerErr.message, 500);
+  if (!offer) throw new AdminSendError("Anfrage nicht gefunden.", 404);
+
+  const { data: items, error: itemsErr } = await admin
+    .from("offer_request_items")
+    .select("*")
+    .eq("request_id", id)
+    .order("pos", { ascending: true });
+  if (itemsErr) throw new AdminSendError(itemsErr.message, 500);
+
+  let html = "";
+  try {
+    const acceptUrl = offerAcceptUrl(offer.accept_token as string | null);
+    html = renderOfferHtml(offer as never, (items ?? []) as never);
+    const pdfBytes = await renderOfferPdf(offer as never, (items ?? []) as never, acceptUrl);
+    const send = await sendOfferEmail({
+      to: offer.customer_email as string,
+      subject: `Ihr Angebot ${offer.angebot_nr as string} — Kanzlei Adler und Sohn`,
+      html,
+      attachments: [{ filename: `Angebot-${offer.angebot_nr}.pdf`, content: toBase64(pdfBytes) }],
+    });
+
+    if (!send.ok) throw new AdminSendError(send.error, 502);
+
+    await admin
+      .from("offer_requests")
+      .update({
+        status: "sent",
+        sent_at: new Date().toISOString(),
+        offer_html: html,
+        resend_message_id: send.messageId,
+        error_message: null,
+      })
+      .eq("id", id);
+
+    return { ok: true, messageId: send.messageId };
+  } catch (error) {
+    const message = errMsg(error);
+    await admin.from("offer_requests").update({ status: "failed", offer_html: html || null, error_message: message }).eq("id", id);
+    if (error instanceof AdminSendError) throw error;
+    throw new AdminSendError(message, 500);
+  }
+}
+
+export async function sendInvoiceFromAdmin(request: Request, input: unknown): Promise<AdminSendResult> {
+  await assertAdminRequest(request);
+  const data = InvoiceSchema.parse(input);
+  const admin = supabaseAdmin as any;
+
+  const { data: offer, error: offerErr } = await admin.from("offer_requests").select("*").eq("id", data.id).maybeSingle();
+  if (offerErr) throw new AdminSendError(offerErr.message, 500);
+  if (!offer) throw new AdminSendError("Anfrage nicht gefunden.", 404);
+
+  const { data: items, error: itemsErr } = await admin
+    .from("offer_request_items")
+    .select("*")
+    .eq("request_id", data.id)
+    .order("pos", { ascending: true });
+  if (itemsErr) throw new AdminSendError(itemsErr.message, 500);
+
+  const rechnung_nr: string = (offer.rechnung_nr as string | null) ?? nextRechnungNr();
+  const datum = new Date();
+  const tage = data.faellig_tage ?? 14;
+  const faellig = new Date(datum.getTime() + tage * 24 * 3600 * 1000);
+  const invoice = {
+    rechnung_nr,
+    datum,
+    faellig_am: faellig,
+    bank_inhaber: data.bank_inhaber || (offer.bank_inhaber as string | null) || process.env.BANK_INHABER || "Kanzlei Adler und Sohn",
+    bank_name: data.bank_name || (offer.bank_name as string | null) || process.env.BANK_NAME || "Sparkasse Trier",
+    bank_iban: data.bank_iban || (offer.bank_iban as string | null) || process.env.BANK_IBAN || "DE00 0000 0000 0000 0000 00",
+    bank_bic: data.bank_bic || (offer.bank_bic as string | null) || process.env.BANK_BIC || "TRISDE55XXX",
+    pay_url: invoicePayUrl(offer.pay_token as string | null),
+    paid: !!offer.paid_at,
+  };
+
+  try {
+    const pdfBytes = await renderInvoicePdf(offer as never, (items ?? []) as never, invoice);
+    const html = renderInvoiceHtml({
+      ...(offer as any),
+      rechnung_nr,
+      rechnung_faellig_am: faellig.toISOString().slice(0, 10),
+      pay_token: offer.pay_token as string | null,
+      paid_at: offer.paid_at as string | null,
+      bank_inhaber: invoice.bank_inhaber,
+      bank_name: invoice.bank_name,
+      bank_iban: invoice.bank_iban,
+      bank_bic: invoice.bank_bic,
+    });
+    const send = await sendOfferEmail({
+      to: offer.customer_email as string,
+      subject: `Ihre Rechnung ${rechnung_nr} — Kanzlei Adler und Sohn`,
+      html,
+      attachments: [{ filename: `Rechnung-${rechnung_nr}.pdf`, content: toBase64(pdfBytes) }],
+    });
+
+    if (!send.ok) throw new AdminSendError(send.error, 502);
+
+    await admin
+      .from("offer_requests")
+      .update({
+        rechnung_nr,
+        rechnung_status: "sent",
+        rechnung_sent_at: new Date().toISOString(),
+        rechnung_message_id: send.messageId,
+        rechnung_faellig_am: faellig.toISOString().slice(0, 10),
+        rechnung_error: null,
+        bank_inhaber: invoice.bank_inhaber,
+        bank_name: invoice.bank_name,
+        bank_iban: invoice.bank_iban,
+        bank_bic: invoice.bank_bic,
+      })
+      .eq("id", data.id);
+
+    return { ok: true, messageId: send.messageId, rechnung_nr };
+  } catch (error) {
+    const message = errMsg(error);
+    await admin
+      .from("offer_requests")
+      .update({
+        rechnung_nr,
+        rechnung_status: "failed",
+        rechnung_error: message,
+        rechnung_faellig_am: faellig.toISOString().slice(0, 10),
+        bank_inhaber: invoice.bank_inhaber,
+        bank_name: invoice.bank_name,
+        bank_iban: invoice.bank_iban,
+        bank_bic: invoice.bank_bic,
+      })
+      .eq("id", data.id);
+    if (error instanceof AdminSendError) throw error;
+    throw new AdminSendError(message, 500);
+  }
+}

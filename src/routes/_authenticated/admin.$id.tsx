@@ -1,14 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import {
-  getOfferRequest,
-  resendOfferNow,
-  sendInvoiceNow,
-  previewOfferPdf,
-  previewInvoicePdf,
-  updateOfferStatus,
-  type OfferDetail,
-} from "@/lib/admin.functions";
+import { getOfferRequest, previewOfferPdf, previewInvoicePdf, updateOfferStatus, type OfferDetail } from "@/lib/admin.functions";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/admin/$id")({
   head: () => ({
@@ -42,6 +35,32 @@ function openBase64Pdf(base64: string, filename: string) {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }, 60000);
+}
+
+async function postAdminJson<T>(url: string, body: unknown): Promise<T> {
+  const { data, error } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  if (error || !token) throw new Error("Bitte neu anmelden.");
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
+  const text = await response.text();
+  let payload: { ok?: boolean; error?: string } | null = null;
+  try {
+    payload = text ? JSON.parse(text) : null;
+  } catch {
+    payload = null;
+  }
+  if (!response.ok || payload?.ok === false) {
+    throw new Error(payload?.error || text || `HTTP ${response.status}`);
+  }
+  return payload as T;
 }
 
 function AdminDetailPage() {
@@ -88,7 +107,7 @@ function AdminDetailPage() {
     setResending(true);
     setSendResult(null);
     try {
-      const res = await resendOfferNow({ data: { id } });
+      const res = await postAdminJson<{ ok: true; messageId?: string }>("/api/public/admin/send-offer", { id });
       await load();
       setSendResult({ ok: true, msg: `Angebot versendet${res.messageId ? ` (ID: ${res.messageId})` : ""}.` });
     } catch (e) {
@@ -103,15 +122,13 @@ function AdminDetailPage() {
     setInvoicing(true);
     setInvoiceResult(null);
     try {
-      const res = await sendInvoiceNow({
-        data: {
-          id,
-          faellig_tage: faelligTage,
-          bank_inhaber: bankInhaber,
-          bank_name: bankName,
-          bank_iban: bankIban,
-          bank_bic: bankBic,
-        },
+      const res = await postAdminJson<{ ok: true; messageId?: string; rechnung_nr: string }>("/api/public/admin/send-invoice", {
+        id,
+        faellig_tage: faelligTage,
+        bank_inhaber: bankInhaber,
+        bank_name: bankName,
+        bank_iban: bankIban,
+        bank_bic: bankBic,
       });
       await load();
       setInvoiceResult({ ok: true, msg: `Rechnung ${res.rechnung_nr} versendet${res.messageId ? ` (ID: ${res.messageId})` : ""}.` });

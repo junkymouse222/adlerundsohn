@@ -30,6 +30,8 @@ import { Route as AuthenticatedAdminIdRouteImport } from './routes/_authenticate
 import { Route as ApiPublicHooksSendScheduledOffersRouteImport } from './routes/api/public/hooks/send-scheduled-offers'
 import { Route as ApiPublicHooksMarkPaidRouteImport } from './routes/api/public/hooks/mark-paid'
 import { Route as ApiPublicHooksAcceptOfferRouteImport } from './routes/api/public/hooks/accept-offer'
+import { Route as ApiPublicAdminSendOfferRouteImport } from './routes/api/public/admin/send-offer'
+import { Route as ApiPublicAdminSendInvoiceRouteImport } from './routes/api/public/admin/send-invoice'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -137,6 +139,17 @@ const ApiPublicHooksAcceptOfferRoute =
     path: '/api/public/hooks/accept-offer',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicAdminSendOfferRoute = ApiPublicAdminSendOfferRouteImport.update({
+  id: '/api/public/admin/send-offer',
+  path: '/api/public/admin/send-offer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicAdminSendInvoiceRoute =
+  ApiPublicAdminSendInvoiceRouteImport.update({
+    id: '/api/public/admin/send-invoice',
+    path: '/api/public/admin/send-invoice',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -156,6 +169,8 @@ export interface FileRoutesByFullPath {
   '/admin/$id': typeof AuthenticatedAdminIdRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/api/public/admin/send-invoice': typeof ApiPublicAdminSendInvoiceRoute
+  '/api/public/admin/send-offer': typeof ApiPublicAdminSendOfferRoute
   '/api/public/hooks/accept-offer': typeof ApiPublicHooksAcceptOfferRoute
   '/api/public/hooks/mark-paid': typeof ApiPublicHooksMarkPaidRoute
   '/api/public/hooks/send-scheduled-offers': typeof ApiPublicHooksSendScheduledOffersRoute
@@ -177,6 +192,8 @@ export interface FileRoutesByTo {
   '/admin/$id': typeof AuthenticatedAdminIdRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/api/public/admin/send-invoice': typeof ApiPublicAdminSendInvoiceRoute
+  '/api/public/admin/send-offer': typeof ApiPublicAdminSendOfferRoute
   '/api/public/hooks/accept-offer': typeof ApiPublicHooksAcceptOfferRoute
   '/api/public/hooks/mark-paid': typeof ApiPublicHooksMarkPaidRoute
   '/api/public/hooks/send-scheduled-offers': typeof ApiPublicHooksSendScheduledOffersRoute
@@ -201,6 +218,8 @@ export interface FileRoutesById {
   '/_authenticated/admin/$id': typeof AuthenticatedAdminIdRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/api/public/admin/send-invoice': typeof ApiPublicAdminSendInvoiceRoute
+  '/api/public/admin/send-offer': typeof ApiPublicAdminSendOfferRoute
   '/api/public/hooks/accept-offer': typeof ApiPublicHooksAcceptOfferRoute
   '/api/public/hooks/mark-paid': typeof ApiPublicHooksMarkPaidRoute
   '/api/public/hooks/send-scheduled-offers': typeof ApiPublicHooksSendScheduledOffersRoute
@@ -225,6 +244,8 @@ export interface FileRouteTypes {
     | '/admin/$id'
     | '/juli/angebote/$filename'
     | '/admin/'
+    | '/api/public/admin/send-invoice'
+    | '/api/public/admin/send-offer'
     | '/api/public/hooks/accept-offer'
     | '/api/public/hooks/mark-paid'
     | '/api/public/hooks/send-scheduled-offers'
@@ -246,6 +267,8 @@ export interface FileRouteTypes {
     | '/admin/$id'
     | '/juli/angebote/$filename'
     | '/admin'
+    | '/api/public/admin/send-invoice'
+    | '/api/public/admin/send-offer'
     | '/api/public/hooks/accept-offer'
     | '/api/public/hooks/mark-paid'
     | '/api/public/hooks/send-scheduled-offers'
@@ -269,6 +292,8 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/$id'
     | '/juli/angebote/$filename'
     | '/_authenticated/admin/'
+    | '/api/public/admin/send-invoice'
+    | '/api/public/admin/send-offer'
     | '/api/public/hooks/accept-offer'
     | '/api/public/hooks/mark-paid'
     | '/api/public/hooks/send-scheduled-offers'
@@ -290,6 +315,8 @@ export interface RootRouteChildren {
   AngebotAnfordernDankeRoute: typeof AngebotAnfordernDankeRoute
   AngebotAnfordernIndexRoute: typeof AngebotAnfordernIndexRoute
   JuliAngeboteFilenameRoute: typeof JuliAngeboteFilenameRoute
+  ApiPublicAdminSendInvoiceRoute: typeof ApiPublicAdminSendInvoiceRoute
+  ApiPublicAdminSendOfferRoute: typeof ApiPublicAdminSendOfferRoute
   ApiPublicHooksAcceptOfferRoute: typeof ApiPublicHooksAcceptOfferRoute
   ApiPublicHooksMarkPaidRoute: typeof ApiPublicHooksMarkPaidRoute
   ApiPublicHooksSendScheduledOffersRoute: typeof ApiPublicHooksSendScheduledOffersRoute
@@ -444,6 +471,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksAcceptOfferRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/admin/send-offer': {
+      id: '/api/public/admin/send-offer'
+      path: '/api/public/admin/send-offer'
+      fullPath: '/api/public/admin/send-offer'
+      preLoaderRoute: typeof ApiPublicAdminSendOfferRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/admin/send-invoice': {
+      id: '/api/public/admin/send-invoice'
+      path: '/api/public/admin/send-invoice'
+      fullPath: '/api/public/admin/send-invoice'
+      preLoaderRoute: typeof ApiPublicAdminSendInvoiceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -487,6 +528,8 @@ const rootRouteChildren: RootRouteChildren = {
   AngebotAnfordernDankeRoute: AngebotAnfordernDankeRoute,
   AngebotAnfordernIndexRoute: AngebotAnfordernIndexRoute,
   JuliAngeboteFilenameRoute: JuliAngeboteFilenameRoute,
+  ApiPublicAdminSendInvoiceRoute: ApiPublicAdminSendInvoiceRoute,
+  ApiPublicAdminSendOfferRoute: ApiPublicAdminSendOfferRoute,
   ApiPublicHooksAcceptOfferRoute: ApiPublicHooksAcceptOfferRoute,
   ApiPublicHooksMarkPaidRoute: ApiPublicHooksMarkPaidRoute,
   ApiPublicHooksSendScheduledOffersRoute:
