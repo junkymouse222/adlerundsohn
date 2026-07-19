@@ -51,7 +51,12 @@ async function postAdminJson<T>(url: string, body: unknown): Promise<T> {
     body: JSON.stringify(body),
   });
   const text = await response.text();
-  const payload = text ? JSON.parse(text) : null;
+  let payload: { ok?: boolean; error?: string } | null = null;
+  try {
+    payload = text ? JSON.parse(text) : null;
+  } catch {
+    payload = null;
+  }
   if (!response.ok || payload?.ok === false) {
     throw new Error(payload?.error || text || `HTTP ${response.status}`);
   }
