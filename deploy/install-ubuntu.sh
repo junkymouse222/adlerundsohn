@@ -243,6 +243,29 @@ else
   warn "Keine schema.sql gefunden - überspringe Schema-Import."
 fi
 
+# Storage-Schema wird vom storage-Container beim ersten Start erzeugt.
+# Warten bis storage.buckets existiert, dann Bucket + Policies nachziehen.
+BUCKET_FILE=""
+if [[ -f "$APP_DIR/deploy/storage-bucket.sql" ]]; then
+  BUCKET_FILE="$APP_DIR/deploy/storage-bucket.sql"
+elif [[ -f "$(dirname "$0")/storage-bucket.sql" ]]; then
+  BUCKET_FILE="$(dirname "$0")/storage-bucket.sql"
+fi
+if [[ -n "$BUCKET_FILE" ]]; then
+  log "Warte auf storage-Schema…"
+  for i in {1..60}; do
+    if docker exec supabase-db psql -U postgres -d postgres -tAc \
+         "SELECT 1 FROM information_schema.tables WHERE table_schema='storage' AND table_name='buckets'" \
+         2>/dev/null | grep -q 1; then
+      break
+    fi
+    sleep 2
+  done
+  log "Storage-Bucket + Policies einspielen: $BUCKET_FILE"
+  docker exec -i supabase-db psql -U postgres -d postgres < "$BUCKET_FILE" || warn "Storage-Bucket-SQL hat Fehler geworfen - prüfen!"
+fi
+
+
 # ---------- .env für die App ------------------------------------------------
 ANON_KEY_VAL="$(grep -E '^ANON_KEY=' "$SUPA_DIR/.env" | cut -d= -f2-)"
 SERVICE_KEY_VAL="$(grep -E '^SERVICE_ROLE_KEY=' "$SUPA_DIR/.env" | cut -d= -f2-)"
