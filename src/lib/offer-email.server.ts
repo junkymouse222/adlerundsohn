@@ -278,6 +278,19 @@ type ResendPostResult = { status: number; body: string };
 
 type ResendHttpClient = "auto" | "https" | "fetch" | "curl";
 
+function normalizeResendApiKey(value: string | undefined): string | null {
+  const apiKey = value?.trim();
+  if (!apiKey) return null;
+  if (apiKey.startsWith("@secret:") || apiKey === "RESEND_API_KEY") return null;
+  return apiKey;
+}
+
+function redactCurlTrace(trace: string): string {
+  return trace
+    .replace(/(Authorization:\s*Bearer\s+)[^\r\n]+/gi, "$1[redacted]")
+    .replace(/(header\s*=\s*"Authorization:\s*Bearer\s+)[^"]+("?)/gi, "$1[redacted]$2");
+}
+
 function preferredResendHttpClient(): ResendHttpClient {
   const configured = process.env.RESEND_HTTP_CLIENT;
   if (configured === "https" || configured === "fetch" || configured === "curl" || configured === "auto") {
@@ -412,7 +425,7 @@ async function postResendWithCurl(payload: string, apiKey: string, timeoutMs: nu
         const markerIndex = stdout.lastIndexOf(marker);
 
         if (markerIndex === -1) {
-          if (stderr) console.error(`[resend] curl verbose trace (tail):\n${stderr.split("\n").slice(-40).join("\n")}`);
+          if (stderr) console.error(`[resend] curl verbose trace (tail):\n${redactCurlTrace(stderr).split("\n").slice(-40).join("\n")}`);
           reject(new Error(`curl lieferte keinen HTTP-Status (exit=${code})${stderr ? `: ${stderr.split("\n").pop()}` : ""}`));
           return;
         }
@@ -420,7 +433,7 @@ async function postResendWithCurl(payload: string, apiKey: string, timeoutMs: nu
         const status = Number(stdout.slice(markerIndex + marker.length).trim());
         const body = stdout.slice(0, markerIndex);
         if (code !== 0 && status === 0) {
-          if (stderr) console.error(`[resend] curl verbose trace (tail):\n${stderr.split("\n").slice(-40).join("\n")}`);
+          if (stderr) console.error(`[resend] curl verbose trace (tail):\n${redactCurlTrace(stderr).split("\n").slice(-40).join("\n")}`);
           reject(new Error(stderr.split("\n").pop() || `curl beendet mit Code ${code}`));
           return;
         }
@@ -440,13 +453,13 @@ export async function sendOfferEmail(params: {
   html: string;
   attachments?: EmailAttachment[];
 }): Promise<{ ok: true; messageId: string } | { ok: false; error: string }> {
-  const RESEND_API_KEY = process.env.RESEND_API_KEY;
+  const RESEND_API_KEY = normalizeResendApiKey(process.env.RESEND_API_KEY);
   const FROM = process.env.OFFER_FROM_EMAIL || "Kanzlei Adler und Sohn <info@adlerundsohn-mail.de>";
   const configuredTimeoutMs = Number(process.env.RESEND_TIMEOUT_MS || 0);
   const timeoutMs = Number.isFinite(configuredTimeoutMs) && configuredTimeoutMs > 0 ? configuredTimeoutMs : 120000;
 
   if (!RESEND_API_KEY) {
-    return { ok: false, error: "RESEND_API_KEY fehlt" };
+    return { ok: false, error: "RESEND_API_KEY fehlt oder ist noch ein Platzhalter. Bitte den echten Resend API-Key in der Server-.env eintragen." };
   }
 
   const body: Record<string, unknown> = {
