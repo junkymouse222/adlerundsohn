@@ -97,7 +97,7 @@ export function renderInvoiceHtml(
       <table role="presentation" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;background:#fff;border-top:4px solid #c9a55c;">
         <tr><td style="padding:36px 40px 8px 40px;">
           <table role="presentation" cellpadding="0" cellspacing="0"><tr>
-            <td style="vertical-align:middle;padding-right:18px;"><img src="${logoUrl()}" alt="Kanzlei Adler und Sohn" width="96" height="96" style="display:block;height:96px;width:auto;" /></td>
+            <td style="vertical-align:middle;padding-right:18px;"><img src="${logoUrl()}" alt="Kanzlei Adler und Sohn" width="136" height="96" style="display:block;height:96px;width:auto;" /></td>
             <td style="vertical-align:middle;">
               <div style="height:2px;width:48px;background:#c9a55c;margin:0 0 8px 0;"></div>
               <div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;color:#6b6455;line-height:1.5;">Strandstraße 14 · 25980 Westerland/Sylt<br/>Tel. +49 6591 6659636 · info@adlerundsohn.com</div>
@@ -181,7 +181,7 @@ export function renderOfferHtml(offer: OfferRow, items: ItemRow[]): string {
 
         <tr><td style="padding:36px 40px 8px 40px;">
           <table role="presentation" cellpadding="0" cellspacing="0"><tr>
-            <td style="vertical-align:middle;padding-right:18px;"><img src="${logoUrl()}" alt="Kanzlei Adler und Sohn" width="96" height="96" style="display:block;height:96px;width:auto;" /></td>
+            <td style="vertical-align:middle;padding-right:18px;"><img src="${logoUrl()}" alt="Kanzlei Adler und Sohn" width="136" height="96" style="display:block;height:96px;width:auto;" /></td>
             <td style="vertical-align:middle;">
               <div style="height:2px;width:48px;background:#c9a55c;margin:0 0 8px 0;"></div>
               <div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;color:#6b6455;line-height:1.5;">Strandstraße 14 · 25980 Westerland/Sylt<br/>Tel. +49 6591 6659636 · info@adlerundsohn.com</div>
@@ -469,6 +469,38 @@ function preferredEmailTransport(): "smtp" | "http" {
   return configured === "smtp" ? "smtp" : "http";
 }
 
+// Logo für Inline-Einbettung (CID) laden. Viele Mail-Clients blockieren extern
+// nachgeladene Bilder standardmäßig — dann wirkt das Logo "kaputt". Als CID-Anhang
+// reist das Logo in der Mail mit und wird ohne externe Anfrage angezeigt.
+async function loadLogoBytesForEmail(): Promise<Buffer | null> {
+  try {
+    const { readFile } = await import("node:fs/promises");
+    const { join } = await import("node:path");
+    const rel = logoAsset.url.replace(/^\//, "");
+    const candidates = [
+      join(process.cwd(), "public", rel),
+      join(process.cwd(), ".output", "public", rel),
+      join(process.cwd(), "dist", rel),
+    ];
+    for (const p of candidates) {
+      try {
+        return await readFile(p);
+      } catch {
+        // nächsten Pfad versuchen
+      }
+    }
+  } catch {
+    // fs nicht verfügbar — Netzwerk-Fallback
+  }
+  try {
+    const res = await fetch(logoUrl());
+    if (res.ok) return Buffer.from(await res.arrayBuffer());
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
 async function sendViaSmtp(
   params: { to: string; subject: string; html: string; attachments?: EmailAttachment[] },
   from: string,
@@ -493,18 +525,42 @@ async function sendViaSmtp(
       greetingTimeout: timeoutMs,
       socketTimeout: timeoutMs,
     });
+
+    const attachments: {
+      filename: string;
+      content: Buffer;
+      cid?: string;
+      contentType?: string;
+    }[] =
+      params.attachments?.map((a) => ({
+        filename: a.filename,
+        content: Buffer.from(a.content, "base64"),
+      })) ?? [];
+
+    // Logo inline per CID einbetten, damit es auch bei blockierten Remote-Bildern erscheint.
+    let html = params.html;
+    const logoBytes = await loadLogoBytesForEmail();
+    const logoRef = logoUrl();
+    if (logoBytes && html.includes(logoRef)) {
+      const cid = "kanzlei-logo@adlerundsohn";
+      html = html.split(logoRef).join(`cid:${cid}`);
+      attachments.unshift({
+        filename: "kanzlei-logo.png",
+        content: logoBytes,
+        cid,
+        contentType: "image/png",
+      });
+    }
+
     console.info(
-      `[resend] sending via SMTP ${host}:${port} to ${params.to} with ${params.attachments?.length ?? 0} attachment(s)`,
+      `[resend] sending via SMTP ${host}:${port} to ${params.to} with ${attachments.length} attachment(s)`,
     );
     const info = await transporter.sendMail({
       from,
       to: params.to,
       subject: params.subject,
-      html: params.html,
-      attachments: params.attachments?.map((a) => ({
-        filename: a.filename,
-        content: Buffer.from(a.content, "base64"),
-      })),
+      html,
+      attachments,
     });
     return { ok: true, messageId: info.messageId ?? "" };
   } catch (error) {
