@@ -24,8 +24,6 @@ function page(status: "ok" | "already" | "invalid", angebotNr?: string): Respons
   body{margin:0;background:#efece4;font-family:'Helvetica Neue',Arial,sans-serif;color:#1a1a1a;}
   .wrap{max-width:560px;margin:0 auto;padding:48px 20px;}
   .card{background:#fff;border-top:4px solid #c9a55c;padding:40px;}
-  .brand{font-family:Georgia,serif;color:#0f2740;font-size:22px;}
-  .name{font-family:Georgia,serif;color:#0f2740;font-size:28px;font-weight:600;margin-top:2px;}
   .rule{height:2px;width:56px;background:#c9a55c;margin:14px 0 28px;}
   h1{font-family:Georgia,serif;color:#0f2740;font-size:26px;margin:0 0 16px;}
   p{font-size:15px;line-height:1.7;color:#3a352b;}
@@ -33,8 +31,6 @@ function page(status: "ok" | "already" | "invalid", angebotNr?: string): Respons
   .foot{margin-top:24px;font-size:11px;color:#8a8578;}
 </style></head><body><div class="wrap"><div class="card">
   <img src="${logoAsset.url}" alt="Kanzlei Adler und Sohn" style="height:72px;width:auto;display:block;margin-bottom:16px;" />
-  <div class="brand">Rechtsanwaltskanzlei</div>
-  <div class="name">Adler und Sohn</div>
   <div class="rule"></div>
   <h1>${title}</h1>
   <p>${message}</p>
