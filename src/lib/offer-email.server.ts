@@ -274,6 +274,63 @@ function escapeHtml(s: string): string {
 
 export type EmailAttachment = { filename: string; content: string /* base64 */ };
 
+type ResendPostResult = { status: number; body: string };
+
+async function postResendWithHttps(payload: string, apiKey: string, timeoutMs: number): Promise<ResendPostResult> {
+  const https = await import("node:https");
+  const payloadBytes = Buffer.byteLength(payload);
+
+  return await new Promise<ResendPostResult>((resolve, reject) => {
+    const req = https.request(
+      {
+        hostname: "api.resend.com",
+        path: "/emails",
+        method: "POST",
+        family: Number(process.env.RESEND_IP_FAMILY || 4),
+        timeout: timeoutMs,
+        headers: {
+          "Content-Type": "application/json",
+          "Content-Length": String(payloadBytes),
+          Authorization: `Bearer ${apiKey}`,
+        },
+      },
+      (res) => {
+        const chunks: Buffer[] = [];
+        res.on("data", (chunk) => chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)));
+        res.on("end", () => {
+          resolve({ status: res.statusCode ?? 0, body: Buffer.concat(chunks).toString("utf8") });
+        });
+      },
+    );
+
+    req.setTimeout(timeoutMs, () => {
+      req.destroy(new Error(`Timeout nach ${Math.round(timeoutMs / 1000)} Sekunden beim Resend-Upload`));
+    });
+    req.on("error", reject);
+    req.write(payload);
+    req.end();
+  });
+}
+
+async function postResendWithFetch(payload: string, apiKey: string, timeoutMs: number): Promise<ResendPostResult> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: payload,
+      signal: ctrl.signal,
+    });
+    return { status: res.status, body: await res.text() };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export async function sendOfferEmail(params: {
   to: string;
   subject: string;
@@ -314,23 +371,21 @@ export async function sendOfferEmail(params: {
     };
   }
 
-  const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
-  let res: Response;
+  let res: ResendPostResult;
   const startedAt = Date.now();
   try {
     console.info(
       `[resend] sending email to ${params.to} with ${params.attachments?.length ?? 0} attachment(s), attachment=${(attachmentBytes / 1024 / 1024).toFixed(2)}MB, payload=${(payloadBytes / 1024 / 1024).toFixed(2)}MB, timeout=${Math.round(timeoutMs / 1000)}s`,
     );
-    res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-      },
-      body: payload,
-      signal: ctrl.signal,
-    });
+    try {
+      res = await postResendWithHttps(payload, RESEND_API_KEY, timeoutMs);
+    } catch (httpsError) {
+      if (process.env.RESEND_HTTP_CLIENT === "https") throw httpsError;
+      console.warn(
+        `[resend] node:https failed, falling back to fetch: ${httpsError instanceof Error ? httpsError.message : String(httpsError)}`,
+      );
+      res = await postResendWithFetch(payload, RESEND_API_KEY, timeoutMs);
+    }
   } catch (error) {
     const isTimeout = error instanceof Error && error.name === "AbortError";
     const msg = isTimeout
@@ -338,17 +393,14 @@ export async function sendOfferEmail(params: {
       : `Resend-Verbindung fehlgeschlagen: ${error instanceof Error ? error.message : String(error)}`;
     console.error(`[resend] send request failed: ${msg}`);
     return { ok: false, error: msg };
-  } finally {
-    clearTimeout(timer);
   }
 
   console.info(`[resend] response ${res.status} after ${Date.now() - startedAt}ms`);
 
-  if (!res.ok) {
-    const txt = await res.text();
-    console.error(`[resend] send failed [${res.status}]: ${txt}`);
-    return { ok: false, error: `Resend ${res.status}: ${txt}` };
+  if (res.status < 200 || res.status >= 300) {
+    console.error(`[resend] send failed [${res.status}]: ${res.body}`);
+    return { ok: false, error: `Resend ${res.status}: ${res.body}` };
   }
-  const data = (await res.json()) as { id?: string };
+  const data = JSON.parse(res.body) as { id?: string };
   return { ok: true, messageId: data.id ?? "" };
 }
