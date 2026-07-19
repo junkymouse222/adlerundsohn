@@ -457,6 +457,63 @@ async function postResendWithCurl(payload: string, apiKey: string, timeoutMs: nu
 }
 
 
+// Manche Hosting-/Provider-Netze können den Cloudflare-Anycast-Pfad der Resend-HTTP-API
+// (api.resend.com) nicht zuverlässig erreichen — große Uploads (PDF-Anhänge) laufen dort in
+// einen Timeout ("0 bytes received"), obwohl kleine Requests durchgehen. Resends SMTP-Relay
+// (smtp.resend.com, AWS) liegt NICHT hinter Cloudflare und umgeht das Problem. Über
+// RESEND_TRANSPORT=smtp lässt sich der SMTP-Weg aktivieren.
+function preferredEmailTransport(): "smtp" | "http" {
+  const configured = (process.env.RESEND_TRANSPORT || process.env.EMAIL_TRANSPORT || "")
+    .trim()
+    .toLowerCase();
+  return configured === "smtp" ? "smtp" : "http";
+}
+
+async function sendViaSmtp(
+  params: { to: string; subject: string; html: string; attachments?: EmailAttachment[] },
+  from: string,
+  apiKey: string,
+  timeoutMs: number,
+): Promise<{ ok: true; messageId: string } | { ok: false; error: string }> {
+  const host = process.env.RESEND_SMTP_HOST || "smtp.resend.com";
+  const port = Number(process.env.RESEND_SMTP_PORT || 465);
+  const user = process.env.RESEND_SMTP_USER || "resend";
+  try {
+    const nodemailer = await import("nodemailer");
+    const createTransport =
+      (nodemailer as { createTransport?: typeof import("nodemailer").createTransport })
+        .createTransport ??
+      (nodemailer as { default: typeof import("nodemailer") }).default.createTransport;
+    const transporter = createTransport({
+      host,
+      port,
+      secure: port === 465,
+      auth: { user, pass: apiKey },
+      connectionTimeout: timeoutMs,
+      greetingTimeout: timeoutMs,
+      socketTimeout: timeoutMs,
+    });
+    console.info(
+      `[resend] sending via SMTP ${host}:${port} to ${params.to} with ${params.attachments?.length ?? 0} attachment(s)`,
+    );
+    const info = await transporter.sendMail({
+      from,
+      to: params.to,
+      subject: params.subject,
+      html: params.html,
+      attachments: params.attachments?.map((a) => ({
+        filename: a.filename,
+        content: Buffer.from(a.content, "base64"),
+      })),
+    });
+    return { ok: true, messageId: info.messageId ?? "" };
+  } catch (error) {
+    const msg = `SMTP-Versand über ${host}:${port} fehlgeschlagen: ${error instanceof Error ? error.message : String(error)}`;
+    console.error(`[resend] ${msg}`);
+    return { ok: false, error: msg };
+  }
+}
+
 export async function sendOfferEmail(params: {
   to: string;
   subject: string;
@@ -474,6 +531,10 @@ export async function sendOfferEmail(params: {
     return { ok: false, error: "RESEND_API_KEY fehlt oder ist noch ein Platzhalter. Bitte den echten Resend API-Key in der Server-.env eintragen." };
   }
   console.log(`[resend] using key prefix=${RESEND_API_KEY.slice(0, 5)}… len=${RESEND_API_KEY.length}`);
+
+  if (preferredEmailTransport() === "smtp") {
+    return sendViaSmtp(params, FROM, RESEND_API_KEY, timeoutMs);
+  }
 
   const body: Record<string, unknown> = {
     from: FROM,
