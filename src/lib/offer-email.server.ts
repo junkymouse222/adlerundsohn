@@ -483,18 +483,19 @@ export async function sendOfferEmail(params: {
             `[resend] node:https failed, falling back to fetch: ${httpsError instanceof Error ? httpsError.message : String(httpsError)}`,
           );
           res = await postResendWithFetch(payload, RESEND_API_KEY, timeoutMs);
-          return;
         }
-        console.warn(
-          `[resend] node:https failed, trying curl: ${httpsError instanceof Error ? httpsError.message : String(httpsError)}`,
-        );
-        try {
-          res = await postResendWithCurl(payload, RESEND_API_KEY, timeoutMs);
-        } catch (curlError) {
+        else {
           console.warn(
-            `[resend] curl failed, falling back to fetch: ${curlError instanceof Error ? curlError.message : String(curlError)}`,
+          `[resend] node:https failed, trying curl: ${httpsError instanceof Error ? httpsError.message : String(httpsError)}`,
           );
-          res = await postResendWithFetch(payload, RESEND_API_KEY, timeoutMs);
+          try {
+            res = await postResendWithCurl(payload, RESEND_API_KEY, timeoutMs);
+          } catch (curlError) {
+            console.warn(
+              `[resend] curl failed, falling back to fetch: ${curlError instanceof Error ? curlError.message : String(curlError)}`,
+            );
+            res = await postResendWithFetch(payload, RESEND_API_KEY, timeoutMs);
+          }
         }
       }
     }
