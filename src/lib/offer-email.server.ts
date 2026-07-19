@@ -380,8 +380,6 @@ async function postResendWithCurl(payload: string, apiKey: string, timeoutMs: nu
 
     const maxTime = Math.ceil(timeoutMs / 1000);
     const args: string[] = [
-      "--silent",
-      "--show-error",
       "--verbose",
       "--http1.1",
       "--no-buffer",
@@ -397,6 +395,7 @@ async function postResendWithCurl(payload: string, apiKey: string, timeoutMs: nu
       "--data-binary", `@${payloadPath}`,
       "--write-out", "\n__RESEND_HTTP_STATUS__:%{http_code}",
     ];
+
 
     const ipFamily = String(process.env.RESEND_IP_FAMILY || "4");
     if (ipFamily === "4") args.unshift("--ipv4");
@@ -429,8 +428,14 @@ async function postResendWithCurl(payload: string, apiKey: string, timeoutMs: nu
         const marker = "\n__RESEND_HTTP_STATUS__:";
         const markerIndex = stdout.lastIndexOf(marker);
 
+        const dumpTrace = () => {
+          const lines = redactCurlTrace(stderr || "(leer — curl hat keine Ausgabe geschrieben)").split("\n");
+          console.error(`[resend] curl exit=${code}, stderr-bytes=${stderr.length}, verbose trace:`);
+          for (const line of lines.slice(-60)) console.error(`[resend]   ${line}`);
+        };
+
         if (markerIndex === -1) {
-          if (stderr) console.error(`[resend] curl verbose trace (tail):\n${redactCurlTrace(stderr).split("\n").slice(-40).join("\n")}`);
+          dumpTrace();
           reject(new Error(`curl lieferte keinen HTTP-Status (exit=${code})${stderr ? `: ${stderr.split("\n").pop()}` : ""}`));
           return;
         }
@@ -438,11 +443,12 @@ async function postResendWithCurl(payload: string, apiKey: string, timeoutMs: nu
         const status = Number(stdout.slice(markerIndex + marker.length).trim());
         const body = stdout.slice(0, markerIndex);
         if (code !== 0 && status === 0) {
-          if (stderr) console.error(`[resend] curl verbose trace (tail):\n${redactCurlTrace(stderr).split("\n").slice(-40).join("\n")}`);
+          dumpTrace();
           reject(new Error(stderr.split("\n").pop() || `curl beendet mit Code ${code}`));
           return;
         }
         resolve({ status, body });
+
       });
     });
   } finally {
