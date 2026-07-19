@@ -137,6 +137,8 @@ export type OfferForPdf = {
   customer_ust_id: string | null;
   message: string | null;
   subtotal: number | string;
+  rabatt_rate?: number | string | null;
+  rabatt?: number | string | null;
   mwst_rate: number | string;
   mwst: number | string;
   total: number | string;
@@ -365,6 +367,9 @@ async function renderBeleg(
   };
 
   drawSum("Zwischensumme", fmtEUR(Number(offer.subtotal)));
+  if (Number(offer.rabatt) > 0) {
+    drawSum(`Neukundenrabatt (${Number(offer.rabatt_rate)}%)`, `-${fmtEUR(Number(offer.rabatt))}`);
+  }
   if (Number(offer.lieferkosten) > 0) drawSum("Lieferkosten", fmtEUR(Number(offer.lieferkosten)));
   drawSum(`zzgl. ${Number(offer.mwst_rate)}% MwSt.`, fmtEUR(Number(offer.mwst)));
   drawSum("Gesamtbetrag", fmtEUR(Number(offer.total)), { bold: true, big: true, line: true });

@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { getOfferRequest, previewOfferPdf, previewInvoicePdf, updateOfferStatus, type OfferDetail } from "@/lib/admin.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { computeOfferTotals } from "@/lib/offer-totals";
 
 export const Route = createFileRoute("/_authenticated/admin/$id")({
   head: () => ({
@@ -71,6 +72,9 @@ function AdminDetailPage() {
   const [resending, setResending] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [sendResult, setSendResult] = useState<{ ok: boolean; msg: string } | null>(null);
+  const [offerRabatt, setOfferRabatt] = useState(5);
+  const [offerMwst, setOfferMwst] = useState(19);
+  const [offerLieferkosten, setOfferLieferkosten] = useState(0);
   const [invoicing, setInvoicing] = useState(false);
   const [invoiceConfirmOpen, setInvoiceConfirmOpen] = useState(false);
   const [previewing, setPreviewing] = useState<"offer" | "invoice" | null>(null);
@@ -87,6 +91,9 @@ function AdminDetailPage() {
     try {
       const res = await getOfferRequest({ data: { id } });
       setDetail(res);
+      setOfferRabatt(Number(res.offer.rabatt_rate ?? 5));
+      setOfferMwst(Number(res.offer.mwst_rate ?? 19));
+      setOfferLieferkosten(Number(res.offer.lieferkosten ?? 0));
       if (res.offer.bank_inhaber) setBankInhaber(res.offer.bank_inhaber);
       if (res.offer.bank_name) setBankName(res.offer.bank_name);
       if (res.offer.bank_iban) setBankIban(res.offer.bank_iban);
@@ -107,7 +114,12 @@ function AdminDetailPage() {
     setResending(true);
     setSendResult(null);
     try {
-      const res = await postAdminJson<{ ok: true; messageId?: string }>("/api/public/admin/send-offer", { id });
+      const res = await postAdminJson<{ ok: true; messageId?: string }>("/api/public/admin/send-offer", {
+        id,
+        rabatt_rate: offerRabatt,
+        mwst_rate: offerMwst,
+        lieferkosten: offerLieferkosten,
+      });
       await load();
       setSendResult({ ok: true, msg: `Angebot versendet${res.messageId ? ` (ID: ${res.messageId})` : ""}.` });
     } catch (e) {
@@ -142,7 +154,9 @@ function AdminDetailPage() {
   async function handlePreviewOffer() {
     setPreviewing("offer");
     try {
-      const res = await previewOfferPdf({ data: { id } });
+      const res = await previewOfferPdf({
+        data: { id, rabatt_rate: offerRabatt, mwst_rate: offerMwst, lieferkosten: offerLieferkosten },
+      });
       openBase64Pdf(res.base64, res.filename);
     } catch (e) {
       setSendResult({ ok: false, msg: e instanceof Error ? e.message : "Fehler beim PDF-Erstellen." });
@@ -227,19 +241,83 @@ function AdminDetailPage() {
         </div>
       )}
 
-      {confirmOpen && (
-        <div className="mt-6 border border-gold bg-parchment p-4 text-sm">
-          <p className="mb-3">Angebot jetzt per E-Mail an <strong>{offer.customer_email}</strong> senden? Der Kunde erhält das PDF im Anhang und einen Annahme-Button.</p>
-          <div className="flex gap-2">
+      {confirmOpen && (() => {
+        const preview = computeOfferTotals({
+          subtotal: offer.subtotal,
+          rabattRate: offerRabatt,
+          lieferkosten: offerLieferkosten,
+          mwstRate: offerMwst,
+        });
+        return (
+        <div className="mt-6 border border-gold bg-parchment p-5 text-sm">
+          <p className="mb-4">Angebot jetzt per E-Mail an <strong>{offer.customer_email}</strong> senden? Der Kunde erhält das PDF im Anhang und einen Annahme-Button.</p>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            <label className="flex flex-col gap-1">
+              <span className="text-[0.65rem] uppercase tracking-widest text-muted-foreground">Neukundenrabatt (%)</span>
+              <input
+                type="number"
+                min={0}
+                max={100}
+                step={0.5}
+                value={offerRabatt}
+                onChange={(e) => setOfferRabatt(Number(e.target.value) || 0)}
+                className="border border-border bg-background px-3 py-2 text-sm"
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-[0.65rem] uppercase tracking-widest text-muted-foreground">MwSt (%)</span>
+              <input
+                type="number"
+                min={0}
+                max={99}
+                step={0.5}
+                value={offerMwst}
+                onChange={(e) => setOfferMwst(Number(e.target.value) || 0)}
+                className="border border-border bg-background px-3 py-2 text-sm"
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-[0.65rem] uppercase tracking-widest text-muted-foreground">Lieferkosten (€ netto)</span>
+              <input
+                type="number"
+                min={0}
+                step={0.01}
+                value={offerLieferkosten}
+                onChange={(e) => setOfferLieferkosten(Number(e.target.value) || 0)}
+                className="border border-border bg-background px-3 py-2 text-sm"
+              />
+            </label>
+          </div>
+
+          <div className="mt-4 grid gap-1 md:ml-auto md:w-72 text-xs">
+            <Row label="Zwischensumme" value={fmtEUR(offer.subtotal)} />
+            {preview.rabatt > 0 && <Row label={`Neukundenrabatt (${offerRabatt}%)`} value={`−${fmtEUR(preview.rabatt)}`} />}
+            {offerLieferkosten > 0 && <Row label="Lieferkosten" value={fmtEUR(offerLieferkosten)} />}
+            <Row label={`zzgl. ${offerMwst}% MwSt.`} value={fmtEUR(preview.mwst)} />
+            <div className="border-t border-border pt-1 font-semibold">
+              <Row label="Gesamtbetrag" value={fmtEUR(preview.total)} />
+            </div>
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-2">
             <button onClick={handleResendConfirmed} className="bg-primary px-4 py-2 text-xs uppercase tracking-widest text-primary-foreground hover:bg-primary/90">
               Ja, senden
+            </button>
+            <button
+              onClick={handlePreviewOffer}
+              disabled={previewing === "offer"}
+              className="border border-border px-4 py-2 text-xs uppercase tracking-widest text-primary hover:border-primary disabled:opacity-60"
+            >
+              {previewing === "offer" ? "…" : "Nur PDF ansehen"}
             </button>
             <button onClick={() => setConfirmOpen(false)} className="border border-border px-4 py-2 text-xs uppercase tracking-widest text-muted-foreground hover:text-primary">
               Abbrechen
             </button>
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {invoiceResult && (
         <div className={`mt-6 border p-4 text-sm ${invoiceResult.ok ? "border-green-700 bg-green-50 text-green-900" : "border-red-700 bg-red-50 text-red-800"}`}>
@@ -450,6 +528,9 @@ function AdminDetailPage() {
 
       <div className="mt-6 grid gap-2 md:ml-auto md:w-80 text-sm">
         <Row label="Zwischensumme" value={fmtEUR(offer.subtotal)} />
+        {Number(offer.rabatt) > 0 && (
+          <Row label={`Neukundenrabatt (${Number(offer.rabatt_rate)}%)`} value={`−${fmtEUR(Number(offer.rabatt))}`} />
+        )}
         <Row label="Lieferkosten" value={fmtEUR(offer.lieferkosten)} />
         <Row label={`zzgl. ${Number(offer.mwst_rate)}% MwSt.`} value={fmtEUR(offer.mwst)} />
         <div className="border-t border-border pt-2 font-semibold">

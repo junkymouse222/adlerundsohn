@@ -16,6 +16,8 @@ type OfferRow = {
   customer_ust_id: string | null;
   message: string | null;
   subtotal: number | string;
+  rabatt_rate?: number | string | null;
+  rabatt?: number | string | null;
   mwst_rate: number | string;
   mwst: number | string;
   total: number | string;
@@ -235,6 +237,7 @@ export function renderOfferHtml(offer: OfferRow, items: ItemRow[]): string {
         <tr><td style="padding:16px 40px 0 40px;">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;">
             <tr><td style="text-align:right;color:#6b6656;padding:4px 6px;">Zwischensumme</td><td style="text-align:right;padding:4px 6px;width:140px;color:#3a352b;">${fmtEUR(Number(offer.subtotal))}</td></tr>
+            ${Number(offer.rabatt) > 0 ? `<tr><td style="text-align:right;color:#8a7a3a;padding:4px 6px;">Neukundenrabatt (${Number(offer.rabatt_rate)}%)</td><td style="text-align:right;padding:4px 6px;color:#8a7a3a;">-${fmtEUR(Number(offer.rabatt))}</td></tr>` : ""}
             ${Number(offer.lieferkosten) > 0 ? `<tr><td style="text-align:right;color:#6b6656;padding:4px 6px;">Lieferkosten</td><td style="text-align:right;padding:4px 6px;color:#3a352b;">${fmtEUR(Number(offer.lieferkosten))}</td></tr>` : ""}
             <tr><td style="text-align:right;color:#6b6656;padding:4px 6px;">zzgl. ${Number(offer.mwst_rate)}% MwSt.</td><td style="text-align:right;padding:4px 6px;color:#3a352b;">${fmtEUR(Number(offer.mwst))}</td></tr>
             <tr><td colspan="2" style="padding:0;"><div style="height:2px;background:#0f2740;margin:6px 0;"></div></td></tr>

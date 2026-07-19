@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { PRODUKTE } from "@/lib/katalog";
 import { computeScheduledSendAt } from "@/lib/offer-scheduling";
+import { DEFAULT_MWST_RATE, DEFAULT_NEUKUNDEN_RABATT, computeOfferTotals } from "@/lib/offer-totals";
 
 const ItemSchema = z.object({
   artikel: z.string().min(1).max(50),
@@ -48,10 +49,10 @@ export const submitOfferRequest = createServerFn({ method: "POST" })
 
     const subtotal = Number(resolved.reduce((s, i) => s + i.position_total, 0).toFixed(2));
     const lieferkosten = subtotal >= 3000 ? 0 : 89;
-    const netto = Number((subtotal + lieferkosten).toFixed(2));
-    const mwstRate = 19;
-    const mwst = Number((netto * (mwstRate / 100)).toFixed(2));
-    const total = Number((netto + mwst).toFixed(2));
+    const mwstRate = DEFAULT_MWST_RATE;
+    // Standardmäßig immer 5% Neukundenrabatt ausweisen (auch bei automatischen Angeboten).
+    const rabattRate = DEFAULT_NEUKUNDEN_RABATT;
+    const { rabatt, mwst, total } = computeOfferTotals({ subtotal, rabattRate, lieferkosten, mwstRate });
 
     const scheduledSendAt = computeScheduledSendAt();
 
@@ -75,6 +76,8 @@ export const submitOfferRequest = createServerFn({ method: "POST" })
         message: data.message ?? null,
         ref_source: data.ref_source ?? null,
         subtotal,
+        rabatt_rate: rabattRate,
+        rabatt,
         mwst_rate: mwstRate,
         mwst,
         total,

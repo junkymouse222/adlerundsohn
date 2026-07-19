@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { DEFAULT_MWST_RATE, DEFAULT_NEUKUNDEN_RABATT, computeOfferTotals } from "@/lib/offer-totals";
 
 async function assertAdmin(supabase: ReturnType<typeof import("@supabase/supabase-js").createClient>, userId: string) {
   // Cast to any to sidestep generated-types lag on new tables.
@@ -49,6 +50,8 @@ export type OfferDetail = {
     message: string | null;
     ref_source: string | null;
     subtotal: number;
+    rabatt_rate: number;
+    rabatt: number;
     mwst_rate: number;
     mwst: number;
     total: number;
@@ -360,7 +363,16 @@ export const sendInvoiceNow = createServerFn({ method: "POST" })
 
 export const previewOfferPdf = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        rabatt_rate: z.number().min(0).max(100).optional(),
+        mwst_rate: z.number().min(0).max(99).optional(),
+        lieferkosten: z.number().min(0).max(1000000).optional(),
+      })
+      .parse(input),
+  )
   .handler(async ({ context, data }): Promise<{ base64: string; filename: string }> => {
     await assertAdmin(context.supabase as never, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -375,7 +387,21 @@ export const previewOfferPdf = createServerFn({ method: "POST" })
       .eq("request_id", data.id)
       .order("pos", { ascending: true });
     const acceptUrl = offerAcceptUrl(offer.accept_token as string | null);
-    const bytes = await renderOfferPdf(offer as never, (items ?? []) as never, acceptUrl);
+    const subtotal = Number(offer.subtotal);
+    const rabattRate = data.rabatt_rate ?? Number(offer.rabatt_rate ?? DEFAULT_NEUKUNDEN_RABATT);
+    const mwstRate = data.mwst_rate ?? Number(offer.mwst_rate ?? DEFAULT_MWST_RATE);
+    const liefer = data.lieferkosten ?? Number(offer.lieferkosten ?? 0);
+    const totals = computeOfferTotals({ subtotal, rabattRate, lieferkosten: liefer, mwstRate });
+    const offerForRender = {
+      ...offer,
+      rabatt_rate: rabattRate,
+      rabatt: totals.rabatt,
+      mwst_rate: mwstRate,
+      mwst: totals.mwst,
+      lieferkosten: liefer,
+      total: totals.total,
+    };
+    const bytes = await renderOfferPdf(offerForRender as never, (items ?? []) as never, acceptUrl);
     return { base64: toBase64(bytes), filename: `Angebot-${offer.angebot_nr}.pdf` };
   });
 

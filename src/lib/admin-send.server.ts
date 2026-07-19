@@ -3,6 +3,7 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { offerAcceptUrl, renderInvoiceHtml, renderOfferHtml, sendOfferEmail, invoicePayUrl } from "@/lib/offer-email.server";
 import { renderInvoicePdf, renderOfferPdf, toBase64 } from "@/lib/pdf.server";
+import { DEFAULT_MWST_RATE, DEFAULT_NEUKUNDEN_RABATT, computeOfferTotals } from "@/lib/offer-totals";
 
 type AdminSendResult = { ok: true; messageId?: string; rechnung_nr?: string };
 
@@ -17,6 +18,11 @@ export class AdminSendError extends Error {
 }
 
 const IdSchema = z.object({ id: z.string().uuid() });
+const SendOfferSchema = IdSchema.extend({
+  rabatt_rate: z.number().min(0).max(100).optional(),
+  mwst_rate: z.number().min(0).max(99).optional(),
+  lieferkosten: z.number().min(0).max(1000000).optional(),
+});
 const InvoiceSchema = IdSchema.extend({
   faellig_tage: z.number().int().min(1).max(120).optional(),
   bank_inhaber: z.string().trim().min(1).max(200).optional(),
@@ -81,7 +87,7 @@ function errMsg(error: unknown): string {
 
 export async function sendOfferFromAdmin(request: Request, input: unknown): Promise<AdminSendResult> {
   await assertAdminRequest(request);
-  const { id } = IdSchema.parse(input);
+  const { id, rabatt_rate, mwst_rate, lieferkosten } = SendOfferSchema.parse(input);
   const admin = supabaseAdmin as any;
 
   const { data: offer, error: offerErr } = await admin.from("offer_requests").select("*").eq("id", id).maybeSingle();
@@ -95,11 +101,27 @@ export async function sendOfferFromAdmin(request: Request, input: unknown): Prom
     .order("pos", { ascending: true });
   if (itemsErr) throw new AdminSendError(itemsErr.message, 500);
 
+  // Rabatt/MwSt/Lieferkosten optional aus dem Backend übernehmen und Summen neu berechnen.
+  const subtotal = Number(offer.subtotal);
+  const rabattRate = rabatt_rate ?? Number(offer.rabatt_rate ?? DEFAULT_NEUKUNDEN_RABATT);
+  const mwstRate = mwst_rate ?? Number(offer.mwst_rate ?? DEFAULT_MWST_RATE);
+  const liefer = lieferkosten ?? Number(offer.lieferkosten ?? 0);
+  const totals = computeOfferTotals({ subtotal, rabattRate, lieferkosten: liefer, mwstRate });
+  const offerForRender = {
+    ...offer,
+    rabatt_rate: rabattRate,
+    rabatt: totals.rabatt,
+    mwst_rate: mwstRate,
+    mwst: totals.mwst,
+    lieferkosten: liefer,
+    total: totals.total,
+  };
+
   let html = "";
   try {
     const acceptUrl = offerAcceptUrl(offer.accept_token as string | null);
-    html = renderOfferHtml(offer as never, (items ?? []) as never);
-    const pdfBytes = await renderOfferPdf(offer as never, (items ?? []) as never, acceptUrl);
+    html = renderOfferHtml(offerForRender as never, (items ?? []) as never);
+    const pdfBytes = await renderOfferPdf(offerForRender as never, (items ?? []) as never, acceptUrl);
     const send = await sendOfferEmail({
       to: offer.customer_email as string,
       subject: `Ihr Angebot ${offer.angebot_nr as string} — Kanzlei Adler und Sohn`,
@@ -117,6 +139,12 @@ export async function sendOfferFromAdmin(request: Request, input: unknown): Prom
         offer_html: html,
         resend_message_id: send.messageId,
         error_message: null,
+        rabatt_rate: rabattRate,
+        rabatt: totals.rabatt,
+        mwst_rate: mwstRate,
+        mwst: totals.mwst,
+        lieferkosten: liefer,
+        total: totals.total,
       })
       .eq("id", id);
 
