@@ -316,8 +316,13 @@ async function renderBeleg(
   items.sort((a, b) => a.pos - b.pos).forEach((it, idx) => {
     const nameLines = wrap(it.name, bold, 10, nameWidth);
     const beschLines = it.beschreibung ? wrap(it.beschreibung, font, 8.5, nameWidth) : [];
-    const rowHeight = Math.max(18, nameLines.length * 12 + beschLines.length * 11 + 6);
-    ensureSpace(rowHeight);
+    // Inhalt + Abstand unter letzter Baseline + Trennlinie + Luft für Ascender der nächsten Zeile.
+    // (pdf-lib zeichnet an der Baseline; Großbuchstaben ragen ~7–8pt darüber — ohne diesen
+    // Puffer schneidet die Trennlinie der vorherigen Zeile durch den Text der nächsten.)
+    const contentSpan = Math.max(12, nameLines.length * 12 + beschLines.length * 11);
+    const gapBelowContent = 4;
+    const gapAfterLine = 12;
+    ensureSpace(contentSpan + gapBelowContent + gapAfterLine);
 
     const rowTop = y;
     drawText(String(idx + 1), cols.pos + 4, rowTop, { size: 9, color: MUTED });
@@ -340,14 +345,15 @@ async function renderBeleg(
     const ges = fmtEUR(Number(it.position_total));
     drawText(ges, cols.end - bold.widthOfTextAtSize(ges, 9) - 4, rowTop, { font: bold, size: 9 });
 
-    y -= rowHeight;
+    // ny liegt eine Zeilenhöhe unter der letzten Baseline → Trennlinie klar darunter.
+    const lineY = ny - gapBelowContent;
     page.drawLine({
-      start: { x: MARGIN.l, y: y - 2 },
-      end: { x: A4.w - MARGIN.r, y: y - 2 },
+      start: { x: MARGIN.l, y: lineY },
+      end: { x: A4.w - MARGIN.r, y: lineY },
       thickness: 0.5,
       color: LINE,
     });
-    y -= 8;
+    y = lineY - gapAfterLine;
   });
 
   y -= 14;
@@ -357,8 +363,15 @@ async function renderBeleg(
   const sumRight = A4.w - MARGIN.r;
   const drawSum = (label: string, value: string, opts: { bold?: boolean; big?: boolean; line?: boolean } = {}) => {
     if (opts.line) {
-      y -= 8;
-      page.drawLine({ start: { x: sumRight - 200, y: y + 16 }, end: { x: sumRight, y: y + 16 }, thickness: 1, color: NAVY });
+      // Linie klar zwischen vorheriger Summenzeile und dem Gesamtbetrag — nicht in den Text.
+      y -= 6;
+      page.drawLine({
+        start: { x: sumRight - 200, y: y + 10 },
+        end: { x: sumRight, y: y + 10 },
+        thickness: 1.25,
+        color: NAVY,
+      });
+      y -= 4;
     }
     const f = opts.bold ? bold : font;
     const size = opts.big ? 12 : 10;
