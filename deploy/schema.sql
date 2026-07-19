@@ -118,6 +118,8 @@ CREATE TABLE IF NOT EXISTS public.offer_requests (
   bank_bic            text,
 
   subtotal            numeric NOT NULL DEFAULT 0,
+  rabatt_rate         numeric NOT NULL DEFAULT 5,
+  rabatt              numeric NOT NULL DEFAULT 0,
   mwst_rate           numeric NOT NULL DEFAULT 19,
   mwst                numeric NOT NULL DEFAULT 0,
   total               numeric NOT NULL DEFAULT 0,
