@@ -48,6 +48,80 @@ async function loadLogo(): Promise<Uint8Array | null> {
 const fmtEUR = (n: number) =>
   new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(Number(n));
 
+// Die pdf-lib-Standardfonts (Helvetica/Times) können nur WinAnsi (CP1252) kodieren.
+// Kundeneingaben (Name, Firma, Adresse) enthalten aber häufig Zeichen außerhalb dieses
+// Bereichs (Emojis, osteuropäische/kyrillische Buchstaben, Sonderzeichen). Ohne
+// Bereinigung wirft pdf-lib `WinAnsi cannot encode "…"` und der komplette Versand
+// ("Angebot senden"/"Rechnung senden") schlägt fehl. Deshalb wandeln wir jeden Text
+// vor dem Zeichnen/Messen in WinAnsi-sichere Zeichen um.
+const WINANSI_EXTRA = new Set<number>([
+  0x20ac, 0x201a, 0x0192, 0x201e, 0x2026, 0x2020, 0x2021, 0x02c6, 0x2030, 0x0160, 0x2039, 0x0152,
+  0x017d, 0x2018, 0x2019, 0x201c, 0x201d, 0x2022, 0x2013, 0x2014, 0x02dc, 0x2122, 0x0161, 0x203a,
+  0x0153, 0x017e, 0x0178,
+]);
+
+const TRANSLIT: Record<string, string> = {
+  Ł: "L",
+  ł: "l",
+  Đ: "D",
+  đ: "d",
+  Ħ: "H",
+  ħ: "h",
+  Ŀ: "L",
+  ŀ: "l",
+  Ŋ: "N",
+  ŋ: "n",
+  Ŧ: "T",
+  ŧ: "t",
+  ı: "i",
+  ﬀ: "ff",
+  ﬁ: "fi",
+  ﬂ: "fl",
+  ﬃ: "ffi",
+  ﬄ: "ffl",
+  "‑": "-",
+  "‒": "-",
+  "―": "-",
+  "−": "-",
+  "‐": "-",
+  "\u00a0": " ",
+  "\u2009": " ",
+  "\u202f": " ",
+  "\u200b": "",
+};
+
+function canWinAnsi(codePoint: number): boolean {
+  if (codePoint >= 0x20 && codePoint <= 0x7e) return true;
+  if (codePoint >= 0xa0 && codePoint <= 0xff) return true;
+  return WINANSI_EXTRA.has(codePoint);
+}
+
+function sanitizeWinAnsi(input: unknown): string {
+  const text = String(input ?? "");
+  let out = "";
+  for (const ch of text) {
+    const cp = ch.codePointAt(0) ?? 0;
+    if (canWinAnsi(cp)) {
+      out += ch;
+      continue;
+    }
+    if (TRANSLIT[ch] !== undefined) {
+      out += TRANSLIT[ch];
+      continue;
+    }
+    // Diakritika entfernen (z. B. ā→a, ș→s, ő→o) und nur sichere Reste behalten.
+    const decomposed = ch.normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
+    let mapped = "";
+    for (const dch of decomposed) {
+      const dcp = dch.codePointAt(0) ?? 0;
+      if (canWinAnsi(dcp)) mapped += dch;
+      else if (TRANSLIT[dch] !== undefined) mapped += TRANSLIT[dch];
+    }
+    out += mapped; // nicht abbildbare Zeichen (Emoji, Kyrillisch …) werden verworfen
+  }
+  return out;
+}
+
 const NAVY = rgb(0.059, 0.153, 0.251); // #0f2740
 const GOLD = rgb(0.788, 0.647, 0.361); // #c9a55c
 const MUTED = rgb(0.4, 0.4, 0.4);
@@ -99,7 +173,7 @@ const MARGIN = { l: 50, r: 50, t: 50, b: 60 };
 
 function wrap(text: string, font: PDFFont, size: number, maxWidth: number): string[] {
   const out: string[] = [];
-  for (const paragraph of String(text ?? "").split(/\r?\n/)) {
+  for (const paragraph of sanitizeWinAnsi(text).split(/\r?\n/)) {
     const words = paragraph.split(/\s+/);
     let line = "";
     for (const w of words) {
@@ -141,7 +215,7 @@ async function renderBeleg(
     yy: number,
     opts: { font?: PDFFont; size?: number; color?: ReturnType<typeof rgb> } = {},
   ) =>
-    page.drawText(text, {
+    page.drawText(sanitizeWinAnsi(text), {
       x,
       y: yy,
       size: opts.size ?? 10,
@@ -257,7 +331,7 @@ async function renderBeleg(
       ny -= 11;
     }
 
-    const menge = `${it.menge} ${it.einheit}`;
+    const menge = sanitizeWinAnsi(`${it.menge} ${it.einheit}`);
     drawText(menge, cols.ep - font.widthOfTextAtSize(menge, 9) - 4, rowTop, { size: 9 });
     const ep = fmtEUR(Number(it.einzelpreis));
     drawText(ep, cols.ges - font.widthOfTextAtSize(ep, 9) - 4, rowTop, { size: 9 });
