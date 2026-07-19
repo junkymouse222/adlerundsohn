@@ -1,90 +1,98 @@
 #!/usr/bin/env bash
 # =============================================================================
-# Adler und Sohn - Self-Hosting Installer für Ubuntu 22.04 / 24.04
+# Adler und Sohn - Self-Hosted-Supabase + App Installer für Ubuntu 22.04/24.04
 # =============================================================================
-# Was das Script macht:
-#   1. System-Update + Basis-Tools (git, curl, ufw)
-#   2. Node.js 22 LTS via NodeSource
-#   3. Bun (für Installs/Build, gleiche Toolchain wie Lovable)
-#   4. Caddy als Reverse Proxy mit automatischem Let's-Encrypt-SSL
-#   5. App-User `adler`, Repo-Clone nach /opt/adlerundsohn
-#   6. .env-Datei mit deinen Secrets (interaktiv abgefragt)
-#   7. Build als Node-Server (Nitro Preset node-server)
-#   8. systemd-Service, der die App auf Port 3000 startet
-#   9. Caddy-Config für adlerundsohn.com + www
+# Ergebnis nach dem Lauf:
+#   https://adlerundsohn.com          -> die App (systemd-Service, Node)
+#   https://supabase.adlerundsohn.com -> Supabase Studio (Basic-Auth)
+#   Supabase-Stack (Postgres, Auth, PostgREST, Storage, Realtime, Studio) via
+#   Docker Compose unter /opt/supabase
 #
 # Voraussetzungen VOR dem Start:
-#   - DNS: A-Record adlerundsohn.com     -> 45.149.145.6
-#   -      A-Record www.adlerundsohn.com -> 45.149.145.6
-#     (mit `dig +short adlerundsohn.com` prüfen)
-#   - Git-Repo-URL bereit (GitHub, Lovable "Connect to GitHub")
-#   - Supabase URL + Publishable + Service-Role Key + Resend API Key bereit
+#   - DNS A-Records auf 45.149.145.6:
+#       adlerundsohn.com
+#       www.adlerundsohn.com
+#       supabase.adlerundsohn.com
+#     (prüfen: dig +short adlerundsohn.com)
+#   - App-Repo-URL bereit (GitHub)
+#   - RESEND_API_KEY bereit
 #
 # Ausführen als root:
 #   bash install-ubuntu.sh
+#
+# WICHTIG: Ändere sofort dein Root-Passwort mit `passwd` und richte SSH-Keys ein.
 # =============================================================================
 
 set -euo pipefail
 
 DOMAIN="adlerundsohn.com"
+STUDIO_DOMAIN="supabase.adlerundsohn.com"
 APP_USER="adler"
 APP_DIR="/opt/adlerundsohn"
 APP_PORT="3000"
+SUPA_DIR="/opt/supabase"
+SUPA_KONG_HTTP_PORT="8000"   # Kong (API-Gateway) - für App-Backend
+SUPA_STUDIO_PORT="3001"      # Studio-UI
 
 log()  { echo -e "\033[1;34m[$(date +%H:%M:%S)]\033[0m $*"; }
 warn() { echo -e "\033[1;33m[WARN]\033[0m $*"; }
 fail() { echo -e "\033[1;31m[FAIL]\033[0m $*"; exit 1; }
 
-[[ $EUID -eq 0 ]] || fail "Bitte als root ausführen (sudo -i)."
+[[ $EUID -eq 0 ]] || fail "Bitte als root ausführen."
 
-# --- Eingaben ----------------------------------------------------------------
-read -rp "Git-Repo-URL (z.B. https://github.com/user/repo.git): " REPO_URL
+# ---------- Eingaben --------------------------------------------------------
+read -rp "App-Git-Repo-URL (https://github.com/user/repo.git): " REPO_URL
 [[ -n "$REPO_URL" ]] || fail "Repo-URL erforderlich."
 read -rp "Git-Branch [main]: " REPO_BRANCH
 REPO_BRANCH="${REPO_BRANCH:-main}"
-
-echo
-log "Supabase / Resend Secrets eingeben (werden in $APP_DIR/.env geschrieben):"
-read -rp "SUPABASE_URL (https://xxx.supabase.co): " SUPA_URL
-read -rp "SUPABASE_PUBLISHABLE_KEY (sb_publishable_...): " SUPA_PUB
-read -rsp "SUPABASE_SERVICE_ROLE_KEY (sb_secret_...): " SUPA_SVC; echo
 read -rsp "RESEND_API_KEY (re_...): " RESEND_KEY; echo
-read -rp "LOVABLE_API_KEY (optional, sonst leer): " LOVABLE_KEY
+read -rp "Studio Basic-Auth User [admin]: " STUDIO_USER
+STUDIO_USER="${STUDIO_USER:-admin}"
+read -rsp "Studio Basic-Auth Passwort: " STUDIO_PASS; echo
+read -rp "Deine E-Mail für Let's-Encrypt / erster Admin-Login: " ADMIN_EMAIL
+[[ -n "$ADMIN_EMAIL" ]] || fail "Admin-Mail nötig."
 
-# --- System ------------------------------------------------------------------
-log "System aktualisieren…"
+# ---------- System ----------------------------------------------------------
 export DEBIAN_FRONTEND=noninteractive
+log "System aktualisieren…"
 apt-get update -y
-apt-get upgrade -y
-apt-get install -y curl git ca-certificates gnupg ufw debian-keyring debian-archive-keyring apt-transport-https unzip build-essential
+apt-get install -y curl git ca-certificates gnupg ufw debian-keyring debian-archive-keyring \
+                   apt-transport-https unzip build-essential jq openssl dnsutils apache2-utils
 
-# --- Firewall ----------------------------------------------------------------
-log "UFW-Firewall (SSH, HTTP, HTTPS)…"
+# ---------- Firewall --------------------------------------------------------
+log "Firewall…"
 ufw --force reset >/dev/null
-ufw default deny incoming
-ufw default allow outgoing
-ufw allow OpenSSH
-ufw allow 80/tcp
-ufw allow 443/tcp
+ufw default deny incoming; ufw default allow outgoing
+ufw allow OpenSSH; ufw allow 80/tcp; ufw allow 443/tcp
 ufw --force enable
 
-# --- Node 22 -----------------------------------------------------------------
+# ---------- Docker ----------------------------------------------------------
+if ! command -v docker >/dev/null; then
+  log "Docker installieren…"
+  install -m 0755 -d /etc/apt/keyrings
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+  chmod a+r /etc/apt/keyrings/docker.gpg
+  echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+    https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) stable" \
+    > /etc/apt/sources.list.d/docker.list
+  apt-get update -y
+  apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+fi
+systemctl enable --now docker
+
+# ---------- Node 22 + Bun ---------------------------------------------------
 if ! command -v node >/dev/null || [[ "$(node -v)" != v22.* ]]; then
-  log "Node.js 22 LTS installieren…"
+  log "Node 22 installieren…"
   curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
   apt-get install -y nodejs
 fi
-log "Node: $(node -v), npm: $(npm -v)"
-
-# --- Bun ---------------------------------------------------------------------
 if ! command -v bun >/dev/null; then
   log "Bun installieren…"
   curl -fsSL https://bun.sh/install | bash
   ln -sf /root/.bun/bin/bun /usr/local/bin/bun
 fi
-log "Bun: $(bun -v)"
 
-# --- Caddy -------------------------------------------------------------------
+# ---------- Caddy -----------------------------------------------------------
 if ! command -v caddy >/dev/null; then
   log "Caddy installieren…"
   curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' \
@@ -95,73 +103,179 @@ if ! command -v caddy >/dev/null; then
   apt-get install -y caddy
 fi
 
-# --- App-User + Verzeichnis --------------------------------------------------
-if ! id "$APP_USER" &>/dev/null; then
-  log "User $APP_USER anlegen…"
-  useradd -m -s /bin/bash "$APP_USER"
+# ---------- Supabase Self-Hosted (Docker Compose) --------------------------
+if [[ ! -d "$SUPA_DIR/docker" ]]; then
+  log "Supabase-Repo klonen…"
+  git clone --depth 1 https://github.com/supabase/supabase "$SUPA_DIR-src"
+  mkdir -p "$SUPA_DIR"
+  cp -r "$SUPA_DIR-src/docker/." "$SUPA_DIR/"
+  rm -rf "$SUPA_DIR-src"
 fi
-mkdir -p "$APP_DIR"
-chown -R "$APP_USER:$APP_USER" "$APP_DIR"
 
-# --- Repo klonen / updaten ---------------------------------------------------
+cd "$SUPA_DIR"
+
+# Secrets generieren, wenn .env fehlt
+if [[ ! -f .env ]]; then
+  log "Supabase-Secrets erzeugen…"
+  POSTGRES_PASSWORD="$(openssl rand -hex 24)"
+  JWT_SECRET="$(openssl rand -hex 32)"
+  DASHBOARD_PASSWORD="$(openssl rand -hex 16)"
+  SECRET_KEY_BASE="$(openssl rand -hex 32)"
+  VAULT_ENC_KEY="$(openssl rand -hex 16)"
+  LOGFLARE_API_KEY="$(openssl rand -hex 16)"
+  LOGFLARE_PUBLIC_ACCESS_TOKEN="$(openssl rand -hex 16)"
+  POOLER_TENANT_ID="1000"
+
+  # ANON- und SERVICE-JWT signieren (HS256, langlebig)
+  ANON_KEY="$(node -e "
+    const c=require('crypto');
+    const enc=b=>Buffer.from(b).toString('base64url');
+    const h=enc(JSON.stringify({alg:'HS256',typ:'JWT'}));
+    const iat=Math.floor(Date.now()/1000);
+    const p=enc(JSON.stringify({role:'anon',iss:'supabase',iat,exp:iat+60*60*24*365*10}));
+    const s=c.createHmac('sha256','$JWT_SECRET').update(h+'.'+p).digest('base64url');
+    process.stdout.write(h+'.'+p+'.'+s);
+  ")"
+  SERVICE_ROLE_KEY="$(node -e "
+    const c=require('crypto');
+    const enc=b=>Buffer.from(b).toString('base64url');
+    const h=enc(JSON.stringify({alg:'HS256',typ:'JWT'}));
+    const iat=Math.floor(Date.now()/1000);
+    const p=enc(JSON.stringify({role:'service_role',iss:'supabase',iat,exp:iat+60*60*24*365*10}));
+    const s=c.createHmac('sha256','$JWT_SECRET').update(h+'.'+p).digest('base64url');
+    process.stdout.write(h+'.'+p+'.'+s);
+  ")"
+
+  cp .env.example .env
+  # Werte in .env setzen
+  sed -i "s|^POSTGRES_PASSWORD=.*|POSTGRES_PASSWORD=$POSTGRES_PASSWORD|"                 .env
+  sed -i "s|^JWT_SECRET=.*|JWT_SECRET=$JWT_SECRET|"                                       .env
+  sed -i "s|^ANON_KEY=.*|ANON_KEY=$ANON_KEY|"                                             .env
+  sed -i "s|^SERVICE_ROLE_KEY=.*|SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY|"                     .env
+  sed -i "s|^DASHBOARD_USERNAME=.*|DASHBOARD_USERNAME=$STUDIO_USER|"                      .env
+  sed -i "s|^DASHBOARD_PASSWORD=.*|DASHBOARD_PASSWORD=$STUDIO_PASS|"                      .env
+  sed -i "s|^SECRET_KEY_BASE=.*|SECRET_KEY_BASE=$SECRET_KEY_BASE|"                        .env
+  sed -i "s|^VAULT_ENC_KEY=.*|VAULT_ENC_KEY=$VAULT_ENC_KEY|"                              .env
+  sed -i "s|^LOGFLARE_API_KEY=.*|LOGFLARE_API_KEY=$LOGFLARE_API_KEY|"                     .env
+  sed -i "s|^LOGFLARE_PUBLIC_ACCESS_TOKEN=.*|LOGFLARE_PUBLIC_ACCESS_TOKEN=$LOGFLARE_PUBLIC_ACCESS_TOKEN|" .env
+  sed -i "s|^POOLER_TENANT_ID=.*|POOLER_TENANT_ID=$POOLER_TENANT_ID|"                     .env
+  sed -i "s|^SITE_URL=.*|SITE_URL=https://$DOMAIN|"                                       .env
+  sed -i "s|^API_EXTERNAL_URL=.*|API_EXTERNAL_URL=https://$STUDIO_DOMAIN|"                .env
+  sed -i "s|^SUPABASE_PUBLIC_URL=.*|SUPABASE_PUBLIC_URL=https://$STUDIO_DOMAIN|"          .env
+  sed -i "s|^KONG_HTTP_PORT=.*|KONG_HTTP_PORT=$SUPA_KONG_HTTP_PORT|"                      .env
+  sed -i "s|^STUDIO_PORT=.*|STUDIO_PORT=$SUPA_STUDIO_PORT|"                               .env
+  # Nur lokal binden - Zugriff läuft ausschließlich über Caddy
+  sed -i "s|^# *KONG_HTTP_HOST=.*|KONG_HTTP_HOST=127.0.0.1|"                              .env || true
+  sed -i "s|^# *STUDIO_HOST=.*|STUDIO_HOST=127.0.0.1|"                                    .env || true
+
+  # SMTP für Auth-Mails via Resend (Port 587)
+  sed -i "s|^SMTP_ADMIN_EMAIL=.*|SMTP_ADMIN_EMAIL=info@adlerundsohn-mail.de|"             .env
+  sed -i "s|^SMTP_HOST=.*|SMTP_HOST=smtp.resend.com|"                                     .env
+  sed -i "s|^SMTP_PORT=.*|SMTP_PORT=587|"                                                 .env
+  sed -i "s|^SMTP_USER=.*|SMTP_USER=resend|"                                              .env
+  sed -i "s|^SMTP_PASS=.*|SMTP_PASS=$RESEND_KEY|"                                         .env
+  sed -i "s|^SMTP_SENDER_NAME=.*|SMTP_SENDER_NAME=Kanzlei Adler und Sohn|"                .env
+
+  chmod 600 .env
+
+  # Sicherheits-Kopie mit Klartext-Keys für dich (root only)
+  {
+    echo "=== Supabase Self-Hosted - erzeugte Werte ==="
+    echo "POSTGRES_PASSWORD=$POSTGRES_PASSWORD"
+    echo "JWT_SECRET=$JWT_SECRET"
+    echo "ANON_KEY=$ANON_KEY"
+    echo "SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY"
+    echo "DASHBOARD_USER=$STUDIO_USER"
+    echo "DASHBOARD_PASSWORD=$STUDIO_PASS"
+  } > /root/supabase-credentials.txt
+  chmod 600 /root/supabase-credentials.txt
+  log "Credentials in /root/supabase-credentials.txt gesichert."
+fi
+
+# Kong/Studio nur lokal binden (falls Compose ports hart gesetzt hat)
+if [[ -f "$SUPA_DIR/docker-compose.yml" ]]; then
+  # Ersetzt "8000:8000" -> "127.0.0.1:8000:8000" und Studio-Port entsprechend
+  sed -i "s|- \"\${KONG_HTTP_PORT}:8000/tcp\"|- \"127.0.0.1:\${KONG_HTTP_PORT}:8000/tcp\"|g" "$SUPA_DIR/docker-compose.yml" || true
+  sed -i "s|- \${STUDIO_PORT}:3000/tcp|- 127.0.0.1:\${STUDIO_PORT}:3000/tcp|g"             "$SUPA_DIR/docker-compose.yml" || true
+fi
+
+log "Supabase-Stack starten…"
+docker compose -f "$SUPA_DIR/docker-compose.yml" pull
+docker compose -f "$SUPA_DIR/docker-compose.yml" up -d
+
+# ---------- Schema einspielen ----------------------------------------------
+log "Warte auf Postgres…"
+for i in {1..60}; do
+  if docker exec supabase-db pg_isready -U postgres >/dev/null 2>&1; then break; fi
+  sleep 2
+done
+
+if [[ -f "$APP_DIR/deploy/schema.sql" ]]; then
+  SCHEMA_FILE="$APP_DIR/deploy/schema.sql"
+elif [[ -f "$(dirname "$0")/schema.sql" ]]; then
+  SCHEMA_FILE="$(dirname "$0")/schema.sql"
+else
+  SCHEMA_FILE=""
+fi
+
+# ---------- App-User + Repo -------------------------------------------------
+id "$APP_USER" &>/dev/null || useradd -m -s /bin/bash "$APP_USER"
+mkdir -p "$APP_DIR"; chown -R "$APP_USER:$APP_USER" "$APP_DIR"
+
 if [[ -d "$APP_DIR/.git" ]]; then
-  log "Repo existiert - pull…"
   sudo -u "$APP_USER" git -C "$APP_DIR" fetch --all
   sudo -u "$APP_USER" git -C "$APP_DIR" checkout "$REPO_BRANCH"
   sudo -u "$APP_USER" git -C "$APP_DIR" reset --hard "origin/$REPO_BRANCH"
 else
-  log "Repo klonen…"
   sudo -u "$APP_USER" git clone -b "$REPO_BRANCH" "$REPO_URL" "$APP_DIR"
 fi
 
-# --- .env schreiben ----------------------------------------------------------
-log ".env schreiben…"
+# Jetzt Schema anwenden (nach Repo-Clone)
+if [[ -z "$SCHEMA_FILE" && -f "$APP_DIR/deploy/schema.sql" ]]; then
+  SCHEMA_FILE="$APP_DIR/deploy/schema.sql"
+fi
+if [[ -n "$SCHEMA_FILE" ]]; then
+  log "Schema einspielen: $SCHEMA_FILE"
+  docker exec -i supabase-db psql -U postgres -d postgres < "$SCHEMA_FILE" || warn "Schema hat Fehler geworfen - prüfen!"
+else
+  warn "Keine schema.sql gefunden - überspringe Schema-Import."
+fi
+
+# ---------- .env für die App ------------------------------------------------
+ANON_KEY_VAL="$(grep -E '^ANON_KEY=' "$SUPA_DIR/.env" | cut -d= -f2-)"
+SERVICE_KEY_VAL="$(grep -E '^SERVICE_ROLE_KEY=' "$SUPA_DIR/.env" | cut -d= -f2-)"
+
 cat > "$APP_DIR/.env" <<EOF
-# Runtime env für den Node-Server
 NODE_ENV=production
 PORT=$APP_PORT
 HOST=127.0.0.1
 
-# Supabase (server)
-SUPABASE_URL=$SUPA_URL
-SUPABASE_PUBLISHABLE_KEY=$SUPA_PUB
-SUPABASE_SERVICE_ROLE_KEY=$SUPA_SVC
+SUPABASE_URL=https://$STUDIO_DOMAIN
+SUPABASE_PUBLISHABLE_KEY=$ANON_KEY_VAL
+SUPABASE_SERVICE_ROLE_KEY=$SERVICE_KEY_VAL
 
-# Supabase (client / Vite - werden beim Build eingebacken)
-VITE_SUPABASE_URL=$SUPA_URL
-VITE_SUPABASE_PUBLISHABLE_KEY=$SUPA_PUB
+VITE_SUPABASE_URL=https://$STUDIO_DOMAIN
+VITE_SUPABASE_PUBLISHABLE_KEY=$ANON_KEY_VAL
 
-# Mail
 RESEND_API_KEY=$RESEND_KEY
-
-# Öffentliche Site-URL (für PDF-Links, Accept/Pay URLs)
 PUBLIC_SITE_URL=https://$DOMAIN
 SITE_URL=https://$DOMAIN
-
-# Optional
-LOVABLE_API_KEY=$LOVABLE_KEY
 EOF
 chown "$APP_USER:$APP_USER" "$APP_DIR/.env"
 chmod 600 "$APP_DIR/.env"
 
-# --- Install + Build ---------------------------------------------------------
-log "Dependencies installieren (bun install)…"
+# ---------- App bauen -------------------------------------------------------
+log "Dependencies + Build (Nitro node-server)…"
 sudo -u "$APP_USER" bash -c "cd $APP_DIR && bun install"
-
-log "Build (Nitro Preset node-server)…"
 sudo -u "$APP_USER" bash -c "cd $APP_DIR && NITRO_PRESET=node-server bun run build"
+[[ -f "$APP_DIR/.output/server/index.mjs" ]] || fail "Build-Output fehlt."
 
-# Nitro node-server Output liegt in .output/server/index.mjs
-if [[ ! -f "$APP_DIR/.output/server/index.mjs" ]]; then
-  fail "Build-Output nicht gefunden ($APP_DIR/.output/server/index.mjs). Log oben prüfen."
-fi
-
-# --- systemd-Service ---------------------------------------------------------
-log "systemd-Service anlegen…"
+# ---------- systemd ---------------------------------------------------------
 cat > /etc/systemd/system/adlerundsohn.service <<EOF
 [Unit]
-Description=Adler und Sohn (TanStack Start / Nitro node-server)
-After=network.target
+Description=Adler und Sohn App (TanStack Start / Nitro)
+After=network.target docker.service
+Requires=docker.service
 
 [Service]
 Type=simple
@@ -171,42 +285,59 @@ EnvironmentFile=$APP_DIR/.env
 ExecStart=/usr/bin/node $APP_DIR/.output/server/index.mjs
 Restart=always
 RestartSec=5
-StandardOutput=journal
-StandardError=journal
 
 [Install]
 WantedBy=multi-user.target
 EOF
-
 systemctl daemon-reload
-systemctl enable adlerundsohn
-systemctl restart adlerundsohn
-sleep 3
-systemctl --no-pager status adlerundsohn | head -20 || true
+systemctl enable --now adlerundsohn
 
-# --- Caddy-Config ------------------------------------------------------------
-log "Caddy-Config schreiben…"
+# ---------- Caddy -----------------------------------------------------------
+log "Caddy konfigurieren…"
+# Basic-Auth-Hash fürs Studio
+STUDIO_HASH="$(caddy hash-password --plaintext "$STUDIO_PASS" 2>/dev/null)"
+
 cat > /etc/caddy/Caddyfile <<EOF
 {
-  email admin@$DOMAIN
+  email $ADMIN_EMAIL
 }
 
+# --- App ---------------------------------------------------------------
 $DOMAIN, www.$DOMAIN {
   encode zstd gzip
   reverse_proxy 127.0.0.1:$APP_PORT
 }
+
+# --- Supabase Studio (Kong routet Studio + REST/Auth/Storage) ----------
+$STUDIO_DOMAIN {
+  encode zstd gzip
+  # Studio-UI schützen; API-Pfade (auth/rest/storage/realtime) offen lassen
+  @studio {
+    not path /auth/* /rest/* /storage/* /realtime/* /functions/* /pg/*
+  }
+  basic_auth @studio {
+    $STUDIO_USER $STUDIO_HASH
+  }
+  reverse_proxy 127.0.0.1:$SUPA_KONG_HTTP_PORT
+}
 EOF
 
-systemctl enable caddy
+systemctl enable --now caddy
 systemctl restart caddy
 
-log "Fertig!"
+# ---------- Fertig ----------------------------------------------------------
+log "FERTIG."
 echo
-echo "  App:     https://$DOMAIN  (SSL wird automatisch von Caddy geholt, 30-90 sek)"
+echo "  App:              https://$DOMAIN"
+echo "  Supabase Studio:  https://$STUDIO_DOMAIN   (Login: $STUDIO_USER / dein Passwort)"
+echo "  Supabase Keys:    /root/supabase-credentials.txt   (600, chmod strict)"
+echo
+echo "  Ersten Admin anlegen: über die App-Signup-Seite mit E-Mail"
+echo "  '$ADMIN_EMAIL' registrieren, oder Rolle direkt setzen:"
+echo "    docker exec -it supabase-db psql -U postgres -d postgres \\"
+echo "      -c \"INSERT INTO public.user_roles(user_id,role) SELECT id,'admin' FROM auth.users WHERE email='$ADMIN_EMAIL';\""
+echo
 echo "  Logs:    journalctl -u adlerundsohn -f"
-echo "  Caddy:   journalctl -u caddy -f"
-echo "  Update:  cd $APP_DIR && sudo -u $APP_USER git pull && sudo -u $APP_USER bun install \\"
-echo "           && sudo -u $APP_USER NITRO_PRESET=node-server bun run build \\"
-echo "           && systemctl restart adlerundsohn"
+echo "  Supa:    docker compose -f $SUPA_DIR/docker-compose.yml logs -f"
 echo
-warn "Ändere jetzt dein Root-Passwort mit 'passwd' und richte SSH-Keys ein!"
+warn "Jetzt: 'passwd' für Root-Passwort ändern + SSH-Key-Login aktivieren!"
