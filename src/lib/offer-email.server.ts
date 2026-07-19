@@ -276,6 +276,23 @@ export type EmailAttachment = { filename: string; content: string /* base64 */ }
 
 type ResendPostResult = { status: number; body: string };
 
+type ResendHttpClient = "auto" | "https" | "fetch" | "curl";
+
+function preferredResendHttpClient(): ResendHttpClient {
+  const configured = process.env.RESEND_HTTP_CLIENT;
+  if (configured === "https" || configured === "fetch" || configured === "curl" || configured === "auto") {
+    return configured;
+  }
+
+  // Auf dem selbst gehosteten Node-Server ist curl oft stabiler als undici/node:https
+  // für Resend-Uploads. In Lovable bleibt der normale HTTPS-Pfad aktiv.
+  if (!process.env.LOVABLE_API_KEY && typeof process !== "undefined" && !!process.versions?.node) {
+    return "curl";
+  }
+
+  return "auto";
+}
+
 async function postResendWithHttps(payload: string, apiKey: string, timeoutMs: number): Promise<ResendPostResult> {
   const https = await import("node:https");
   const payloadBytes = Buffer.byteLength(payload);
@@ -331,6 +348,79 @@ async function postResendWithFetch(payload: string, apiKey: string, timeoutMs: n
   }
 }
 
+async function postResendWithCurl(payload: string, apiKey: string, timeoutMs: number): Promise<ResendPostResult> {
+  const [{ spawn }, fs, os, path] = await Promise.all([
+    import("node:child_process"),
+    import("node:fs/promises"),
+    import("node:os"),
+    import("node:path"),
+  ]);
+
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "resend-"));
+  const payloadPath = path.join(tempDir, "payload.json");
+
+  try {
+    await fs.writeFile(payloadPath, payload, { mode: 0o600 });
+
+    const configLines = [
+      "silent",
+      "show-error",
+      "request = POST",
+      'url = "https://api.resend.com/emails"',
+      `max-time = ${Math.ceil(timeoutMs / 1000)}`,
+      "connect-timeout = 15",
+      'header = "Content-Type: application/json"',
+      `header = "Authorization: Bearer ${apiKey.replace(/"/g, '\\"')}"`,
+      `data-binary = "@${payloadPath.replace(/"/g, '\\"')}"`,
+    ];
+
+    const ipFamily = String(process.env.RESEND_IP_FAMILY || "4");
+    if (ipFamily === "4") configLines.push("ipv4");
+    if (ipFamily === "6") configLines.push("ipv6");
+
+    return await new Promise<ResendPostResult>((resolve, reject) => {
+      const child = spawn("curl", ["--config", "-", "--write-out", "\n__RESEND_HTTP_STATUS__:%{http_code}"], {
+        stdio: ["pipe", "pipe", "pipe"],
+      });
+
+      const stdoutChunks: Buffer[] = [];
+      const stderrChunks: Buffer[] = [];
+      const killer = setTimeout(() => child.kill("SIGKILL"), timeoutMs + 5000);
+
+      child.stdout.on("data", (chunk) => stdoutChunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)));
+      child.stderr.on("data", (chunk) => stderrChunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)));
+      child.on("error", (error) => {
+        clearTimeout(killer);
+        reject(error);
+      });
+      child.on("close", (code) => {
+        clearTimeout(killer);
+        const stdout = Buffer.concat(stdoutChunks).toString("utf8");
+        const stderr = Buffer.concat(stderrChunks).toString("utf8").trim();
+        const marker = "\n__RESEND_HTTP_STATUS__:";
+        const markerIndex = stdout.lastIndexOf(marker);
+
+        if (markerIndex === -1) {
+          reject(new Error(`curl lieferte keinen HTTP-Status${stderr ? `: ${stderr}` : ""}`));
+          return;
+        }
+
+        const status = Number(stdout.slice(markerIndex + marker.length).trim());
+        const body = stdout.slice(0, markerIndex);
+        if (code !== 0 && status === 0) {
+          reject(new Error(stderr || `curl beendet mit Code ${code}`));
+          return;
+        }
+        resolve({ status, body });
+      });
+
+      child.stdin.end(`${configLines.join("\n")}\n`);
+    });
+  } finally {
+    await fs.rm(tempDir, { recursive: true, force: true }).catch(() => undefined);
+  }
+}
+
 export async function sendOfferEmail(params: {
   to: string;
   subject: string;
@@ -377,14 +467,29 @@ export async function sendOfferEmail(params: {
     console.info(
       `[resend] sending email to ${params.to} with ${params.attachments?.length ?? 0} attachment(s), attachment=${(attachmentBytes / 1024 / 1024).toFixed(2)}MB, payload=${(payloadBytes / 1024 / 1024).toFixed(2)}MB, timeout=${Math.round(timeoutMs / 1000)}s`,
     );
-    try {
-      res = await postResendWithHttps(payload, RESEND_API_KEY, timeoutMs);
-    } catch (httpsError) {
-      if (process.env.RESEND_HTTP_CLIENT === "https") throw httpsError;
-      console.warn(
-        `[resend] node:https failed, falling back to fetch: ${httpsError instanceof Error ? httpsError.message : String(httpsError)}`,
-      );
+    const client = preferredResendHttpClient();
+
+    if (client === "curl") {
+      res = await postResendWithCurl(payload, RESEND_API_KEY, timeoutMs);
+    } else if (client === "fetch") {
       res = await postResendWithFetch(payload, RESEND_API_KEY, timeoutMs);
+    } else {
+      try {
+        res = await postResendWithHttps(payload, RESEND_API_KEY, timeoutMs);
+      } catch (httpsError) {
+        if (client === "https") throw httpsError;
+        console.warn(
+          `[resend] node:https failed, trying curl: ${httpsError instanceof Error ? httpsError.message : String(httpsError)}`,
+        );
+        try {
+          res = await postResendWithCurl(payload, RESEND_API_KEY, timeoutMs);
+        } catch (curlError) {
+          console.warn(
+            `[resend] curl failed, falling back to fetch: ${curlError instanceof Error ? curlError.message : String(curlError)}`,
+          );
+          res = await postResendWithFetch(payload, RESEND_API_KEY, timeoutMs);
+        }
+      }
     }
   } catch (error) {
     const isTimeout = error instanceof Error && error.name === "AbortError";
