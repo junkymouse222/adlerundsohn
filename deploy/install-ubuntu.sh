@@ -335,10 +335,10 @@ STUDIO_HASH="$(caddy hash-password --plaintext "$STUDIO_PASS" 2>/dev/null)"
 cat > /etc/caddy/Caddyfile <<EOF
 {
   email $ADMIN_EMAIL
-  # HTTP/3 (QUIC/UDP:443) aus: Host-Firewall blockiert oft UDP/443,
-  # Browser mit Alt-Svc hängen dann auf manchen Netzen/RDP-Clients.
+  # Nur HTTP/1.1: HTTP/3 (QUIC/UDP:443) oft geblockt; HTTP/2 hängt auf
+  # manchen Provider-Pfaden/RDP-Clients mit ERR_CONNECTION_RESET / Stalls.
   servers {
-    protocols h1 h2
+    protocols h1
   }
 }
 
