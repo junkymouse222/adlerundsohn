@@ -380,8 +380,6 @@ async function postResendWithCurl(payload: string, apiKey: string, timeoutMs: nu
 
     const maxTime = Math.ceil(timeoutMs / 1000);
     const args: string[] = [
-      "--silent",
-      "--show-error",
       "--verbose",
       "--http1.1",
       "--no-buffer",
@@ -397,6 +395,7 @@ async function postResendWithCurl(payload: string, apiKey: string, timeoutMs: nu
       "--data-binary", `@${payloadPath}`,
       "--write-out", "\n__RESEND_HTTP_STATUS__:%{http_code}",
     ];
+
 
     const ipFamily = String(process.env.RESEND_IP_FAMILY || "4");
     if (ipFamily === "4") args.unshift("--ipv4");
