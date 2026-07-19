@@ -365,11 +365,15 @@ async function postResendWithCurl(payload: string, apiKey: string, timeoutMs: nu
     const configLines = [
       "silent",
       "show-error",
+      "http1.1",
       "request = POST",
       'url = "https://api.resend.com/emails"',
       `max-time = ${Math.ceil(timeoutMs / 1000)}`,
       "connect-timeout = 15",
       'header = "Content-Type: application/json"',
+      'header = "Accept: application/json"',
+      'header = "Expect:"',
+      'header = "Connection: close"',
       `header = "Authorization: Bearer ${apiKey.replace(/"/g, '\\"')}"`,
       `data-binary = "@${payloadPath.replace(/"/g, '\\"')}"`,
     ];
