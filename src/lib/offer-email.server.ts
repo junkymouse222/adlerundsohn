@@ -478,6 +478,13 @@ export async function sendOfferEmail(params: {
         res = await postResendWithHttps(payload, RESEND_API_KEY, timeoutMs);
       } catch (httpsError) {
         if (client === "https") throw httpsError;
+        if (process.env.LOVABLE_API_KEY) {
+          console.warn(
+            `[resend] node:https failed, falling back to fetch: ${httpsError instanceof Error ? httpsError.message : String(httpsError)}`,
+          );
+          res = await postResendWithFetch(payload, RESEND_API_KEY, timeoutMs);
+          return;
+        }
         console.warn(
           `[resend] node:https failed, trying curl: ${httpsError instanceof Error ? httpsError.message : String(httpsError)}`,
         );
