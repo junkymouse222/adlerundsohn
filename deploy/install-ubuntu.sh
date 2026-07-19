@@ -344,9 +344,20 @@ cat > /etc/caddy/Caddyfile <<EOF
 
 # --- App ---------------------------------------------------------------
 $DOMAIN, www.$DOMAIN {
-  encode zstd gzip
+  # Nur gzip (kein zstd): weniger Edge-Fälle; Statik direkt von Disk.
+  encode gzip
   header Alt-Svc "clear"
-  reverse_proxy 127.0.0.1:$APP_PORT
+
+  @static path /assets/* /kanzlei-logo.png /favicon.ico /robots.txt
+  handle @static {
+    root * $APP_DIR/.output/public
+    header Cache-Control "public, max-age=31536000, immutable"
+    file_server
+  }
+
+  handle {
+    reverse_proxy 127.0.0.1:$APP_PORT
+  }
 }
 
 # --- Supabase Studio (Kong routet Studio + REST/Auth/Storage) ----------
