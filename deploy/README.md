@@ -57,6 +57,19 @@ sudo -u adler NITRO_PRESET=node-server bun run build
 systemctl restart adlerundsohn
 ```
 
+## Mailversand testen
+Wenn „Angebot senden" oder „Rechnung senden" hängt, zuerst Logs öffnen:
+```bash
+journalctl -u adlerundsohn -f
+```
+
+Danach isoliert prüfen, ob der Server Resend erreicht:
+```bash
+cd /opt/adlerundsohn
+bash deploy/test-resend.sh deine@email.de
+```
+Erwartet ist `HTTP 200` und eine Resend-ID. Bei `Timeout` oder Verbindungsfehler blockiert DNS/Firewall/Outbound-HTTPS auf dem Server; bei `401/403` ist der API-Key oder die Absender-Domain falsch.
+
 ## Rollback / Deinstall
 ```bash
 systemctl disable --now adlerundsohn
