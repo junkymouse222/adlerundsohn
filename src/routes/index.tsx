@@ -43,8 +43,9 @@ function Index() {
             src={heroImg}
             alt="Empfangshalle der Rechtsanwaltskanzlei Adler und Sohn"
             className="h-full w-full object-cover"
-            width={1920}
-            height={1280}
+            width={1280}
+            height={858}
+            decoding="async"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/70 to-primary/30" />
         </div>
