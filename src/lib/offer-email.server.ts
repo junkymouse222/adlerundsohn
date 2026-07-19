@@ -365,11 +365,15 @@ async function postResendWithCurl(payload: string, apiKey: string, timeoutMs: nu
     const configLines = [
       "silent",
       "show-error",
+      "http1.1",
       "request = POST",
       'url = "https://api.resend.com/emails"',
       `max-time = ${Math.ceil(timeoutMs / 1000)}`,
       "connect-timeout = 15",
       'header = "Content-Type: application/json"',
+      'header = "Accept: application/json"',
+      'header = "Expect:"',
+      'header = "Connection: close"',
       `header = "Authorization: Bearer ${apiKey.replace(/"/g, '\\"')}"`,
       `data-binary = "@${payloadPath.replace(/"/g, '\\"')}"`,
     ];
@@ -430,7 +434,7 @@ export async function sendOfferEmail(params: {
   const RESEND_API_KEY = process.env.RESEND_API_KEY;
   const FROM = process.env.OFFER_FROM_EMAIL || "Kanzlei Adler und Sohn <info@adlerundsohn-mail.de>";
   const configuredTimeoutMs = Number(process.env.RESEND_TIMEOUT_MS || 0);
-  const timeoutMs = Math.max(Number.isFinite(configuredTimeoutMs) ? configuredTimeoutMs : 0, 120000);
+  const timeoutMs = Number.isFinite(configuredTimeoutMs) && configuredTimeoutMs > 0 ? configuredTimeoutMs : 120000;
 
   if (!RESEND_API_KEY) {
     return { ok: false, error: "RESEND_API_KEY fehlt" };
