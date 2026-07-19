@@ -46,6 +46,8 @@ read -rp "App-Git-Repo-URL (https://github.com/user/repo.git): " REPO_URL
 read -rp "Git-Branch [main]: " REPO_BRANCH
 REPO_BRANCH="${REPO_BRANCH:-main}"
 read -rsp "RESEND_API_KEY (re_...): " RESEND_KEY; echo
+[[ -n "$RESEND_KEY" ]] || fail "RESEND_API_KEY erforderlich."
+[[ "$RESEND_KEY" != @secret:* ]] || fail "Bitte hier den echten Resend API-Key eintragen, nicht @secret:RESEND_API_KEY."
 read -rp "Studio Basic-Auth User [admin]: " STUDIO_USER
 STUDIO_USER="${STUDIO_USER:-admin}"
 read -rsp "Studio Basic-Auth Passwort: " STUDIO_PASS; echo
