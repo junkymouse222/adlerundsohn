@@ -371,37 +371,42 @@ async function postResendWithCurl(payload: string, apiKey: string, timeoutMs: nu
 
   const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "resend-"));
   const payloadPath = path.join(tempDir, "payload.json");
+  const headerPath = path.join(tempDir, "auth.header");
 
   try {
     await fs.writeFile(payloadPath, payload, { mode: 0o600 });
+    // Auth-Header über Datei einlesen, damit der Key nirgends in argv oder Logs auftaucht.
+    await fs.writeFile(headerPath, `Authorization: Bearer ${apiKey}\n`, { mode: 0o600 });
 
-    const configLines = [
-      "silent",
-      "show-error",
-      "verbose",
-      "http1.1",
-      "no-buffer",
-      "noproxy = \"*\"",
-      "request = POST",
-      'url = "https://api.resend.com/emails"',
-      `max-time = ${Math.ceil(timeoutMs / 1000)}`,
-      "connect-timeout = 15",
-      'header = "Content-Type: application/json"',
-      'header = "Accept: application/json"',
-      'header = "Expect:"',
-      'header = "Connection: close"',
-      `header = "Authorization: Bearer ${apiKey.replace(/"/g, '\\"')}"`,
-      `data-binary = "@${payloadPath.replace(/"/g, '\\"')}"`,
+    const maxTime = Math.ceil(timeoutMs / 1000);
+    const args: string[] = [
+      "--silent",
+      "--show-error",
+      "--verbose",
+      "--http1.1",
+      "--no-buffer",
+      "--noproxy", "*",
+      "--connect-timeout", "15",
+      "--max-time", String(maxTime),
+      "-X", "POST",
+      "-H", "Content-Type: application/json",
+      "-H", "Accept: application/json",
+      "-H", "Expect:",
+      "-H", "Connection: close",
+      "-H", `@${headerPath}`,
+      "--data-binary", `@${payloadPath}`,
+      "--write-out", "\n__RESEND_HTTP_STATUS__:%{http_code}",
     ];
 
     const ipFamily = String(process.env.RESEND_IP_FAMILY || "4");
-    if (ipFamily === "4") configLines.push("ipv4");
-    if (ipFamily === "6") configLines.push("ipv6");
+    if (ipFamily === "4") args.unshift("--ipv4");
+    else if (ipFamily === "6") args.unshift("--ipv6");
+
+    args.push("https://api.resend.com/emails");
 
     return await new Promise<ResendPostResult>((resolve, reject) => {
-      const child = spawn("curl", ["--config", "-", "--write-out", "\n__RESEND_HTTP_STATUS__:%{http_code}"], {
-        stdio: ["pipe", "pipe", "pipe"],
-        // Proxy-Env bewusst NICHT weitergeben, sonst hängt curl u.U. an einem kaputten Systemd-Proxy.
+      const child = spawn("curl", args, {
+        stdio: ["ignore", "pipe", "pipe"],
         env: Object.fromEntries(
           Object.entries(process.env).filter(([k]) => !/^(HTTP|HTTPS|ALL|NO)_PROXY$/i.test(k)),
         ) as NodeJS.ProcessEnv,
@@ -439,13 +444,12 @@ async function postResendWithCurl(payload: string, apiKey: string, timeoutMs: nu
         }
         resolve({ status, body });
       });
-
-      child.stdin.end(`${configLines.join("\n")}\n`);
     });
   } finally {
     await fs.rm(tempDir, { recursive: true, force: true }).catch(() => undefined);
   }
 }
+
 
 export async function sendOfferEmail(params: {
   to: string;
@@ -459,8 +463,11 @@ export async function sendOfferEmail(params: {
   const timeoutMs = Number.isFinite(configuredTimeoutMs) && configuredTimeoutMs > 0 ? configuredTimeoutMs : 120000;
 
   if (!RESEND_API_KEY) {
+    const raw = process.env.RESEND_API_KEY;
+    console.error(`[resend] key check failed: value=${raw ? `${raw.slice(0, 8)}… (len=${raw.length})` : "(unset)"}`);
     return { ok: false, error: "RESEND_API_KEY fehlt oder ist noch ein Platzhalter. Bitte den echten Resend API-Key in der Server-.env eintragen." };
   }
+  console.log(`[resend] using key prefix=${RESEND_API_KEY.slice(0, 5)}… len=${RESEND_API_KEY.length}`);
 
   const body: Record<string, unknown> = {
     from: FROM,
