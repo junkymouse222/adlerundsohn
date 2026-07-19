@@ -471,7 +471,7 @@ async function renderBeleg(
   ensureSpace(40);
   const footerLines = wrap(
     belegArt === "Angebot"
-      ? "Vielen Dank für Ihre Anfrage. Dieses Angebot ist 21 Tage gültig. Alle Positionen aus laufender Verwertung. Lieferung ab Bestellwert 3.000 € netto kostenfrei innerhalb des Liefergebiets. Zwischenverkauf vorbehalten."
+      ? "Vielen Dank für Ihre Anfrage. Dieses Angebot ist 7 Tage gültig. Alle Positionen aus laufender Verwertung. Lieferung ab Bestellwert 3.000 € netto kostenfrei innerhalb des Liefergebiets. Zwischenverkauf vorbehalten."
       : "Vielen Dank für Ihren Auftrag. Bitte überweisen Sie den Rechnungsbetrag unter Angabe der Rechnungsnummer bis zum Fälligkeitsdatum auf das oben genannte Konto.",
     font,
     8.5,
@@ -491,7 +491,7 @@ export function renderOfferPdf(
   acceptUrl?: string | null,
 ): Promise<Uint8Array> {
   const created = new Date(offer.created_at);
-  const gueltigBis = new Date(created.getTime() + 21 * 24 * 3600 * 1000);
+  const gueltigBis = new Date(created.getTime() + 7 * 24 * 3600 * 1000);
   return renderBeleg("Angebot", offer.angebot_nr, created, gueltigBis, offer, items, undefined, acceptUrl, !!offer.accepted_at);
 }
 
