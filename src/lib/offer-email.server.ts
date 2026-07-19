@@ -282,6 +282,7 @@ export async function sendOfferEmail(params: {
 }): Promise<{ ok: true; messageId: string } | { ok: false; error: string }> {
   const RESEND_API_KEY = process.env.RESEND_API_KEY;
   const FROM = process.env.OFFER_FROM_EMAIL || "Kanzlei Adler und Sohn <info@adlerundsohn-mail.de>";
+  const timeoutMs = Number(process.env.RESEND_TIMEOUT_MS || 25000);
 
   if (!RESEND_API_KEY) {
     return { ok: false, error: "RESEND_API_KEY fehlt" };
@@ -297,14 +298,30 @@ export async function sendOfferEmail(params: {
     body.attachments = params.attachments.map((a) => ({ filename: a.filename, content: a.content }));
   }
 
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${RESEND_API_KEY}`,
-    },
-    body: JSON.stringify(body),
-  });
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  let res: Response;
+  try {
+    console.info(`[resend] sending email to ${params.to} with ${params.attachments?.length ?? 0} attachment(s)`);
+    res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+      },
+      body: JSON.stringify(body),
+      signal: ctrl.signal,
+    });
+  } catch (error) {
+    const isTimeout = error instanceof Error && error.name === "AbortError";
+    const msg = isTimeout
+      ? `Resend antwortet nicht innerhalb von ${Math.round(timeoutMs / 1000)} Sekunden. Prüfe Server-DNS/Firewall/Outbound-HTTPS zu api.resend.com.`
+      : `Resend-Verbindung fehlgeschlagen: ${error instanceof Error ? error.message : String(error)}`;
+    console.error(`[resend] send request failed: ${msg}`);
+    return { ok: false, error: msg };
+  } finally {
+    clearTimeout(timer);
+  }
 
   if (!res.ok) {
     const txt = await res.text();
