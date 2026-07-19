@@ -335,17 +335,24 @@ STUDIO_HASH="$(caddy hash-password --plaintext "$STUDIO_PASS" 2>/dev/null)"
 cat > /etc/caddy/Caddyfile <<EOF
 {
   email $ADMIN_EMAIL
+  # HTTP/3 (QUIC/UDP:443) aus: Host-Firewall blockiert oft UDP/443,
+  # Browser mit Alt-Svc hängen dann auf manchen Netzen/RDP-Clients.
+  servers {
+    protocols h1 h2
+  }
 }
 
 # --- App ---------------------------------------------------------------
 $DOMAIN, www.$DOMAIN {
   encode zstd gzip
+  header Alt-Svc "clear"
   reverse_proxy 127.0.0.1:$APP_PORT
 }
 
 # --- Supabase Studio (Kong routet Studio + REST/Auth/Storage) ----------
 $STUDIO_DOMAIN {
   encode zstd gzip
+  header Alt-Svc "clear"
   # Studio-UI schützen; API-Pfade (auth/rest/storage/realtime) offen lassen
   @studio {
     not path /auth/* /rest/* /storage/* /realtime/* /functions/* /pg/*
