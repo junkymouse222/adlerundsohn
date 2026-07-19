@@ -47,11 +47,12 @@ function AngebotAnfordernPage() {
       if (kategorie && p.kategorie !== kategorie) return false;
       if (!q) return true;
       return (
+        String(p.pos).includes(q) ||
         p.name.toLowerCase().includes(q) ||
         p.artikel.toLowerCase().includes(q) ||
         p.beschreibung.toLowerCase().includes(q)
       );
-    });
+    }).sort((a, b) => a.pos - b.pos);
   }, [suche, kategorie]);
 
   const subtotal = useMemo(
@@ -141,7 +142,7 @@ function AngebotAnfordernPage() {
           <div className="mt-6 grid gap-3 md:grid-cols-2">
             <input
               type="text"
-              placeholder="Suche nach Name oder Artikelnummer …"
+              placeholder="Suche nach Position, Name oder Artikelnummer …"
               value={suche}
               onChange={(e) => setSuche(e.target.value)}
               className="border border-border bg-white px-4 py-3 text-sm"
@@ -167,7 +168,7 @@ function AngebotAnfordernPage() {
                 className="flex w-full items-start justify-between gap-4 border-b border-border px-4 py-3 text-left hover:bg-parchment"
               >
                 <div>
-                  <div className="text-xs font-mono text-muted-foreground">{p.artikel}</div>
+                  <div className="text-xs font-mono text-muted-foreground">Pos. {p.pos}</div>
                   <div className="text-sm font-medium">{p.name}</div>
                   <div className="text-xs text-muted-foreground">{p.beschreibung}</div>
                 </div>
@@ -190,7 +191,7 @@ function AngebotAnfordernPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border bg-parchment text-xs uppercase tracking-widest text-muted-foreground">
-                    <th className="p-3 text-left">Artikel</th>
+                    <th className="p-3 text-left">Pos.</th>
                     <th className="p-3 text-left">Bezeichnung</th>
                     <th className="p-3 text-right">Menge</th>
                     <th className="p-3 text-right">Einzelpreis</th>
@@ -199,9 +200,9 @@ function AngebotAnfordernPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {positionen.map((pos) => (
+                  {[...positionen].sort((a, b) => a.produkt.pos - b.produkt.pos).map((pos) => (
                     <tr key={pos.produkt.artikel} className="border-b border-border">
-                      <td className="p-3 font-mono text-xs">{pos.produkt.artikel}</td>
+                      <td className="p-3 font-mono text-xs">{pos.produkt.pos}</td>
                       <td className="p-3">{pos.produkt.name}</td>
                       <td className="p-3 text-right">
                         <input
