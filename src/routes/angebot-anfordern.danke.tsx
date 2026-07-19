@@ -21,9 +21,8 @@ function DankePage() {
       <h1 className="mt-6 max-w-3xl text-4xl md:text-5xl">Vielen Dank für Ihre Anfrage.</h1>
       <span className="rule-gold mt-8" />
       <p className="mt-8 max-w-2xl text-lg leading-relaxed text-foreground/80">
-        Ihr Angebot wird jetzt erstellt und automatisch an Ihre E-Mail-Adresse
-        versendet — üblicherweise innerhalb weniger Stunden während
-        unserer Geschäftszeiten (Mo–Fr, 07:00–19:00 Uhr).
+        Wir haben Ihre Anfrage erhalten und bereiten Ihr Angebot vor. Sie erhalten
+        es in Kürze per E-Mail an die von Ihnen angegebene Adresse.
       </p>
       {nr && (
         <p className="mt-6 font-mono text-sm text-muted-foreground">
