@@ -282,7 +282,7 @@ export async function sendOfferEmail(params: {
 }): Promise<{ ok: true; messageId: string } | { ok: false; error: string }> {
   const LOVABLE_API_KEY = process.env.LOVABLE_API_KEY;
   const RESEND_API_KEY = process.env.RESEND_API_KEY;
-  const FROM = process.env.OFFER_FROM_EMAIL || "Kanzlei Adler und Sohn <angebote@adlerundsohn.com>";
+  const FROM = process.env.OFFER_FROM_EMAIL || "Kanzlei Adler und Sohn <info@adlerundsohn-mail.de>";
 
   if (!LOVABLE_API_KEY) return { ok: false, error: "LOVABLE_API_KEY missing" };
   if (!RESEND_API_KEY) {
