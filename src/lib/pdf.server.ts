@@ -306,8 +306,13 @@ async function renderBeleg(
   drawText(gText, cols.end - font.widthOfTextAtSize(gText, 9) - 4, headY, { font: bold, size: 9, color: white });
   y -= 22;
 
-  const ensureSpace = (needed: number) => {
-    if (y - needed < MARGIN.b + 120) {
+  // Bei kurzen Angeboten (≤5 Positionen) den Annahme-Button auf Seite 1 halten:
+  // dafür keinen großen „Reservestreifen“ am Seitenende erzwingen.
+  const keepAcceptOnFirstPage =
+    belegArt === "Angebot" && !!acceptUrl && items.length <= 5;
+
+  const ensureSpace = (needed: number, bottomPad = keepAcceptOnFirstPage ? 24 : 48) => {
+    if (y - needed < MARGIN.b + bottomPad) {
       page = pdf.addPage([A4.w, A4.h]);
       y = A4.h - MARGIN.t;
     }
@@ -357,7 +362,8 @@ async function renderBeleg(
   });
 
   y -= 14;
-  ensureSpace(120);
+  // Summenblock: ~5 Zeilen + Linie; kein künstlicher 120pt-Seitenumbruch mehr.
+  ensureSpace(100);
 
   // ============ SUMMEN ============
   const sumRight = A4.w - MARGIN.r;
@@ -416,9 +422,11 @@ async function renderBeleg(
 
   // ============ ANNAHME-BUTTON (nur Angebot, mit URL) ============
   if (belegArt === "Angebot" && acceptUrl) {
-    ensureSpace(80);
     const bw = 240;
     const bh = 34;
+    const buttonBlock = bh + 28; // Button + Hinweiszeile
+    // Bei ≤5 Positionen keinen Seitenumbruch vor dem CTA erzwingen.
+    if (!keepAcceptOnFirstPage) ensureSpace(buttonBlock);
     const bx = (A4.w - bw) / 2;
     const by = y - bh - 4;
     if (alreadyAccepted) {
@@ -481,7 +489,6 @@ async function renderBeleg(
   }
 
 
-  ensureSpace(40);
   const footerLines = wrap(
     belegArt === "Angebot"
       ? "Vielen Dank für Ihre Anfrage. Dieses Angebot ist 7 Tage gültig. Alle Positionen aus laufender Verwertung. Lieferung ab Bestellwert 3.000 € netto kostenfrei innerhalb des Liefergebiets. Zwischenverkauf vorbehalten."
@@ -490,6 +497,11 @@ async function renderBeleg(
     8.5,
     A4.w - MARGIN.l - MARGIN.r,
   );
+  const footerHeight = footerLines.length * 10 + 4;
+  // Kurze Angebote: Footer nicht allein auf eine neue Seite schieben.
+  if (!(keepAcceptOnFirstPage && pdf.getPageCount() === 1)) {
+    ensureSpace(footerHeight);
+  }
   for (const l of footerLines) {
     drawText(l, MARGIN.l, y, { size: 8.5, color: MUTED });
     y -= 10;
