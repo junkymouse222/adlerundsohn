@@ -306,12 +306,13 @@ async function renderBeleg(
   drawText(gText, cols.end - font.widthOfTextAtSize(gText, 9) - 4, headY, { font: bold, size: 9, color: white });
   y -= 22;
 
-  // Bei kurzen Angeboten (≤5 Positionen) den Annahme-Button auf Seite 1 halten:
-  // dafür keinen großen „Reservestreifen“ am Seitenende erzwingen.
-  const keepAcceptOnFirstPage =
-    belegArt === "Angebot" && !!acceptUrl && items.length <= 5;
+  // Bei kurzen Belegen (≤5 Positionen) CTA auf Seite 1 halten
+  // (Angebot annehmen / Zahlung bestätigen) — ohne großen Reservestreifen unten.
+  const keepCtaOnFirstPage =
+    items.length <= 5 &&
+    ((belegArt === "Angebot" && !!acceptUrl) || (belegArt === "Rechnung" && !!invoice?.pay_url));
 
-  const ensureSpace = (needed: number, bottomPad = keepAcceptOnFirstPage ? 24 : 48) => {
+  const ensureSpace = (needed: number, bottomPad = keepCtaOnFirstPage ? 24 : 48) => {
     if (y - needed < MARGIN.b + bottomPad) {
       page = pdf.addPage([A4.w, A4.h]);
       y = A4.h - MARGIN.t;
@@ -400,7 +401,8 @@ async function renderBeleg(
 
 
   if (belegArt === "Rechnung" && invoice) {
-    ensureSpace(70);
+    const bankBlock = 70;
+    if (!keepCtaOnFirstPage) ensureSpace(bankBlock);
     drawText("BANKVERBINDUNG", MARGIN.l, y, { font: bold, size: 8, color: MUTED });
     y -= 14;
     drawText(`Kontoinhaber: ${invoice.bank_inhaber}`, MARGIN.l, y, { size: 9 });
@@ -426,7 +428,7 @@ async function renderBeleg(
     const bh = 34;
     const buttonBlock = bh + 28; // Button + Hinweiszeile
     // Bei ≤5 Positionen keinen Seitenumbruch vor dem CTA erzwingen.
-    if (!keepAcceptOnFirstPage) ensureSpace(buttonBlock);
+    if (!keepCtaOnFirstPage) ensureSpace(buttonBlock);
     const bx = (A4.w - bw) / 2;
     const by = y - bh - 4;
     if (alreadyAccepted) {
@@ -457,9 +459,10 @@ async function renderBeleg(
 
   // ============ ZAHLUNGS-BUTTON (nur Rechnung, mit URL) ============
   if (belegArt === "Rechnung" && invoice?.pay_url) {
-    ensureSpace(80);
     const bw = 240;
     const bh = 34;
+    const buttonBlock = bh + 28;
+    if (!keepCtaOnFirstPage) ensureSpace(buttonBlock);
     const bx = (A4.w - bw) / 2;
     const by = y - bh - 4;
     if (invoice.paid) {
@@ -498,8 +501,8 @@ async function renderBeleg(
     A4.w - MARGIN.l - MARGIN.r,
   );
   const footerHeight = footerLines.length * 10 + 4;
-  // Kurze Angebote: Footer nicht allein auf eine neue Seite schieben.
-  if (!(keepAcceptOnFirstPage && pdf.getPageCount() === 1)) {
+  // Kurze Belege: Footer nicht allein auf eine neue Seite schieben.
+  if (!(keepCtaOnFirstPage && pdf.getPageCount() === 1)) {
     ensureSpace(footerHeight);
   }
   for (const l of footerLines) {
