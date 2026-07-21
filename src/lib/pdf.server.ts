@@ -408,7 +408,7 @@ async function renderBeleg(
   y -= 10;
 
   // ============ CTA (Angebot annehmen / Zahlung bestätigen) ============
-  const drawCta = (url: string, done: boolean, doneLabel: string, activeLabel: string, hint: string) => {
+  const drawCta = (url: string, done: boolean, doneLabel: string, activeLabel: string, _hint: string) => {
     const bw = 240;
     const bh = 34;
     if (!keepCtaOnFirstPage) ensureSpace(bh + 28);
