@@ -79,10 +79,12 @@ function AdminDetailPage() {
   const [invoiceConfirmOpen, setInvoiceConfirmOpen] = useState(false);
   const [previewing, setPreviewing] = useState<"offer" | "invoice" | null>(null);
   const [faelligTage, setFaelligTage] = useState(14);
-  const [bankInhaber, setBankInhaber] = useState("Kanzlei Adler und Sohn");
-  const [bankName, setBankName] = useState("Sparkasse Trier");
-  const [bankIban, setBankIban] = useState("DE00 0000 0000 0000 0000 00");
-  const [bankBic, setBankBic] = useState("TRISDE55XXX");
+  // Bankdaten bewusst leer — der Sachbearbeiter muss das aktuelle
+  // Anderkonto je Mandat eintragen. Keine Vorbelegung, kein env-Fallback.
+  const [bankInhaber, setBankInhaber] = useState("");
+  const [bankName, setBankName] = useState("");
+  const [bankIban, setBankIban] = useState("");
+  const [bankBic, setBankBic] = useState("");
   const [invoiceResult, setInvoiceResult] = useState<{ ok: boolean; msg: string } | null>(null);
 
   async function load() {
@@ -129,7 +131,20 @@ function AdminDetailPage() {
     }
   }
 
+  function validateBank(): string | null {
+    if (!bankInhaber.trim()) return "Bitte Kontoinhaber eintragen.";
+    if (!bankName.trim()) return "Bitte Bankname eintragen.";
+    if (bankIban.trim().length < 4) return "Bitte IBAN eintragen (Anderkonto je Mandat prüfen!).";
+    if (bankBic.trim().length < 4) return "Bitte BIC eintragen.";
+    return null;
+  }
+
   async function handleInvoiceConfirmed() {
+    const bankErr = validateBank();
+    if (bankErr) {
+      setInvoiceResult({ ok: false, msg: bankErr });
+      return;
+    }
     setInvoiceConfirmOpen(false);
     setInvoicing(true);
     setInvoiceResult(null);
@@ -166,6 +181,11 @@ function AdminDetailPage() {
   }
 
   async function handlePreviewInvoice() {
+    const bankErr = validateBank();
+    if (bankErr) {
+      setInvoiceResult({ ok: false, msg: bankErr });
+      return;
+    }
     setPreviewing("invoice");
     try {
       const res = await previewInvoicePdf({
@@ -361,14 +381,23 @@ function AdminDetailPage() {
             </label>
           </div>
 
+          <p className="mt-4 border-l-4 border-gold bg-parchment/60 px-3 py-2 text-xs text-primary">
+            <strong>Achtung:</strong> Bankverbindung je Mandat prüfen — Anderkonten wechseln.
+            Es gibt bewusst <strong>keine Vorbelegung</strong>, damit keine alte IBAN versehentlich mitgeschickt wird.
+          </p>
+
           <div className="mt-5 flex flex-wrap gap-2">
-            <button onClick={handleInvoiceConfirmed} className="bg-primary px-4 py-2 text-xs uppercase tracking-widest text-primary-foreground hover:bg-primary/90">
+            <button
+              onClick={handleInvoiceConfirmed}
+              disabled={!!validateBank()}
+              className="bg-primary px-4 py-2 text-xs uppercase tracking-widest text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               Ja, Rechnung senden
             </button>
             <button
               onClick={handlePreviewInvoice}
-              disabled={previewing === "invoice"}
-              className="border border-border px-4 py-2 text-xs uppercase tracking-widest text-primary hover:border-primary disabled:opacity-60"
+              disabled={previewing === "invoice" || !!validateBank()}
+              className="border border-border px-4 py-2 text-xs uppercase tracking-widest text-primary hover:border-primary disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {previewing === "invoice" ? "…" : "Nur PDF ansehen"}
             </button>

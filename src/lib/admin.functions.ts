@@ -253,10 +253,11 @@ function nextRechnungNr(): string {
 const InvoiceInputSchema = z.object({
   id: z.string().uuid(),
   faellig_tage: z.number().int().min(1).max(120).optional(),
-  bank_inhaber: z.string().trim().min(1).max(200).optional(),
-  bank_name: z.string().trim().min(1).max(200).optional(),
-  bank_iban: z.string().trim().min(4).max(64).optional(),
-  bank_bic: z.string().trim().min(4).max(32).optional(),
+  // Bankdaten sind Pflicht — keine Fallbacks, weil Anderkonten je Mandat wechseln.
+  bank_inhaber: z.string().trim().min(1, "Kontoinhaber fehlt").max(200),
+  bank_name: z.string().trim().min(1, "Bankname fehlt").max(200),
+  bank_iban: z.string().trim().min(4, "IBAN fehlt").max(64),
+  bank_bic: z.string().trim().min(4, "BIC fehlt").max(32),
 });
 
 export const sendInvoiceNow = createServerFn({ method: "POST" })
@@ -294,10 +295,10 @@ export const sendInvoiceNow = createServerFn({ method: "POST" })
       rechnung_nr,
       datum,
       faellig_am: faellig,
-      bank_inhaber: data.bank_inhaber || (offer.bank_inhaber as string | null) || process.env.BANK_INHABER || "Kanzlei Adler und Sohn",
-      bank_name: data.bank_name || (offer.bank_name as string | null) || process.env.BANK_NAME || "Sparkasse Trier",
-      bank_iban: data.bank_iban || (offer.bank_iban as string | null) || process.env.BANK_IBAN || "DE00 0000 0000 0000 0000 00",
-      bank_bic: data.bank_bic || (offer.bank_bic as string | null) || process.env.BANK_BIC || "TRISDE55XXX",
+      bank_inhaber: data.bank_inhaber,
+      bank_name: data.bank_name,
+      bank_iban: data.bank_iban,
+      bank_bic: data.bank_bic,
       pay_url: invoicePayUrl(offer.pay_token as string | null),
       paid: !!offer.paid_at,
     };
@@ -430,10 +431,10 @@ export const previewInvoicePdf = createServerFn({ method: "POST" })
       rechnung_nr,
       datum,
       faellig_am: faellig,
-      bank_inhaber: data.bank_inhaber || (offer.bank_inhaber as string | null) || process.env.BANK_INHABER || "Kanzlei Adler und Sohn",
-      bank_name: data.bank_name || (offer.bank_name as string | null) || process.env.BANK_NAME || "Sparkasse Trier",
-      bank_iban: data.bank_iban || (offer.bank_iban as string | null) || process.env.BANK_IBAN || "DE00 0000 0000 0000 0000 00",
-      bank_bic: data.bank_bic || (offer.bank_bic as string | null) || process.env.BANK_BIC || "TRISDE55XXX",
+      bank_inhaber: data.bank_inhaber,
+      bank_name: data.bank_name,
+      bank_iban: data.bank_iban,
+      bank_bic: data.bank_bic,
       pay_url: invoicePayUrl(offer.pay_token as string | null),
       paid: !!offer.paid_at,
     };
