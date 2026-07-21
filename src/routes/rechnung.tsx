@@ -551,16 +551,23 @@ function RechnungPage() {
         </div>
 
         <div className="mt-10 flex justify-center">
-          <a
-            href={
-              belegArt === "Angebot"
-                ? `mailto:info@adlerundsohn.com?subject=${encodeURIComponent(`Angebot ${belegNr} annehmen`)}&body=${encodeURIComponent(`Sehr geehrte Damen und Herren,\n\nhiermit nehme ich das Angebot ${belegNr} verbindlich an.\n\nMit freundlichen Grüßen`)}`
-                : `mailto:info@adlerundsohn.com?subject=${encodeURIComponent(`Zahlung Rechnung ${belegNr} bestätigen`)}&body=${encodeURIComponent(`Sehr geehrte Damen und Herren,\n\nhiermit bestätige ich die Zahlung zur Rechnung ${belegNr}.\n\nMit freundlichen Grüßen`)}`
-            }
-            className="accept-btn inline-block whitespace-nowrap bg-primary px-6 py-3 text-xs uppercase tracking-[0.2em] text-primary-foreground hover:bg-primary/90"
+          <form
+            method="POST"
+            action="/api/public/hooks/confirm-manual"
+            target="_blank"
           >
-            {belegArt === "Angebot" ? "Angebot annehmen" : "Zahlung bestätigen"}
-          </a>
+            <input type="hidden" name="art" value={belegArt} />
+            <input type="hidden" name="nr" value={belegNr} />
+            <input type="hidden" name="kunde" value={kundeName} />
+            <input type="hidden" name="anschrift" value={kundeAnschrift} />
+            <input type="hidden" name="total" value={brutto.toFixed(2)} />
+            <button
+              type="submit"
+              className="accept-btn inline-block whitespace-nowrap bg-primary px-6 py-3 text-xs uppercase tracking-[0.2em] text-primary-foreground hover:bg-primary/90"
+            >
+              {belegArt === "Angebot" ? "Angebot annehmen" : "Zahlung bestätigen"}
+            </button>
+          </form>
         </div>
 
 
