@@ -51,11 +51,11 @@ const anwaelte = [
     kontakt: "k.weber@adlerundsohn.com",
   },
   {
-    name: "Marcus Hartmann",
+    name: "Marcus Adler",
     role: "Partner · Gläubigervertretung",
     img: hartmannImg,
     bio: [
-      "Marcus Hartmann ist seit 2020 Teil der Kanzlei und verantwortet die Gläubigervertretung. Er begleitet Banken, Lieferanten und institutionelle Gläubiger von der Forderungsanmeldung über die Verwertung von Sicherheiten bis zur Vertretung im Gläubigerausschuss.",
+      "Marcus Adler ist seit 2020 Teil der Kanzlei und verantwortet die Gläubigervertretung. Er begleitet Banken, Lieferanten und institutionelle Gläubiger von der Forderungsanmeldung über die Verwertung von Sicherheiten bis zur Vertretung im Gläubigerausschuss.",
       "Ein besonderer Fokus liegt auf der Anfechtungsabwehr sowie der Prüfung und Durchsetzung von Absonderungs- und Aussonderungsrechten.",
     ],
     schwerpunkte: ["Forderungsanmeldung", "Gläubigerausschuss", "Anfechtungsrecht", "Sicherheitenverwertung"],
@@ -64,7 +64,7 @@ const anwaelte = [
       "Referendariat am OLG Hamm",
       "Fachanwalt für Insolvenzrecht (seit 2018)",
     ],
-    kontakt: "m.hartmann@adlerundsohn.com",
+    kontakt: "m.adler@adlerundsohn.com",
   },
 ];
 
