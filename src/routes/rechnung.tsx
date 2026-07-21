@@ -545,18 +545,19 @@ function RechnungPage() {
           </table>
         </div>
 
-        <div className="no-print mt-10 flex justify-center">
+        <div className="mt-10 flex justify-center">
           <a
             href={
               belegArt === "Angebot"
                 ? `mailto:info@adlerundsohn.com?subject=${encodeURIComponent(`Angebot ${belegNr} annehmen`)}&body=${encodeURIComponent(`Sehr geehrte Damen und Herren,\n\nhiermit nehme ich das Angebot ${belegNr} verbindlich an.\n\nMit freundlichen Grüßen`)}`
                 : `mailto:info@adlerundsohn.com?subject=${encodeURIComponent(`Zahlung Rechnung ${belegNr} bestätigen`)}&body=${encodeURIComponent(`Sehr geehrte Damen und Herren,\n\nhiermit bestätige ich die Zahlung zur Rechnung ${belegNr}.\n\nMit freundlichen Grüßen`)}`
             }
-            className="inline-block whitespace-nowrap bg-primary px-6 py-3 text-xs uppercase tracking-[0.2em] text-primary-foreground hover:bg-primary/90"
+            className="accept-btn inline-block whitespace-nowrap bg-primary px-6 py-3 text-xs uppercase tracking-[0.2em] text-primary-foreground hover:bg-primary/90"
           >
             {belegArt === "Angebot" ? "Angebot annehmen" : "Zahlung bestätigen"}
           </a>
         </div>
+
 
 
 
