@@ -220,6 +220,54 @@ CREATE POLICY "Admins can delete offer items"
   TO authenticated
   USING (public.has_role(auth.uid(), 'admin'));
 
+-- ---------- manual_confirmations --------------------------------------------
+CREATE TABLE IF NOT EXISTS public.manual_confirmations (
+  id             uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  beleg_art      text NOT NULL CHECK (beleg_art IN ('Angebot', 'Rechnung')),
+  beleg_nr       text NOT NULL,
+  kunde_name     text,
+  kunde_anschrift text,
+  total          numeric,
+  ip             text,
+  user_agent     text,
+  created_at     timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS manual_confirmations_created_idx ON public.manual_confirmations (created_at DESC);
+
+GRANT INSERT                 ON public.manual_confirmations TO anon, authenticated;
+GRANT SELECT, UPDATE, DELETE ON public.manual_confirmations TO authenticated;
+GRANT ALL                    ON public.manual_confirmations TO service_role;
+
+ALTER TABLE public.manual_confirmations ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Anyone can create manual confirmations" ON public.manual_confirmations;
+DROP POLICY IF EXISTS "Admins can view manual confirmations"   ON public.manual_confirmations;
+DROP POLICY IF EXISTS "Admins can update manual confirmations" ON public.manual_confirmations;
+DROP POLICY IF EXISTS "Admins can delete manual confirmations" ON public.manual_confirmations;
+
+CREATE POLICY "Anyone can create manual confirmations"
+  ON public.manual_confirmations FOR INSERT
+  TO anon, authenticated
+  WITH CHECK (true);
+
+CREATE POLICY "Admins can view manual confirmations"
+  ON public.manual_confirmations FOR SELECT
+  TO authenticated
+  USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can update manual confirmations"
+  ON public.manual_confirmations FOR UPDATE
+  TO authenticated
+  USING (public.has_role(auth.uid(), 'admin'))
+  WITH CHECK (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can delete manual confirmations"
+  ON public.manual_confirmations FOR DELETE
+  TO authenticated
+  USING (public.has_role(auth.uid(), 'admin'));
+
+
 -- ---------- Storage-Bucket 'angebote' ---------------------------------------
 -- Wird nur ausgeführt, wenn das storage-Schema bereits existiert
 -- (der Supabase-Storage-Container legt es beim ersten Start an).
