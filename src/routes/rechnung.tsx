@@ -397,10 +397,7 @@ function RechnungPage() {
       <article className="beleg mt-12 border border-border bg-background p-8 md:p-12 print:mt-0 print:border-0 print:p-0">
         <div className="beleg-header flex flex-wrap items-start justify-between gap-6 border-b border-gold pb-6">
           <div>
-            <div className="text-2xl font-serif tracking-widest">G O L D M A N N</div>
-            <div className="mt-1 text-[0.65rem] uppercase tracking-[0.25em] text-muted-foreground">
-              Rechtsanwaltskanzlei · Sylt
-            </div>
+            <img src="/kanzlei-logo.png" alt="Kanzlei Adler und Sohn" className="h-16 w-auto" />
             <div className="mt-4 text-xs leading-relaxed text-muted-foreground">
               Kanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt
               <br />
