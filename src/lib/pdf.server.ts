@@ -381,7 +381,7 @@ async function renderBeleg(
     }
     if (opts.line === "gold") {
       y -= 4;
-      page.drawLine({ start: { x: sumLeft, y: y + 10 }, end: { x: sumRight, y: y + 10 }, thickness: 1.25, color: GOLD });
+      page.drawLine({ start: { x: sumLeft, y: y + 10 }, end: { x: sumRight, y: y + 10 }, thickness: 1, color: GOLD });
       y -= 4;
     }
     const f = opts.bold ? bold : font;
@@ -408,7 +408,7 @@ async function renderBeleg(
   y -= 10;
 
   // ============ CTA (Angebot annehmen / Zahlung bestätigen) ============
-  const drawCta = (url: string, done: boolean, doneLabel: string, activeLabel: string, hint: string) => {
+  const drawCta = (url: string, done: boolean, doneLabel: string, activeLabel: string, _hint: string) => {
     const bw = 240;
     const bh = 34;
     if (!keepCtaOnFirstPage) ensureSpace(bh + 28);
@@ -432,7 +432,7 @@ async function renderBeleg(
       const existing = page.node.get(PDFName.of("Annots"));
       if (existing instanceof PDFArray) existing.push(link);
       else page.node.set(PDFName.of("Annots"), pdf.context.obj([link]));
-      drawText(hint, bx + (bw - font.widthOfTextAtSize(hint, 8)) / 2, by - 12, { size: 8, color: MUTED });
+      // Hinweistext entfernt — /rechnung zeigt unter dem Button ebenfalls keinen.
     }
     y = by - 24;
   };
