@@ -29,6 +29,7 @@ import { Route as JuliAngeboteFilenameRouteImport } from './routes/juli.angebote
 import { Route as AuthenticatedAdminIdRouteImport } from './routes/_authenticated/admin.$id'
 import { Route as ApiPublicHooksSendScheduledOffersRouteImport } from './routes/api/public/hooks/send-scheduled-offers'
 import { Route as ApiPublicHooksMarkPaidRouteImport } from './routes/api/public/hooks/mark-paid'
+import { Route as ApiPublicHooksConfirmManualRouteImport } from './routes/api/public/hooks/confirm-manual'
 import { Route as ApiPublicHooksAcceptOfferRouteImport } from './routes/api/public/hooks/accept-offer'
 import { Route as ApiPublicAdminSendOfferRouteImport } from './routes/api/public/admin/send-offer'
 import { Route as ApiPublicAdminSendInvoiceRouteImport } from './routes/api/public/admin/send-invoice'
@@ -133,6 +134,12 @@ const ApiPublicHooksMarkPaidRoute = ApiPublicHooksMarkPaidRouteImport.update({
   path: '/api/public/hooks/mark-paid',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksConfirmManualRoute =
+  ApiPublicHooksConfirmManualRouteImport.update({
+    id: '/api/public/hooks/confirm-manual',
+    path: '/api/public/hooks/confirm-manual',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksAcceptOfferRoute =
   ApiPublicHooksAcceptOfferRouteImport.update({
     id: '/api/public/hooks/accept-offer',
@@ -172,6 +179,7 @@ export interface FileRoutesByFullPath {
   '/api/public/admin/send-invoice': typeof ApiPublicAdminSendInvoiceRoute
   '/api/public/admin/send-offer': typeof ApiPublicAdminSendOfferRoute
   '/api/public/hooks/accept-offer': typeof ApiPublicHooksAcceptOfferRoute
+  '/api/public/hooks/confirm-manual': typeof ApiPublicHooksConfirmManualRoute
   '/api/public/hooks/mark-paid': typeof ApiPublicHooksMarkPaidRoute
   '/api/public/hooks/send-scheduled-offers': typeof ApiPublicHooksSendScheduledOffersRoute
 }
@@ -195,6 +203,7 @@ export interface FileRoutesByTo {
   '/api/public/admin/send-invoice': typeof ApiPublicAdminSendInvoiceRoute
   '/api/public/admin/send-offer': typeof ApiPublicAdminSendOfferRoute
   '/api/public/hooks/accept-offer': typeof ApiPublicHooksAcceptOfferRoute
+  '/api/public/hooks/confirm-manual': typeof ApiPublicHooksConfirmManualRoute
   '/api/public/hooks/mark-paid': typeof ApiPublicHooksMarkPaidRoute
   '/api/public/hooks/send-scheduled-offers': typeof ApiPublicHooksSendScheduledOffersRoute
 }
@@ -221,6 +230,7 @@ export interface FileRoutesById {
   '/api/public/admin/send-invoice': typeof ApiPublicAdminSendInvoiceRoute
   '/api/public/admin/send-offer': typeof ApiPublicAdminSendOfferRoute
   '/api/public/hooks/accept-offer': typeof ApiPublicHooksAcceptOfferRoute
+  '/api/public/hooks/confirm-manual': typeof ApiPublicHooksConfirmManualRoute
   '/api/public/hooks/mark-paid': typeof ApiPublicHooksMarkPaidRoute
   '/api/public/hooks/send-scheduled-offers': typeof ApiPublicHooksSendScheduledOffersRoute
 }
@@ -247,6 +257,7 @@ export interface FileRouteTypes {
     | '/api/public/admin/send-invoice'
     | '/api/public/admin/send-offer'
     | '/api/public/hooks/accept-offer'
+    | '/api/public/hooks/confirm-manual'
     | '/api/public/hooks/mark-paid'
     | '/api/public/hooks/send-scheduled-offers'
   fileRoutesByTo: FileRoutesByTo
@@ -270,6 +281,7 @@ export interface FileRouteTypes {
     | '/api/public/admin/send-invoice'
     | '/api/public/admin/send-offer'
     | '/api/public/hooks/accept-offer'
+    | '/api/public/hooks/confirm-manual'
     | '/api/public/hooks/mark-paid'
     | '/api/public/hooks/send-scheduled-offers'
   id:
@@ -295,6 +307,7 @@ export interface FileRouteTypes {
     | '/api/public/admin/send-invoice'
     | '/api/public/admin/send-offer'
     | '/api/public/hooks/accept-offer'
+    | '/api/public/hooks/confirm-manual'
     | '/api/public/hooks/mark-paid'
     | '/api/public/hooks/send-scheduled-offers'
   fileRoutesById: FileRoutesById
@@ -318,6 +331,7 @@ export interface RootRouteChildren {
   ApiPublicAdminSendInvoiceRoute: typeof ApiPublicAdminSendInvoiceRoute
   ApiPublicAdminSendOfferRoute: typeof ApiPublicAdminSendOfferRoute
   ApiPublicHooksAcceptOfferRoute: typeof ApiPublicHooksAcceptOfferRoute
+  ApiPublicHooksConfirmManualRoute: typeof ApiPublicHooksConfirmManualRoute
   ApiPublicHooksMarkPaidRoute: typeof ApiPublicHooksMarkPaidRoute
   ApiPublicHooksSendScheduledOffersRoute: typeof ApiPublicHooksSendScheduledOffersRoute
 }
@@ -464,6 +478,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksMarkPaidRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/confirm-manual': {
+      id: '/api/public/hooks/confirm-manual'
+      path: '/api/public/hooks/confirm-manual'
+      fullPath: '/api/public/hooks/confirm-manual'
+      preLoaderRoute: typeof ApiPublicHooksConfirmManualRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/accept-offer': {
       id: '/api/public/hooks/accept-offer'
       path: '/api/public/hooks/accept-offer'
@@ -531,6 +552,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAdminSendInvoiceRoute: ApiPublicAdminSendInvoiceRoute,
   ApiPublicAdminSendOfferRoute: ApiPublicAdminSendOfferRoute,
   ApiPublicHooksAcceptOfferRoute: ApiPublicHooksAcceptOfferRoute,
+  ApiPublicHooksConfirmManualRoute: ApiPublicHooksConfirmManualRoute,
   ApiPublicHooksMarkPaidRoute: ApiPublicHooksMarkPaidRoute,
   ApiPublicHooksSendScheduledOffersRoute:
     ApiPublicHooksSendScheduledOffersRoute,

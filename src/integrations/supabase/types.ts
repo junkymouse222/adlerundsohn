@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      manual_confirmations: {
+        Row: {
+          beleg_art: string
+          beleg_nr: string
+          created_at: string
+          id: string
+          ip: string | null
+          kunde_anschrift: string | null
+          kunde_name: string | null
+          total: number | null
+          user_agent: string | null
+        }
+        Insert: {
+          beleg_art: string
+          beleg_nr: string
+          created_at?: string
+          id?: string
+          ip?: string | null
+          kunde_anschrift?: string | null
+          kunde_name?: string | null
+          total?: number | null
+          user_agent?: string | null
+        }
+        Update: {
+          beleg_art?: string
+          beleg_nr?: string
+          created_at?: string
+          id?: string
+          ip?: string | null
+          kunde_anschrift?: string | null
+          kunde_name?: string | null
+          total?: number | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       offer_request_items: {
         Row: {
           artikel: string
