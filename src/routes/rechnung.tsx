@@ -563,8 +563,13 @@ function RechnungPage() {
                 <strong>{new Date(gueltigBis).toLocaleDateString("de-DE")}</strong> auf das
                 unten genannte Konto unter Angabe der Rechnungsnummer <strong>{belegNr}</strong>.
               </p>
-            </div>
-            <div>
+              <p className="mt-3 leading-relaxed text-muted-foreground">
+                <strong>Hinweis:</strong> Bei dem angegebenen Konto handelt es sich um ein
+                Mandanten-/Anderkonto der Kanzlei, über das ausschließlich der bestellte
+                Insolvenzverwalter alleinige Handlungs- und Verfügungsvollmacht besitzt. Ihre
+                Zahlung ist dadurch treuhänderisch durch die Kanzlei geschützt und gegen den
+                Zugriff Dritter gesichert.
+              </p>
               <div className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">Bankverbindung</div>
               <div className="mt-2 space-y-0.5 leading-relaxed">
                 <div>Kontoinhaber: <strong>{bankInhaber}</strong></div>
