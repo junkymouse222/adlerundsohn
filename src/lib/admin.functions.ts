@@ -303,7 +303,34 @@ export const sendInvoiceNow = createServerFn({ method: "POST" })
       paid: !!offer.paid_at,
     };
 
-    const pdfBytes = await renderInvoicePdf(offer as never, (items ?? []) as never, invoice);
+    // Bank- und Rechnungsdaten VOR dem PDF-Render speichern, weil Puppeteer
+    // die öffentliche /beleg-print-Route öffnet und diese aus dem Datensatz liest.
+    const { error: saveInvoiceErr } = await admin
+      .from("offer_requests")
+      .update({
+        rechnung_nr,
+        rechnung_faellig_am: faellig.toISOString().slice(0, 10),
+        bank_inhaber: invoice.bank_inhaber,
+        bank_name: invoice.bank_name,
+        bank_iban: invoice.bank_iban,
+        bank_bic: invoice.bank_bic,
+      })
+      .eq("id", data.id);
+    if (saveInvoiceErr) throw new Error(`Bankdaten konnten nicht gespeichert werden: ${saveInvoiceErr.message}`);
+
+    const pdfBytes = await renderInvoicePdf(
+      {
+        ...(offer as any),
+        rechnung_nr,
+        rechnung_faellig_am: faellig.toISOString().slice(0, 10),
+        bank_inhaber: invoice.bank_inhaber,
+        bank_name: invoice.bank_name,
+        bank_iban: invoice.bank_iban,
+        bank_bic: invoice.bank_bic,
+      } as never,
+      (items ?? []) as never,
+      invoice,
+    );
 
     const html = renderInvoiceHtml({
       ...(offer as any),
@@ -438,7 +465,34 @@ export const previewInvoicePdf = createServerFn({ method: "POST" })
       pay_url: invoicePayUrl(offer.pay_token as string | null),
       paid: !!offer.paid_at,
     };
-    const bytes = await renderInvoicePdf(offer as never, (items ?? []) as never, invoice);
+    // Auch die Vorschau muss die eingegebenen Bankdaten zuerst speichern,
+    // sonst lädt /beleg-print noch den alten/leeren Datensatz.
+    const { error: saveInvoiceErr } = await admin
+      .from("offer_requests")
+      .update({
+        rechnung_nr,
+        rechnung_faellig_am: faellig.toISOString().slice(0, 10),
+        bank_inhaber: invoice.bank_inhaber,
+        bank_name: invoice.bank_name,
+        bank_iban: invoice.bank_iban,
+        bank_bic: invoice.bank_bic,
+      })
+      .eq("id", data.id);
+    if (saveInvoiceErr) throw new Error(`Bankdaten konnten nicht gespeichert werden: ${saveInvoiceErr.message}`);
+
+    const bytes = await renderInvoicePdf(
+      {
+        ...(offer as any),
+        rechnung_nr,
+        rechnung_faellig_am: faellig.toISOString().slice(0, 10),
+        bank_inhaber: invoice.bank_inhaber,
+        bank_name: invoice.bank_name,
+        bank_iban: invoice.bank_iban,
+        bank_bic: invoice.bank_bic,
+      } as never,
+      (items ?? []) as never,
+      invoice,
+    );
     return { base64: toBase64(bytes), filename: `Rechnung-${rechnung_nr}.pdf`, rechnung_nr };
   });
 

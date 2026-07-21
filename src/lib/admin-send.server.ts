@@ -193,7 +193,7 @@ export async function sendInvoiceFromAdmin(request: Request, input: unknown): Pr
   try {
     // Bank- und Rechnungsdaten VOR dem PDF-Render in die DB schreiben,
     // damit die Puppeteer-/Beleg-Print-Route sie aus offer_requests lesen kann.
-    await admin
+    const { error: saveInvoiceErr } = await admin
       .from("offer_requests")
       .update({
         rechnung_nr,
@@ -204,8 +204,21 @@ export async function sendInvoiceFromAdmin(request: Request, input: unknown): Pr
         bank_bic: invoice.bank_bic,
       })
       .eq("id", data.id);
+    if (saveInvoiceErr) throw new AdminSendError(`Bankdaten konnten nicht gespeichert werden: ${saveInvoiceErr.message}`, 500);
 
-    const pdfBytes = await renderInvoicePdf(offer as never, (items ?? []) as never, invoice);
+    const pdfBytes = await renderInvoicePdf(
+      {
+        ...(offer as any),
+        rechnung_nr,
+        rechnung_faellig_am: faellig.toISOString().slice(0, 10),
+        bank_inhaber: invoice.bank_inhaber,
+        bank_name: invoice.bank_name,
+        bank_iban: invoice.bank_iban,
+        bank_bic: invoice.bank_bic,
+      } as never,
+      (items ?? []) as never,
+      invoice,
+    );
     const html = renderInvoiceHtml({
       ...(offer as any),
       rechnung_nr,

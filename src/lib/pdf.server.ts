@@ -122,6 +122,19 @@ async function renderPdfFromUrl(url: string): Promise<Uint8Array> {
   }
 }
 
+function assertCompleteInvoiceBankData(invoice: InvoiceMeta): void {
+  const missing = [
+    ["Kontoinhaber", invoice.bank_inhaber],
+    ["Bankname", invoice.bank_name],
+    ["IBAN", invoice.bank_iban],
+    ["BIC", invoice.bank_bic],
+  ].filter(([, value]) => !String(value ?? "").trim());
+
+  if (missing.length > 0) {
+    throw new Error(`Bankverbindung unvollständig: ${missing.map(([label]) => label).join(", ")}`);
+  }
+}
+
 export async function renderOfferPdf(
   offer: OfferForPdf,
   _items: ItemForPdf[],
@@ -130,19 +143,20 @@ export async function renderOfferPdf(
   if (!offer.accept_token) {
     throw new Error("Angebot hat kein accept_token — bitte Datensatz prüfen.");
   }
-  const url = `${siteBaseUrl()}/beleg-print/angebot/${encodeURIComponent(offer.accept_token)}`;
+  const url = `${siteBaseUrl()}/beleg-print/angebot/${encodeURIComponent(offer.accept_token)}?v=${Date.now()}`;
   return renderPdfFromUrl(url);
 }
 
 export async function renderInvoicePdf(
   offer: OfferForPdf,
   _items: ItemForPdf[],
-  _invoice: InvoiceMeta,
+  invoice: InvoiceMeta,
 ): Promise<Uint8Array> {
+  assertCompleteInvoiceBankData(invoice);
   if (!offer.pay_token) {
     throw new Error("Rechnung hat kein pay_token — bitte Datensatz prüfen.");
   }
-  const url = `${siteBaseUrl()}/beleg-print/rechnung/${encodeURIComponent(offer.pay_token)}`;
+  const url = `${siteBaseUrl()}/beleg-print/rechnung/${encodeURIComponent(offer.pay_token)}?v=${Date.now()}`;
   return renderPdfFromUrl(url);
 }
 

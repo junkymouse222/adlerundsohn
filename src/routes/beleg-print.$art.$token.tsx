@@ -90,7 +90,7 @@ function BelegPrintPage() {
           rabattProzent={Number(offer.rabatt_rate ?? 0)}
           mwstSatz={Number(offer.mwst_rate ?? 19)}
           lieferkosten={Number(offer.lieferkosten ?? 0)}
-          bankInhaber={offer.bank_inhaber ?? "Kanzlei Adler und Sohn"}
+          bankInhaber={offer.bank_inhaber ?? ""}
           bankName={offer.bank_name ?? ""}
           bankIban={offer.bank_iban ?? ""}
           bankBic={offer.bank_bic ?? ""}
