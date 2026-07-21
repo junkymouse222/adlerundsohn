@@ -79,10 +79,12 @@ function AdminDetailPage() {
   const [invoiceConfirmOpen, setInvoiceConfirmOpen] = useState(false);
   const [previewing, setPreviewing] = useState<"offer" | "invoice" | null>(null);
   const [faelligTage, setFaelligTage] = useState(14);
-  const [bankInhaber, setBankInhaber] = useState("Kanzlei Adler und Sohn");
-  const [bankName, setBankName] = useState("Sparkasse Trier");
-  const [bankIban, setBankIban] = useState("DE00 0000 0000 0000 0000 00");
-  const [bankBic, setBankBic] = useState("TRISDE55XXX");
+  // Bankdaten bewusst leer — der Sachbearbeiter muss das aktuelle
+  // Anderkonto je Mandat eintragen. Keine Vorbelegung, kein env-Fallback.
+  const [bankInhaber, setBankInhaber] = useState("");
+  const [bankName, setBankName] = useState("");
+  const [bankIban, setBankIban] = useState("");
+  const [bankBic, setBankBic] = useState("");
   const [invoiceResult, setInvoiceResult] = useState<{ ok: boolean; msg: string } | null>(null);
 
   async function load() {
