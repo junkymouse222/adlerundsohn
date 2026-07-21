@@ -253,10 +253,11 @@ function nextRechnungNr(): string {
 const InvoiceInputSchema = z.object({
   id: z.string().uuid(),
   faellig_tage: z.number().int().min(1).max(120).optional(),
-  bank_inhaber: z.string().trim().min(1).max(200).optional(),
-  bank_name: z.string().trim().min(1).max(200).optional(),
-  bank_iban: z.string().trim().min(4).max(64).optional(),
-  bank_bic: z.string().trim().min(4).max(32).optional(),
+  // Bankdaten sind Pflicht — keine Fallbacks, weil Anderkonten je Mandat wechseln.
+  bank_inhaber: z.string().trim().min(1, "Kontoinhaber fehlt").max(200),
+  bank_name: z.string().trim().min(1, "Bankname fehlt").max(200),
+  bank_iban: z.string().trim().min(4, "IBAN fehlt").max(64),
+  bank_bic: z.string().trim().min(4, "BIC fehlt").max(32),
 });
 
 export const sendInvoiceNow = createServerFn({ method: "POST" })
