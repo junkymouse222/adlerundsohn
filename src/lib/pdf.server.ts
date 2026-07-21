@@ -225,85 +225,96 @@ async function renderBeleg(
       color: opts.color ?? TEXT,
     });
 
-  // ============ HEADER ============
+  // ============ HEADER (Logo links, Beleginfo rechts, Gold-Unterlinie) ============
+  const headerTop = y;
   const logoBytes = await loadLogo();
-  let textX = MARGIN.l;
+  const logoH = 56;
+  let logoBottom = headerTop - logoH;
   if (logoBytes) {
     try {
       const img = await pdf.embedPng(logoBytes);
-      const logoH = 64;
       const logoW = (img.width / img.height) * logoH;
-      page.drawImage(img, { x: MARGIN.l, y: y - logoH, width: logoW, height: logoH });
-      textX = MARGIN.l + logoW + 16;
+      page.drawImage(img, { x: MARGIN.l, y: logoBottom, width: logoW, height: logoH });
     } catch {
-      // Falls Embed scheitert, ohne Logo weiter
+      /* ohne Logo weiter */
     }
   }
-  drawText("Rechtsanwaltskanzlei Adler und Sohn", textX, y - 16, { font: serif, size: 18, color: NAVY });
-  page.drawRectangle({ x: textX, y: y - 22, width: 48, height: 1.5, color: GOLD });
-  drawText("Strandstraße 14 · 25980 Westerland/Sylt", textX, y - 36, { size: 9, color: MUTED });
-  drawText("Tel. +49 6591 6659636 · info@adlerundsohn.com", textX, y - 48, { size: 9, color: MUTED });
+  drawText("Kanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt", MARGIN.l, logoBottom - 14, { size: 9, color: MUTED });
+  drawText("Telefon +49 6591 6659636 · info@adlerundsohn.com", MARGIN.l, logoBottom - 26, { size: 9, color: MUTED });
 
   // Beleg-Info rechts
   const rightX = A4.w - MARGIN.r;
   const label = belegArt.toUpperCase();
-  drawText(label, rightX - bold.widthOfTextAtSize(label, 9), y - 14, { font: bold, size: 9, color: MUTED });
-  drawText(belegNr, rightX - bold.widthOfTextAtSize(belegNr, 16), y - 32, { font: bold, size: 16, color: TEXT });
+  drawText(label, rightX - bold.widthOfTextAtSize(label, 9), headerTop - 4, { font: bold, size: 9, color: MUTED });
+  drawText(belegNr, rightX - serif.widthOfTextAtSize(belegNr, 22), headerTop - 26, { font: serif, size: 22, color: NAVY });
   const datumStr = `Datum: ${datum.toLocaleDateString("de-DE")}`;
-  drawText(datumStr, rightX - font.widthOfTextAtSize(datumStr, 9), y - 48, { size: 9, color: MUTED });
+  drawText(datumStr, rightX - font.widthOfTextAtSize(datumStr, 9), headerTop - 42, { size: 9, color: MUTED });
   const gueltigLabel = belegArt === "Angebot" ? "Gültig bis: " : "Fällig am: ";
   const gueltigStr = `${gueltigLabel}${faelligOderGueltig.toLocaleDateString("de-DE")}`;
-  drawText(gueltigStr, rightX - font.widthOfTextAtSize(gueltigStr, 9), y - 60, { size: 9, color: MUTED });
+  drawText(gueltigStr, rightX - font.widthOfTextAtSize(gueltigStr, 9), headerTop - 54, { size: 9, color: MUTED });
 
-  y -= 100;
+  // Gold-Unterlinie unterhalb des Header-Blocks
+  const headerBottom = logoBottom - 36;
+  page.drawLine({
+    start: { x: MARGIN.l, y: headerBottom },
+    end: { x: A4.w - MARGIN.r, y: headerBottom },
+    thickness: 1.2,
+    color: GOLD,
+  });
+  y = headerBottom - 24;
 
-
-  // ============ KUNDE ============
-  drawText("KUNDE", MARGIN.l, y, { font: bold, size: 8, color: MUTED });
+  // ============ EMPFÄNGER + LIEFERANSCHRIFT (2 Spalten) ============
+  const colW = (A4.w - MARGIN.l - MARGIN.r) / 2;
+  drawText("RECHNUNGSEMPFÄNGER", MARGIN.l, y, { font: bold, size: 8, color: MUTED });
+  const lieferLabel = "LIEFERANSCHRIFT";
+  drawText(lieferLabel, rightX - bold.widthOfTextAtSize(lieferLabel, 8), y, { font: bold, size: 8, color: MUTED });
   y -= 14;
-  const kundeLines: string[] = [];
-  kundeLines.push(offer.customer_company || offer.customer_name);
-  if (offer.customer_company) kundeLines.push(offer.customer_name);
-  for (const l of String(offer.customer_address).split(/\r?\n/)) kundeLines.push(l);
-  if (offer.customer_ust_id) kundeLines.push(`USt-IdNr.: ${offer.customer_ust_id}`);
-  for (let i = 0; i < kundeLines.length; i++) {
-    drawText(kundeLines[i], MARGIN.l, y, { font: i === 0 ? bold : font, size: 10 });
+
+  const empfLines: string[] = [];
+  empfLines.push(offer.customer_company || offer.customer_name);
+  if (offer.customer_company) empfLines.push(offer.customer_name);
+  for (const l of String(offer.customer_address).split(/\r?\n/)) if (l.trim()) empfLines.push(l);
+  if (offer.customer_ust_id) empfLines.push(`USt-IdNr.: ${offer.customer_ust_id}`);
+
+  const empfY = y;
+  for (let i = 0; i < empfLines.length; i++) {
+    drawText(empfLines[i], MARGIN.l, y, { font: i === 0 ? bold : font, size: 10 });
     y -= 13;
   }
+  // Lieferanschrift (rechts, aktuell: gleich Rechnungsempfänger)
+  const lieferText = "Gleich Rechnungsempfänger";
+  drawText(lieferText, rightX - font.widthOfTextAtSize(lieferText, 10), empfY, { size: 10, color: MUTED });
 
-  y -= 12;
+  y -= 16;
 
-  // ============ TABELLE ============
+  // ============ TABELLE (Pos / Bezeichnung / Menge / Einh. / Einzel netto / Summe netto) ============
   const cols = {
     pos: MARGIN.l,
-    artikel: MARGIN.l + 30,
-    name: MARGIN.l + 110,
-    menge: A4.w - MARGIN.r - 200,
+    name: MARGIN.l + 32,
+    menge: A4.w - MARGIN.r - 230,
+    einh: A4.w - MARGIN.r - 175,
     ep: A4.w - MARGIN.r - 130,
     ges: A4.w - MARGIN.r - 60,
     end: A4.w - MARGIN.r,
   };
   const nameWidth = cols.menge - cols.name - 6;
 
-  // Kopfzeile — heller Stil wie in /rechnung: dünne Linien oben/unten, muted Uppercase-Labels
   const headTopY = y + 14;
   const headBotY = y - 6;
   page.drawLine({ start: { x: MARGIN.l, y: headTopY }, end: { x: A4.w - MARGIN.r, y: headTopY }, thickness: 0.75, color: LINE });
   page.drawLine({ start: { x: MARGIN.l, y: headBotY }, end: { x: A4.w - MARGIN.r, y: headBotY }, thickness: 0.75, color: LINE });
   const headY = y + 2;
   drawText("POS.", cols.pos, headY, { font: bold, size: 8, color: MUTED });
-  drawText("ARTIKEL", cols.artikel, headY, { font: bold, size: 8, color: MUTED });
   drawText("BEZEICHNUNG", cols.name, headY, { font: bold, size: 8, color: MUTED });
   const mText = "MENGE";
-  drawText(mText, cols.ep - font.widthOfTextAtSize(mText, 8) - 4, headY, { font: bold, size: 8, color: MUTED });
+  drawText(mText, cols.einh - font.widthOfTextAtSize(mText, 8) - 4, headY, { font: bold, size: 8, color: MUTED });
+  drawText("EINH.", cols.einh, headY, { font: bold, size: 8, color: MUTED });
   const epText = "EINZEL NETTO";
   drawText(epText, cols.ges - font.widthOfTextAtSize(epText, 8) - 4, headY, { font: bold, size: 8, color: MUTED });
   const gText = "SUMME NETTO";
   drawText(gText, cols.end - font.widthOfTextAtSize(gText, 8) - 4, headY, { font: bold, size: 8, color: MUTED });
   y -= 16;
 
-  // Bei kurzen Belegen (≤5 Positionen) CTA auf Seite 1 halten
-  // (Angebot annehmen / Zahlung bestätigen) — ohne großen Reservestreifen unten.
   const keepCtaOnFirstPage =
     items.length <= 5 &&
     ((belegArt === "Angebot" && !!acceptUrl) || (belegArt === "Rechnung" && !!invoice?.pay_url));
@@ -317,18 +328,13 @@ async function renderBeleg(
 
   items.sort((a, b) => a.pos - b.pos).forEach((it, idx) => {
     const nameLines = wrap(it.name, bold, 10, nameWidth);
-    const beschLines = it.beschreibung ? wrap(it.beschreibung, font, 8.5, nameWidth) : [];
-    // Inhalt + Abstand unter letzter Baseline + Trennlinie + Luft für Ascender der nächsten Zeile.
-    // (pdf-lib zeichnet an der Baseline; Großbuchstaben ragen ~7–8pt darüber — ohne diesen
-    // Puffer schneidet die Trennlinie der vorherigen Zeile durch den Text der nächsten.)
+    const detail = [it.artikel ? `Art.-Nr. ${it.artikel}` : "", it.beschreibung || ""].filter(Boolean).join(" · ");
+    const beschLines = detail ? wrap(detail, font, 8.5, nameWidth) : [];
     const contentSpan = Math.max(12, nameLines.length * 12 + beschLines.length * 11);
-    const gapBelowContent = 4;
-    const gapAfterLine = 12;
-    ensureSpace(contentSpan + gapBelowContent + gapAfterLine);
+    ensureSpace(contentSpan + 16);
 
     const rowTop = y;
-    drawText(String(idx + 1), cols.pos + 4, rowTop, { size: 9, color: MUTED });
-    drawText(it.artikel, cols.artikel, rowTop, { size: 9, color: MUTED });
+    drawText(String(idx + 1), cols.pos + 2, rowTop, { size: 9, color: MUTED });
 
     let ny = rowTop;
     for (const nl of nameLines) {
@@ -340,171 +346,157 @@ async function renderBeleg(
       ny -= 11;
     }
 
-    const menge = sanitizeWinAnsi(`${it.menge} ${it.einheit}`);
-    drawText(menge, cols.ep - font.widthOfTextAtSize(menge, 9) - 4, rowTop, { size: 9 });
+    const menge = String(it.menge);
+    drawText(menge, cols.einh - font.widthOfTextAtSize(menge, 9) - 4, rowTop, { size: 9 });
+    drawText(sanitizeWinAnsi(it.einheit), cols.einh, rowTop, { size: 9, color: MUTED });
     const ep = fmtEUR(Number(it.einzelpreis));
     drawText(ep, cols.ges - font.widthOfTextAtSize(ep, 9) - 4, rowTop, { size: 9 });
     const ges = fmtEUR(Number(it.position_total));
     drawText(ges, cols.end - bold.widthOfTextAtSize(ges, 9) - 4, rowTop, { font: bold, size: 9 });
 
-    // ny liegt eine Zeilenhöhe unter der letzten Baseline → Trennlinie klar darunter.
-    const lineY = ny - gapBelowContent;
+    const lineY = ny - 4;
     page.drawLine({
       start: { x: MARGIN.l, y: lineY },
       end: { x: A4.w - MARGIN.r, y: lineY },
       thickness: 0.5,
       color: LINE,
     });
-    y = lineY - gapAfterLine;
+    y = lineY - 10;
   });
 
-  y -= 14;
-  // Summenblock: ~5 Zeilen + Linie; kein künstlicher 120pt-Seitenumbruch mehr.
-  ensureSpace(100);
+  y -= 12;
+  ensureSpace(110);
 
-  // ============ SUMMEN ============
+  // ============ SUMMEN (mit Netto-Zeile und Gold-Regel vor Gesamt) ============
   const sumRight = A4.w - MARGIN.r;
-  const drawSum = (label: string, value: string, opts: { bold?: boolean; big?: boolean; line?: boolean } = {}) => {
-    if (opts.line) {
-      // Linie klar zwischen vorheriger Summenzeile und dem Gesamtbetrag — nicht in den Text.
-      y -= 6;
-      page.drawLine({
-        start: { x: sumRight - 200, y: y + 10 },
-        end: { x: sumRight, y: y + 10 },
-        thickness: 1.25,
-        color: NAVY,
-      });
+  const sumLeft = sumRight - 220;
+  const drawSum = (
+    lbl: string,
+    value: string,
+    opts: { bold?: boolean; big?: boolean; line?: "thin" | "gold"; muted?: boolean } = {},
+  ) => {
+    if (opts.line === "thin") {
+      page.drawLine({ start: { x: sumLeft, y: y + 10 }, end: { x: sumRight, y: y + 10 }, thickness: 0.5, color: LINE });
+      y -= 2;
+    }
+    if (opts.line === "gold") {
+      y -= 4;
+      page.drawLine({ start: { x: sumLeft, y: y + 10 }, end: { x: sumRight, y: y + 10 }, thickness: 1.25, color: GOLD });
       y -= 4;
     }
     const f = opts.bold ? bold : font;
     const size = opts.big ? 12 : 10;
-    drawText(label, sumRight - 200, y, { font: f, size, color: opts.bold ? TEXT : MUTED });
-    drawText(value, sumRight - f.widthOfTextAtSize(value, size), y, { font: f, size });
+    const labelColor = opts.bold ? NAVY : MUTED;
+    drawText(lbl, sumLeft, y, { font: f, size, color: labelColor });
+    drawText(value, sumRight - f.widthOfTextAtSize(value, size), y, { font: f, size, color: opts.bold ? NAVY : TEXT });
     y -= opts.big ? 20 : 14;
   };
 
-  drawSum("Zwischensumme", fmtEUR(Number(offer.subtotal)));
-  if (Number(offer.rabatt) > 0) {
-    drawSum(`Neukundenrabatt (${Number(offer.rabatt_rate)}%)`, `-${fmtEUR(Number(offer.rabatt))}`);
-  }
-  if (Number(offer.lieferkosten) > 0) drawSum("Lieferkosten", fmtEUR(Number(offer.lieferkosten)));
-  drawSum(`zzgl. ${Number(offer.mwst_rate)}% MwSt.`, fmtEUR(Number(offer.mwst)));
-  drawSum("Gesamtbetrag", fmtEUR(Number(offer.total)), { bold: true, big: true, line: true });
+  const subtotal = Number(offer.subtotal);
+  const rabattBetrag = Number(offer.rabatt ?? 0);
+  const rabattRate = Number(offer.rabatt_rate ?? 0);
+  const lieferkosten = Number(offer.lieferkosten);
+  const netto = subtotal - rabattBetrag + lieferkosten;
+
+  drawSum("Zwischensumme", fmtEUR(subtotal));
+  if (rabattBetrag > 0) drawSum(`Rabatt (${rabattRate}%)`, `-${fmtEUR(rabattBetrag)}`);
+  if (lieferkosten > 0) drawSum("Lieferkosten", fmtEUR(lieferkosten));
+  drawSum("Netto", fmtEUR(netto), { line: "thin" });
+  drawSum(`zzgl. MwSt. (${Number(offer.mwst_rate)}%)`, fmtEUR(Number(offer.mwst)));
+  drawSum("GESAMT", fmtEUR(Number(offer.total)), { bold: true, big: true, line: "gold" });
 
   y -= 10;
 
-  // ============ BANK / FOOTER ============
+  // ============ CTA (Angebot annehmen / Zahlung bestätigen) ============
+  const drawCta = (url: string, done: boolean, doneLabel: string, activeLabel: string, hint: string) => {
+    const bw = 240;
+    const bh = 34;
+    if (!keepCtaOnFirstPage) ensureSpace(bh + 28);
+    const bx = (A4.w - bw) / 2;
+    const by = y - bh - 4;
+    if (done) {
+      page.drawRectangle({ x: bx, y: by, width: bw, height: bh, color: rgb(0.96, 0.95, 0.91), borderColor: GOLD, borderWidth: 1 });
+      const lw = font.widthOfTextAtSize(doneLabel, 11);
+      drawText(doneLabel, bx + (bw - lw) / 2, by + 12, { size: 11, color: NAVY });
+    } else {
+      page.drawRectangle({ x: bx, y: by, width: bw, height: bh, color: NAVY });
+      const lw = bold.widthOfTextAtSize(activeLabel, 11);
+      drawText(activeLabel, bx + (bw - lw) / 2, by + 12, { font: bold, size: 11, color: rgb(0.96, 0.95, 0.91) });
+      const link = pdf.context.obj({
+        Type: "Annot",
+        Subtype: "Link",
+        Rect: [bx, by, bx + bw, by + bh],
+        Border: [0, 0, 0],
+        A: { Type: "Action", S: "URI", URI: PDFString.of(url) },
+      });
+      const existing = page.node.get(PDFName.of("Annots"));
+      if (existing instanceof PDFArray) existing.push(link);
+      else page.node.set(PDFName.of("Annots"), pdf.context.obj([link]));
+      drawText(hint, bx + (bw - font.widthOfTextAtSize(hint, 8)) / 2, by - 12, { size: 8, color: MUTED });
+    }
+    y = by - 24;
+  };
 
-
-  if (belegArt === "Rechnung" && invoice) {
-    const bankBlock = 70;
-    if (!keepCtaOnFirstPage) ensureSpace(bankBlock);
-    drawText("BANKVERBINDUNG", MARGIN.l, y, { font: bold, size: 8, color: MUTED });
-    y -= 14;
-    drawText(`Kontoinhaber: ${invoice.bank_inhaber}`, MARGIN.l, y, { size: 9 });
-    y -= 12;
-    drawText(`Bank: ${invoice.bank_name}`, MARGIN.l, y, { size: 9 });
-    y -= 12;
-    drawText(`IBAN: ${invoice.bank_iban}`, MARGIN.l, y, { size: 9 });
-    y -= 12;
-    drawText(`BIC: ${invoice.bank_bic}`, MARGIN.l, y, { size: 9 });
-    y -= 12;
-    drawText(
-      `Zahlbar bis ${invoice.faellig_am.toLocaleDateString("de-DE")}, ohne Abzug.`,
-      MARGIN.l,
-      y,
-      { size: 9, color: MUTED },
-    );
-    y -= 16;
-  }
-
-  // ============ ANNAHME-BUTTON (nur Angebot, mit URL) ============
   if (belegArt === "Angebot" && acceptUrl) {
-    const bw = 240;
-    const bh = 34;
-    const buttonBlock = bh + 28; // Button + Hinweiszeile
-    // Bei ≤5 Positionen keinen Seitenumbruch vor dem CTA erzwingen.
-    if (!keepCtaOnFirstPage) ensureSpace(buttonBlock);
-    const bx = (A4.w - bw) / 2;
-    const by = y - bh - 4;
-    if (alreadyAccepted) {
-      page.drawRectangle({ x: bx, y: by, width: bw, height: bh, color: rgb(0.96, 0.95, 0.91), borderColor: GOLD, borderWidth: 1 });
-      const label = "Angebot bereits angenommen";
-      const lw = font.widthOfTextAtSize(label, 11);
-      drawText(label, bx + (bw - lw) / 2, by + 12, { size: 11, color: NAVY });
-    } else {
-      page.drawRectangle({ x: bx, y: by, width: bw, height: bh, color: NAVY });
-      const label = "ANGEBOT ANNEHMEN";
-      const lw = bold.widthOfTextAtSize(label, 11);
-      drawText(label, bx + (bw - lw) / 2, by + 12, { font: bold, size: 11, color: rgb(0.96, 0.95, 0.91) });
-      const link = pdf.context.obj({
-        Type: "Annot",
-        Subtype: "Link",
-        Rect: [bx, by, bx + bw, by + bh],
-        Border: [0, 0, 0],
-        A: { Type: "Action", S: "URI", URI: PDFString.of(acceptUrl) },
-      });
-      const existing = page.node.get(PDFName.of("Annots"));
-      if (existing instanceof PDFArray) existing.push(link);
-      else page.node.set(PDFName.of("Annots"), pdf.context.obj([link]));
-      const hint = "Klicken zum verbindlichen Annehmen";
-      drawText(hint, bx + (bw - font.widthOfTextAtSize(hint, 8)) / 2, by - 12, { size: 8, color: MUTED });
-    }
-    y = by - 24;
+    drawCta(acceptUrl, !!alreadyAccepted, "Angebot bereits angenommen", "ANGEBOT ANNEHMEN", "Klicken zum verbindlichen Annehmen");
   }
-
-  // ============ ZAHLUNGS-BUTTON (nur Rechnung, mit URL) ============
   if (belegArt === "Rechnung" && invoice?.pay_url) {
-    const bw = 240;
-    const bh = 34;
-    const buttonBlock = bh + 28;
-    if (!keepCtaOnFirstPage) ensureSpace(buttonBlock);
-    const bx = (A4.w - bw) / 2;
-    const by = y - bh - 4;
-    if (invoice.paid) {
-      page.drawRectangle({ x: bx, y: by, width: bw, height: bh, color: rgb(0.96, 0.95, 0.91), borderColor: GOLD, borderWidth: 1 });
-      const label = "Zahlung bereits bestätigt";
-      const lw = font.widthOfTextAtSize(label, 11);
-      drawText(label, bx + (bw - lw) / 2, by + 12, { size: 11, color: NAVY });
-    } else {
-      page.drawRectangle({ x: bx, y: by, width: bw, height: bh, color: NAVY });
-      const label = "ZAHLUNG BESTÄTIGEN";
-      const lw = bold.widthOfTextAtSize(label, 11);
-      drawText(label, bx + (bw - lw) / 2, by + 12, { font: bold, size: 11, color: rgb(0.96, 0.95, 0.91) });
-      const link = pdf.context.obj({
-        Type: "Annot",
-        Subtype: "Link",
-        Rect: [bx, by, bx + bw, by + bh],
-        Border: [0, 0, 0],
-        A: { Type: "Action", S: "URI", URI: PDFString.of(invoice.pay_url) },
-      });
-      const existing = page.node.get(PDFName.of("Annots"));
-      if (existing instanceof PDFArray) existing.push(link);
-      else page.node.set(PDFName.of("Annots"), pdf.context.obj([link]));
-      const hint = "Klicken sobald überwiesen";
-      drawText(hint, bx + (bw - font.widthOfTextAtSize(hint, 8)) / 2, by - 12, { size: 8, color: MUTED });
-    }
-    y = by - 24;
+    drawCta(invoice.pay_url, !!invoice.paid, "Zahlung bereits bestätigt", "ZAHLUNG BESTÄTIGEN", "Klicken sobald überwiesen");
   }
 
-
-  const footerLines = wrap(
-    belegArt === "Angebot"
-      ? "Vielen Dank für Ihre Anfrage. Dieses Angebot ist 7 Tage gültig. Alle Positionen aus laufender Verwertung. Lieferung ab Bestellwert 3.000 € netto kostenfrei innerhalb des Liefergebiets. Zwischenverkauf vorbehalten."
-      : "Vielen Dank für Ihren Auftrag. Bitte überweisen Sie den Rechnungsbetrag unter Angabe der Rechnungsnummer bis zum Fälligkeitsdatum auf das oben genannte Konto.",
-    font,
-    8.5,
-    A4.w - MARGIN.l - MARGIN.r,
-  );
-  const footerHeight = footerLines.length * 10 + 4;
-  // Kurze Belege: Footer nicht allein auf eine neue Seite schieben.
-  if (!(keepCtaOnFirstPage && pdf.getPageCount() === 1)) {
-    ensureSpace(footerHeight);
-  }
-  for (const l of footerLines) {
-    drawText(l, MARGIN.l, y, { size: 8.5, color: MUTED });
+  // ============ BANK / ZAHLUNGSBEDINGUNGEN (nur Rechnung, 2 Spalten) ============
+  if (belegArt === "Rechnung" && invoice) {
+    ensureSpace(140);
+    page.drawLine({ start: { x: MARGIN.l, y: y + 6 }, end: { x: A4.w - MARGIN.r, y: y + 6 }, thickness: 0.5, color: LINE });
     y -= 10;
+
+    const bankTopY = y;
+    const leftColW = colW - 10;
+    const rightColX = MARGIN.l + colW + 10;
+
+    // Links: Zahlungsbedingungen + Anderkonto-Hinweis
+    drawText("ZAHLUNGSBEDINGUNGEN", MARGIN.l, y, { font: bold, size: 8, color: MUTED });
+    let ly = y - 14;
+    const bedText = `Bitte überweisen Sie den Rechnungsbetrag bis zum ${invoice.faellig_am.toLocaleDateString("de-DE")} auf das nebenstehende Konto unter Angabe der Rechnungsnummer ${invoice.rechnung_nr}.`;
+    for (const line of wrap(bedText, font, 9, leftColW)) {
+      drawText(line, MARGIN.l, ly, { size: 9 });
+      ly -= 12;
+    }
+    ly -= 4;
+    drawText("Hinweis:", MARGIN.l, ly, { font: bold, size: 8.5, color: MUTED });
+    ly -= 11;
+    const hinweis =
+      "Bei dem angegebenen Konto handelt es sich um ein Mandanten-/Anderkonto der Kanzlei, über das ausschließlich der bestellte Insolvenzverwalter alleinige Handlungs- und Verfügungsvollmacht besitzt. Ihre Zahlung ist dadurch treuhänderisch durch die Kanzlei geschützt und gegen den Zugriff Dritter gesichert.";
+    for (const line of wrap(hinweis, font, 8.5, leftColW)) {
+      drawText(line, MARGIN.l, ly, { size: 8.5, color: MUTED });
+      ly -= 10.5;
+    }
+
+    // Rechts: Bankverbindung
+    let ry = bankTopY;
+    drawText("BANKVERBINDUNG", rightColX, ry, { font: bold, size: 8, color: MUTED });
+    ry -= 14;
+    drawText(`Kontoinhaber: ${invoice.bank_inhaber}`, rightColX, ry, { size: 9 });
+    ry -= 13;
+    drawText(`Bank: ${invoice.bank_name}`, rightColX, ry, { size: 9 });
+    ry -= 13;
+    drawText(`IBAN: ${invoice.bank_iban}`, rightColX, ry, { size: 9 });
+    ry -= 13;
+    drawText(`BIC: ${invoice.bank_bic}`, rightColX, ry, { size: 9 });
+
+    y = Math.min(ly, ry) - 12;
   }
+
+  // ============ FOOTER ============
+  ensureSpace(24);
+  page.drawLine({ start: { x: MARGIN.l, y: y + 6 }, end: { x: A4.w - MARGIN.r, y: y + 6 }, thickness: 0.5, color: LINE });
+  y -= 8;
+  drawText(
+    "Kanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt · +49 6591 6659636 · info@adlerundsohn.com · USt-IdNr. DE271552088",
+    MARGIN.l,
+    y,
+    { size: 7.5, color: MUTED },
+  );
 
   return pdf.save();
 }
