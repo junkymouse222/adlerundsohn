@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { PRODUKTE, KATEGORIEN, type Produkt } from "@/lib/katalog";
+import { BelegView, belegPrintStyles, type BelegViewPosition } from "@/components/BelegView";
 
 
-const printStyles = `
+const printStyles = belegPrintStyles;
   @page { margin: 0; size: auto; }
   @media print {
     body * { visibility: hidden; }
