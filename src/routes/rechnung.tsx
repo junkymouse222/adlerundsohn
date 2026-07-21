@@ -536,7 +536,7 @@ function RechnungPage() {
           </table>
         </div>
 
-        <div className="mt-10 flex justify-center">
+        <div className="no-print mt-10 flex justify-center">
           <a
             href={
               belegArt === "Angebot"
@@ -548,6 +548,7 @@ function RechnungPage() {
             {belegArt === "Angebot" ? "Angebot annehmen" : "Zahlung bestätigen"}
           </a>
         </div>
+
 
 
         {belegArt === "Rechnung" && (
