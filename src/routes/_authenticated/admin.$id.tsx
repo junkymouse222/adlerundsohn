@@ -131,7 +131,20 @@ function AdminDetailPage() {
     }
   }
 
+  function validateBank(): string | null {
+    if (!bankInhaber.trim()) return "Bitte Kontoinhaber eintragen.";
+    if (!bankName.trim()) return "Bitte Bankname eintragen.";
+    if (bankIban.trim().length < 4) return "Bitte IBAN eintragen (Anderkonto je Mandat prüfen!).";
+    if (bankBic.trim().length < 4) return "Bitte BIC eintragen.";
+    return null;
+  }
+
   async function handleInvoiceConfirmed() {
+    const bankErr = validateBank();
+    if (bankErr) {
+      setInvoiceResult({ ok: false, msg: bankErr });
+      return;
+    }
     setInvoiceConfirmOpen(false);
     setInvoicing(true);
     setInvoiceResult(null);
