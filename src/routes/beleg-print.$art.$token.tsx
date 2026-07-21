@@ -27,14 +27,22 @@ function BelegPrintPage() {
   const params = Route.useParams();
   const art = params.art === "rechnung" ? "Rechnung" : "Angebot";
 
-  const positionen: BelegViewPosition[] = items
+  const positionen: BelegViewPosition[] = (items as BelegViewPosition[] | Array<{
+    pos: number;
+    artikel: string;
+    name: string;
+    beschreibung: string | null;
+    einheit: string;
+    einzelpreis: number | string;
+    menge: number;
+  }>)
     .slice()
     .sort((a, b) => a.pos - b.pos)
     .map((it) => ({
       pos: it.pos,
       artikel: it.artikel,
       name: it.name,
-      beschreibung: it.beschreibung ?? "",
+      beschreibung: (it as { beschreibung: string | null }).beschreibung ?? "",
       einheit: it.einheit,
       einzelpreis: Number(it.einzelpreis),
       menge: it.menge,
