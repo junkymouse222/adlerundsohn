@@ -110,15 +110,14 @@ function renderBelegHtml(offer: OfferRow, items: ItemRow[], opts: BelegOptions):
   const ctaBlock = opts.ctaUrl
     ? opts.ctaDone
       ? `<div style="margin:32px auto 8px auto;text-align:center;">
-           <div style="display:inline-block;background:#f5f3ee;border:1px solid #c9a55c;padding:16px 32px;">
-             <div style="font-family:Georgia,serif;font-size:15px;color:#0f2740;">${escapeHtml(opts.ctaDoneLabel)}</div>
+           <div style="display:inline-block;background:#f5f3ee;border:1px solid #c9a55c;padding:14px 28px;">
+             <div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#0f2740;">${escapeHtml(opts.ctaDoneLabel)}</div>
            </div>
          </div>`
-      : `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:32px auto 8px auto;">
+      : `<table role="presentation" cellpadding="0" cellspacing="0" align="center" style="margin:32px auto 8px auto;">
            <tr><td style="background:#0f2740;padding:0;">
-             <a href="${opts.ctaUrl}" style="display:inline-block;padding:16px 44px;font-family:Georgia,serif;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#f5f3ee;text-decoration:none;">${escapeHtml(opts.ctaLabel)}</a>
+             <a href="${opts.ctaUrl}" style="display:inline-block;padding:14px 32px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#f5f3ee;text-decoration:none;white-space:nowrap;">${escapeHtml(opts.ctaLabel)}</a>
            </td></tr>
-           <tr><td style="text-align:center;padding-top:10px;font-size:10px;color:#8a8578;letter-spacing:2px;text-transform:uppercase;">${escapeHtml(opts.ctaHint)}</td></tr>
          </table>`
     : "";
 
