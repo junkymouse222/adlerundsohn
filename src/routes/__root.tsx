@@ -112,6 +112,7 @@ const navItems = [
   { to: "/anwaelte", label: "Anwälte" },
   { to: "/fachgebiete", label: "Fachgebiete" },
   { to: "/kontakt", label: "Kontakt" },
+  { to: "/angebot-anfordern", label: "Angebot anfordern" },
 ] as const;
 
 import logoAsset from "@/assets/kanzlei-logo.png.asset.json";
