@@ -201,7 +201,7 @@ export async function sendInvoiceFromAdmin(request: Request, input: unknown): Pr
       bank_name: invoice.bank_name,
       bank_iban: invoice.bank_iban,
       bank_bic: invoice.bank_bic,
-    });
+    }, (items ?? []) as never);
     const send = await sendOfferEmail({
       to: offer.customer_email as string,
       subject: `Ihre Rechnung ${rechnung_nr} — Kanzlei Adler und Sohn`,
