@@ -1,9 +1,48 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-// Lädt einen Angebot- oder Rechnungs-Beleg anhand des jeweiligen Tokens
-// (accept_token für Angebote, pay_token für Rechnungen). Öffentlich, aber
-// durch das unbekannte Token effektiv nur vom Empfänger nutzbar.
+export type BelegDbPosition = {
+  pos: number;
+  artikel: string;
+  name: string;
+  beschreibung: string | null;
+  einheit: string;
+  einzelpreis: number | string;
+  menge: number;
+};
+
+export type BelegDbOffer = {
+  id: string;
+  angebot_nr: string;
+  created_at: string;
+  customer_company: string | null;
+  customer_name: string;
+  customer_address: string;
+  customer_ust_id: string | null;
+  subtotal: number | string;
+  rabatt_rate: number | string | null;
+  rabatt: number | string | null;
+  mwst_rate: number | string;
+  mwst: number | string;
+  lieferkosten: number | string;
+  total: number | string;
+  accept_token: string | null;
+  accepted_at: string | null;
+  pay_token: string | null;
+  paid_at: string | null;
+  rechnung_nr: string | null;
+  rechnung_faellig_am: string | null;
+  bank_inhaber: string | null;
+  bank_name: string | null;
+  bank_iban: string | null;
+  bank_bic: string | null;
+};
+
+export type BelegLoadResult = {
+  offer: BelegDbOffer;
+  items: BelegDbPosition[];
+};
+
 export const loadBelegByToken = createServerFn({ method: "GET" })
   .inputValidator((input) =>
     z
@@ -13,14 +52,14 @@ export const loadBelegByToken = createServerFn({ method: "GET" })
       })
       .parse(input),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data }): Promise<BelegLoadResult> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const admin = supabaseAdmin as unknown as {
       from: (t: string) => {
         select: (c: string) => {
           eq: (col: string, val: string) => {
-            maybeSingle: () => Promise<{ data: Record<string, unknown> | null; error: { message: string } | null }>;
-            order: (col: string, o: { ascending: boolean }) => Promise<{ data: Record<string, unknown>[] | null; error: { message: string } | null }>;
+            maybeSingle: () => Promise<{ data: unknown; error: { message: string } | null }>;
+            order: (col: string, o: { ascending: boolean }) => Promise<{ data: unknown; error: { message: string } | null }>;
           };
         };
       };
@@ -36,13 +75,15 @@ export const loadBelegByToken = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     if (!offer) throw new Error("Beleg nicht gefunden");
 
+    const offerRow = offer as BelegDbOffer;
+
     const { data: items, error: itemsErr } = await admin
       .from("offer_request_items")
       .select("*")
-      .eq("request_id", offer.id as string)
+      .eq("request_id", offerRow.id)
       .order("pos", { ascending: true });
 
     if (itemsErr) throw new Error(itemsErr.message);
 
-    return { offer, items: items ?? [] };
+    return { offer: offerRow, items: (items ?? []) as BelegDbPosition[] };
   });
