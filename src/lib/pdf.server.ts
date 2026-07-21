@@ -381,7 +381,7 @@ async function renderBeleg(
     }
     if (opts.line === "gold") {
       y -= 4;
-      page.drawLine({ start: { x: sumLeft, y: y + 10 }, end: { x: sumRight, y: y + 10 }, thickness: 1.25, color: GOLD });
+      page.drawLine({ start: { x: sumLeft, y: y + 10 }, end: { x: sumRight, y: y + 10 }, thickness: 1, color: GOLD });
       y -= 4;
     }
     const f = opts.bold ? bold : font;
