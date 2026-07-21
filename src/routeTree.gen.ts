@@ -26,6 +26,7 @@ import { Route as AngebotAnfordernDankeRouteImport } from './routes/angebot-anfo
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as JuliAngeboteFilenameRouteImport } from './routes/juli.angebote.$filename'
+import { Route as BelegPrintArtTokenRouteImport } from './routes/beleg-print.$art.$token'
 import { Route as AuthenticatedAdminManuellRouteImport } from './routes/_authenticated/admin.manuell'
 import { Route as AuthenticatedAdminIdRouteImport } from './routes/_authenticated/admin.$id'
 import { Route as ApiPublicHooksSendScheduledOffersRouteImport } from './routes/api/public/hooks/send-scheduled-offers'
@@ -119,6 +120,11 @@ const JuliAngeboteFilenameRoute = JuliAngeboteFilenameRouteImport.update({
   path: '/juli/angebote/$filename',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BelegPrintArtTokenRoute = BelegPrintArtTokenRouteImport.update({
+  id: '/beleg-print/$art/$token',
+  path: '/beleg-print/$art/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminManuellRoute =
   AuthenticatedAdminManuellRouteImport.update({
     id: '/manuell',
@@ -182,6 +188,7 @@ export interface FileRoutesByFullPath {
   '/angebot-anfordern/': typeof AngebotAnfordernIndexRoute
   '/admin/$id': typeof AuthenticatedAdminIdRoute
   '/admin/manuell': typeof AuthenticatedAdminManuellRoute
+  '/beleg-print/$art/$token': typeof BelegPrintArtTokenRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/api/public/admin/send-invoice': typeof ApiPublicAdminSendInvoiceRoute
@@ -207,6 +214,7 @@ export interface FileRoutesByTo {
   '/angebot-anfordern': typeof AngebotAnfordernIndexRoute
   '/admin/$id': typeof AuthenticatedAdminIdRoute
   '/admin/manuell': typeof AuthenticatedAdminManuellRoute
+  '/beleg-print/$art/$token': typeof BelegPrintArtTokenRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/api/public/admin/send-invoice': typeof ApiPublicAdminSendInvoiceRoute
@@ -235,6 +243,7 @@ export interface FileRoutesById {
   '/angebot-anfordern/': typeof AngebotAnfordernIndexRoute
   '/_authenticated/admin/$id': typeof AuthenticatedAdminIdRoute
   '/_authenticated/admin/manuell': typeof AuthenticatedAdminManuellRoute
+  '/beleg-print/$art/$token': typeof BelegPrintArtTokenRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/api/public/admin/send-invoice': typeof ApiPublicAdminSendInvoiceRoute
@@ -263,6 +272,7 @@ export interface FileRouteTypes {
     | '/angebot-anfordern/'
     | '/admin/$id'
     | '/admin/manuell'
+    | '/beleg-print/$art/$token'
     | '/juli/angebote/$filename'
     | '/admin/'
     | '/api/public/admin/send-invoice'
@@ -288,6 +298,7 @@ export interface FileRouteTypes {
     | '/angebot-anfordern'
     | '/admin/$id'
     | '/admin/manuell'
+    | '/beleg-print/$art/$token'
     | '/juli/angebote/$filename'
     | '/admin'
     | '/api/public/admin/send-invoice'
@@ -315,6 +326,7 @@ export interface FileRouteTypes {
     | '/angebot-anfordern/'
     | '/_authenticated/admin/$id'
     | '/_authenticated/admin/manuell'
+    | '/beleg-print/$art/$token'
     | '/juli/angebote/$filename'
     | '/_authenticated/admin/'
     | '/api/public/admin/send-invoice'
@@ -340,6 +352,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   AngebotAnfordernDankeRoute: typeof AngebotAnfordernDankeRoute
   AngebotAnfordernIndexRoute: typeof AngebotAnfordernIndexRoute
+  BelegPrintArtTokenRoute: typeof BelegPrintArtTokenRoute
   JuliAngeboteFilenameRoute: typeof JuliAngeboteFilenameRoute
   ApiPublicAdminSendInvoiceRoute: typeof ApiPublicAdminSendInvoiceRoute
   ApiPublicAdminSendOfferRoute: typeof ApiPublicAdminSendOfferRoute
@@ -470,6 +483,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JuliAngeboteFilenameRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/beleg-print/$art/$token': {
+      id: '/beleg-print/$art/$token'
+      path: '/beleg-print/$art/$token'
+      fullPath: '/beleg-print/$art/$token'
+      preLoaderRoute: typeof BelegPrintArtTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/admin/manuell': {
       id: '/_authenticated/admin/manuell'
       path: '/manuell'
@@ -570,6 +590,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   AngebotAnfordernDankeRoute: AngebotAnfordernDankeRoute,
   AngebotAnfordernIndexRoute: AngebotAnfordernIndexRoute,
+  BelegPrintArtTokenRoute: BelegPrintArtTokenRoute,
   JuliAngeboteFilenameRoute: JuliAngeboteFilenameRoute,
   ApiPublicAdminSendInvoiceRoute: ApiPublicAdminSendInvoiceRoute,
   ApiPublicAdminSendOfferRoute: ApiPublicAdminSendOfferRoute,

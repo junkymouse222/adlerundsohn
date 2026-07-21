@@ -1,40 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { PRODUKTE, KATEGORIEN, type Produkt } from "@/lib/katalog";
+import { BelegView, belegPrintStyles, type BelegViewPosition } from "@/components/BelegView";
 
 
-const printStyles = `
-  @page { margin: 0; size: auto; }
-  @media print {
-    body * { visibility: hidden; }
-    .beleg, .beleg * { visibility: visible; }
-    .beleg {
-      position: absolute;
-      inset: 0;
-      margin: 0;
-      padding: 16mm 18mm 20mm 18mm;
-      width: 100%;
-      min-height: 100%;
-      box-sizing: border-box;
-    }
-    .no-print { display: none !important; }
-    .print-only { display: inline; }
-    .site-footer { display: none !important; }
-    .accept-btn {
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-      color-adjust: exact !important;
-      appearance: none !important;
-      background: var(--primary) !important;
-      background-color: var(--primary) !important;
-      background-image: linear-gradient(var(--primary), var(--primary)) !important;
-      box-shadow: inset 0 0 0 999px var(--primary) !important;
-      color: var(--primary-foreground) !important;
-      border: 1.5px solid var(--primary) !important;
-      text-decoration: none !important;
-    }
-  }
-`;
+const printStyles = belegPrintStyles;
 
 
 export const Route = createFileRoute("/rechnung")({
@@ -408,196 +378,74 @@ function RechnungPage() {
         </button>
       </div>
 
-      {/* ============ BELEG (auch Bildschirm-Vorschau) ============ */}
-      <article className="beleg mt-12 border border-border bg-background p-8 md:p-12 print:mt-0 print:border-0 print:p-0">
-        <div className="beleg-header flex flex-wrap items-start justify-between gap-6 border-b border-gold pb-6">
-          <div>
-            <img src="/kanzlei-logo.png" alt="Kanzlei Adler und Sohn" className="h-16 w-auto" />
-            <div className="mt-4 text-xs leading-relaxed text-muted-foreground">
-              Kanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt
-              <br />
-              Telefon +49 6591 6659636 · info@adlerundsohn.com
-            </div>
+      {/* Positions-Editor (nur Bildschirm) */}
+      {positionen.length > 0 && (
+        <div className="no-print mt-6 border border-border bg-parchment p-4">
+          <div className="mb-3 text-[0.7rem] uppercase tracking-[0.2em] text-muted-foreground">
+            Ausgewählte Positionen
           </div>
-          <div className="text-right">
-            <div className="text-[0.7rem] uppercase tracking-[0.25em] text-muted-foreground">
-              {belegArt}
-            </div>
-            <div className="mt-1 text-3xl font-semibold tabular-nums">{belegNr}</div>
-            <div className="mt-2 text-xs text-muted-foreground">
-              Datum: {new Date(datum).toLocaleDateString("de-DE")}
-              <br />
-              {belegArt === "Angebot" ? "Gültig bis: " : "Fällig am: "}
-              {new Date(gueltigBis).toLocaleDateString("de-DE")}
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-8 grid grid-cols-2 gap-8 text-xs">
-          <div>
-            <div className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
-              Rechnungsempfänger
-            </div>
-            <div className="mt-2 whitespace-pre-line text-sm">
-              {kundeName || "—"}
-              {kundeAnschrift && "\n" + kundeAnschrift}
-              {kundeUstId && "\nUSt-IdNr.: " + kundeUstId}
-            </div>
-          </div>
-          <div className="text-right">
-            <div className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
-              Lieferanschrift
-            </div>
-            <div className="mt-2 whitespace-pre-line text-sm">
-              {lieferName || lieferAnschrift ? (
-                <>
-                  {lieferName || "—"}
-                  {lieferAnschrift && "\n" + lieferAnschrift}
-                </>
-              ) : (
-                <span className="text-muted-foreground">Gleich Rechnungsempfänger</span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <table className="mt-8 w-full border-collapse text-xs">
-          <thead>
-            <tr className="border-y border-border text-[0.65rem] uppercase tracking-[0.15em] text-muted-foreground">
-              <th className="w-10 py-2 text-left">Pos.</th>
-              <th className="py-2 text-left">Bezeichnung</th>
-              <th className="w-20 py-2 text-right">Menge</th>
-              <th className="w-16 py-2 text-left">Einh.</th>
-              <th className="w-28 py-2 text-right">Einzel netto</th>
-              <th className="w-28 py-2 text-right">Summe netto</th>
-            </tr>
-          </thead>
-          <tbody>
-            {positionen.map((x, i) => (
-              <tr key={x.produkt.pos} className="border-b border-border/60 align-top">
-                <td className="py-3 text-muted-foreground">{i + 1}</td>
-                <td className="py-3 pr-3">
+          <div className="space-y-2 text-xs">
+            {positionen.map((x) => (
+              <div key={x.produkt.pos} className="flex flex-wrap items-center gap-3 border-b border-border/60 pb-2">
+                <div className="flex-1 min-w-[200px]">
                   <div className="font-medium">{x.produkt.name}</div>
                   <div className="text-muted-foreground">
-                    Art.-Nr. {x.produkt.artikel} · {x.produkt.beschreibung}
+                    Art.-Nr. {x.produkt.artikel} · {fmtEUR(x.produkt.einzelpreis)} / {x.produkt.einheit}
                   </div>
-                </td>
-                <td className="py-3 text-right tabular-nums">
-                  <input
-                    type="number"
-                    min={0}
-                    value={x.menge}
-                    onChange={(e) => setMenge(x.produkt.pos, Number(e.target.value))}
-                    className="no-print w-20 border border-border bg-background px-2 py-1 text-right"
-                  />
-                  <span className="print-only">{x.menge}</span>
-                </td>
-                <td className="py-3">{x.produkt.einheit}</td>
-                <td className="py-3 text-right tabular-nums">{fmtEUR(x.produkt.einzelpreis)}</td>
-                <td className="py-3 text-right tabular-nums">
+                </div>
+                <input
+                  type="number"
+                  min={0}
+                  value={x.menge}
+                  onChange={(e) => setMenge(x.produkt.pos, Number(e.target.value))}
+                  className="w-20 border border-border bg-background px-2 py-1 text-right"
+                />
+                <div className="w-24 text-right tabular-nums">
                   {fmtEUR(x.produkt.einzelpreis * x.menge)}
-                  <button
-                    type="button"
-                    onClick={() => remove(x.produkt.pos)}
-                    className="no-print ml-3 text-[0.6rem] uppercase tracking-[0.15em] text-destructive"
-                  >
-                    entfernen
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {positionen.length === 0 && (
-              <tr>
-                <td colSpan={6} className="py-10 text-center text-muted-foreground">
-                  Noch keine Positionen ausgewählt.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-
-        <div className="mt-6 flex justify-end">
-          <table className="w-full max-w-sm text-sm">
-            <tbody>
-              <tr>
-                <td className="py-1 text-muted-foreground">Zwischensumme</td>
-                <td className="py-1 text-right tabular-nums">{fmtEUR(zwischensumme)}</td>
-              </tr>
-              {rabatt > 0 && (
-                <tr>
-                  <td className="py-1 text-muted-foreground">Rabatt ({rabatt}%)</td>
-                  <td className="py-1 text-right tabular-nums">−{fmtEUR(rabattBetrag)}</td>
-                </tr>
-              )}
-              {lieferkosten > 0 && (
-                <tr>
-                  <td className="py-1 text-muted-foreground">Lieferkosten</td>
-                  <td className="py-1 text-right tabular-nums">{fmtEUR(lieferkosten)}</td>
-                </tr>
-              )}
-              <tr className="border-t border-border">
-                <td className="py-1 text-muted-foreground">Netto</td>
-                <td className="py-1 text-right tabular-nums">{fmtEUR(netto)}</td>
-              </tr>
-              <tr>
-                <td className="py-1 text-muted-foreground">zzgl. MwSt. ({mwstSatz}%)</td>
-                <td className="py-1 text-right tabular-nums">{fmtEUR(mwst)}</td>
-              </tr>
-              <tr className="border-t border-gold">
-                <td className="py-2 text-sm font-semibold uppercase tracking-[0.15em]">Gesamt</td>
-                <td className="py-2 text-right tabular-nums font-semibold">{fmtEUR(brutto)}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div className="mt-10 flex justify-center">
-          <a
-            href={bestaetigungsUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="accept-btn inline-block whitespace-nowrap bg-primary px-6 py-3 text-xs uppercase tracking-[0.2em] text-primary-foreground no-underline hover:bg-primary/90"
-          >
-            {belegArt === "Angebot" ? "Angebot annehmen" : "Zahlung bestätigen"}
-          </a>
-        </div>
-
-
-
-
-        {belegArt === "Rechnung" && (
-          <div className="mt-8 grid gap-6 border-t border-border pt-6 text-xs sm:grid-cols-2">
-            <div>
-              <div className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">Zahlungsbedingungen</div>
-              <p className="mt-2 leading-relaxed">
-                Bitte überweisen Sie den Rechnungsbetrag bis zum{" "}
-                <strong>{new Date(gueltigBis).toLocaleDateString("de-DE")}</strong> auf das
-                unten genannte Konto unter Angabe der Rechnungsnummer <strong>{belegNr}</strong>.
-              </p>
-              <p className="mt-3 leading-relaxed text-muted-foreground">
-                <strong>Hinweis:</strong> Bei dem angegebenen Konto handelt es sich um ein
-                Mandanten-/Anderkonto der Kanzlei, über das ausschließlich der bestellte
-                Insolvenzverwalter alleinige Handlungs- und Verfügungsvollmacht besitzt. Ihre
-                Zahlung ist dadurch treuhänderisch durch die Kanzlei geschützt und gegen den
-                Zugriff Dritter gesichert.
-              </p>
-            </div>
-            <div>
-              <div className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">Bankverbindung</div>
-              <div className="mt-2 space-y-0.5 leading-relaxed">
-                <div>Kontoinhaber: <strong>{bankInhaber}</strong></div>
-                <div>Bank: {bankName}</div>
-                <div>IBAN: <span className="tabular-nums">{bankIban}</span></div>
-                <div>BIC: <span className="tabular-nums">{bankBic}</span></div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => remove(x.produkt.pos)}
+                  className="text-[0.6rem] uppercase tracking-[0.15em] text-destructive"
+                >
+                  entfernen
+                </button>
               </div>
-            </div>
+            ))}
           </div>
-        )}
-
-        <div className="beleg-footer mt-10 border-t border-border pt-4 text-[0.65rem] uppercase tracking-[0.15em] text-muted-foreground">
-          Kanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt · +49 6591 6659636 · info@adlerundsohn.com · USt-IdNr. DE271552088
         </div>
-      </article>
+      )}
+
+      {/* ============ BELEG (Vorschau + Druckausgabe) ============ */}
+      <BelegView
+        belegArt={belegArt}
+        belegNr={belegNr}
+        datum={datum}
+        gueltigOderFaellig={gueltigBis}
+        kundeName={kundeName}
+        kundeAnschrift={kundeAnschrift}
+        kundeUstId={kundeUstId}
+        lieferName={lieferName}
+        lieferAnschrift={lieferAnschrift}
+        positionen={positionen.map<BelegViewPosition>((x) => ({
+          pos: x.produkt.pos,
+          artikel: x.produkt.artikel,
+          name: x.produkt.name,
+          beschreibung: x.produkt.beschreibung,
+          einheit: x.produkt.einheit,
+          einzelpreis: x.produkt.einzelpreis,
+          menge: x.menge,
+        }))}
+        rabattProzent={rabatt}
+        mwstSatz={mwstSatz}
+        lieferkosten={lieferkosten}
+        bankInhaber={bankInhaber}
+        bankName={bankName}
+        bankIban={bankIban}
+        bankBic={bankBic}
+        bestaetigungsUrl={bestaetigungsUrl}
+      />
+
 
       <style>{printStyles}</style>
     </section>
