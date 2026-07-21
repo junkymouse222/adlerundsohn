@@ -442,3 +442,30 @@ export const previewInvoicePdf = createServerFn({ method: "POST" })
   });
 
 
+
+export type ManualConfirmationRow = {
+  id: string;
+  created_at: string;
+  beleg_art: string;
+  beleg_nr: string;
+  kunde_name: string | null;
+  kunde_anschrift: string | null;
+  total: number | null;
+  ip: string | null;
+  user_agent: string | null;
+};
+
+export const listManualConfirmations = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context.supabase as never, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const admin = supabaseAdmin as any;
+    const { data, error } = await admin
+      .from("manual_confirmations")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(500);
+    if (error) throw new Error(error.message);
+    return { rows: (data ?? []) as ManualConfirmationRow[] };
+  });
