@@ -26,6 +26,7 @@ import { Route as AngebotAnfordernDankeRouteImport } from './routes/angebot-anfo
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as JuliAngeboteFilenameRouteImport } from './routes/juli.angebote.$filename'
+import { Route as AuthenticatedAdminManuellRouteImport } from './routes/_authenticated/admin.manuell'
 import { Route as AuthenticatedAdminIdRouteImport } from './routes/_authenticated/admin.$id'
 import { Route as ApiPublicHooksSendScheduledOffersRouteImport } from './routes/api/public/hooks/send-scheduled-offers'
 import { Route as ApiPublicHooksMarkPaidRouteImport } from './routes/api/public/hooks/mark-paid'
@@ -118,6 +119,12 @@ const JuliAngeboteFilenameRoute = JuliAngeboteFilenameRouteImport.update({
   path: '/juli/angebote/$filename',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminManuellRoute =
+  AuthenticatedAdminManuellRouteImport.update({
+    id: '/manuell',
+    path: '/manuell',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminIdRoute = AuthenticatedAdminIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -174,6 +181,7 @@ export interface FileRoutesByFullPath {
   '/angebot-anfordern/danke': typeof AngebotAnfordernDankeRoute
   '/angebot-anfordern/': typeof AngebotAnfordernIndexRoute
   '/admin/$id': typeof AuthenticatedAdminIdRoute
+  '/admin/manuell': typeof AuthenticatedAdminManuellRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/api/public/admin/send-invoice': typeof ApiPublicAdminSendInvoiceRoute
@@ -198,6 +206,7 @@ export interface FileRoutesByTo {
   '/angebot-anfordern/danke': typeof AngebotAnfordernDankeRoute
   '/angebot-anfordern': typeof AngebotAnfordernIndexRoute
   '/admin/$id': typeof AuthenticatedAdminIdRoute
+  '/admin/manuell': typeof AuthenticatedAdminManuellRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/api/public/admin/send-invoice': typeof ApiPublicAdminSendInvoiceRoute
@@ -225,6 +234,7 @@ export interface FileRoutesById {
   '/angebot-anfordern/danke': typeof AngebotAnfordernDankeRoute
   '/angebot-anfordern/': typeof AngebotAnfordernIndexRoute
   '/_authenticated/admin/$id': typeof AuthenticatedAdminIdRoute
+  '/_authenticated/admin/manuell': typeof AuthenticatedAdminManuellRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/api/public/admin/send-invoice': typeof ApiPublicAdminSendInvoiceRoute
@@ -252,6 +262,7 @@ export interface FileRouteTypes {
     | '/angebot-anfordern/danke'
     | '/angebot-anfordern/'
     | '/admin/$id'
+    | '/admin/manuell'
     | '/juli/angebote/$filename'
     | '/admin/'
     | '/api/public/admin/send-invoice'
@@ -276,6 +287,7 @@ export interface FileRouteTypes {
     | '/angebot-anfordern/danke'
     | '/angebot-anfordern'
     | '/admin/$id'
+    | '/admin/manuell'
     | '/juli/angebote/$filename'
     | '/admin'
     | '/api/public/admin/send-invoice'
@@ -302,6 +314,7 @@ export interface FileRouteTypes {
     | '/angebot-anfordern/danke'
     | '/angebot-anfordern/'
     | '/_authenticated/admin/$id'
+    | '/_authenticated/admin/manuell'
     | '/juli/angebote/$filename'
     | '/_authenticated/admin/'
     | '/api/public/admin/send-invoice'
@@ -457,6 +470,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JuliAngeboteFilenameRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/manuell': {
+      id: '/_authenticated/admin/manuell'
+      path: '/manuell'
+      fullPath: '/admin/manuell'
+      preLoaderRoute: typeof AuthenticatedAdminManuellRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/$id': {
       id: '/_authenticated/admin/$id'
       path: '/$id'
@@ -511,11 +531,13 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminIdRoute: typeof AuthenticatedAdminIdRoute
+  AuthenticatedAdminManuellRoute: typeof AuthenticatedAdminManuellRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminIdRoute: AuthenticatedAdminIdRoute,
+  AuthenticatedAdminManuellRoute: AuthenticatedAdminManuellRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 
