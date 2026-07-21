@@ -212,7 +212,7 @@ function renderBelegHtml(offer: OfferRow, items: ItemRow[], opts: BelegOptions):
             ${lieferkosten > 0 ? `<tr><td style="padding:4px 12px 4px 0;color:#6b6656;">Lieferkosten</td><td style="padding:4px 0;text-align:right;color:#3a352b;white-space:nowrap;">${fmtEUR(lieferkosten)}</td></tr>` : ""}
             <tr style="border-top:1px solid #d9d4c4;"><td style="padding:6px 12px 4px 0;color:#6b6656;">Netto</td><td style="padding:6px 0 4px 0;text-align:right;color:#3a352b;white-space:nowrap;">${fmtEUR(netto)}</td></tr>
             <tr><td style="padding:4px 12px 4px 0;color:#6b6656;">zzgl. MwSt. (${mwstRate}%)</td><td style="padding:4px 0;text-align:right;color:#3a352b;white-space:nowrap;">${fmtEUR(mwst)}</td></tr>
-            <tr style="border-top:2px solid #c9a55c;"><td style="padding:10px 12px 4px 0;font-family:Georgia,serif;font-weight:600;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#0f2740;">Gesamt</td><td style="padding:10px 0 4px 0;text-align:right;font-family:Georgia,serif;font-weight:600;font-size:16px;color:#0f2740;white-space:nowrap;">${fmtEUR(total)}</td></tr>
+            <tr style="border-top:1px solid #c9a55c;"><td style="padding:10px 12px 4px 0;font-family:'Helvetica Neue',Arial,sans-serif;font-weight:600;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#0f2740;">Gesamt</td><td style="padding:10px 0 4px 0;text-align:right;font-family:'Helvetica Neue',Arial,sans-serif;font-weight:600;font-size:15px;color:#0f2740;white-space:nowrap;">${fmtEUR(total)}</td></tr>
           </table>
           <div style="clear:both;"></div>
         </td></tr>
