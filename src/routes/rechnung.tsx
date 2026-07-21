@@ -570,6 +570,8 @@ function RechnungPage() {
                 Zahlung ist dadurch treuhänderisch durch die Kanzlei geschützt und gegen den
                 Zugriff Dritter gesichert.
               </p>
+            </div>
+            <div>
               <div className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">Bankverbindung</div>
               <div className="mt-2 space-y-0.5 leading-relaxed">
                 <div>Kontoinhaber: <strong>{bankInhaber}</strong></div>
