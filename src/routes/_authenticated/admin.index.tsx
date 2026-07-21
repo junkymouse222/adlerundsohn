@@ -52,12 +52,20 @@ function AdminListPage() {
           <h1 className="mt-2 text-4xl">Angebotsanfragen</h1>
           <span className="rule-gold mt-4" />
         </div>
-        <button
-          onClick={handleSignOut}
-          className="text-xs uppercase tracking-widest text-muted-foreground hover:text-primary"
-        >
-          Abmelden
-        </button>
+        <div className="flex items-center gap-4">
+          <Link
+            to="/admin/manuell"
+            className="border border-primary px-4 py-2 text-xs uppercase tracking-widest text-primary hover:bg-primary hover:text-primary-foreground"
+          >
+            Manuelle Bestätigungen
+          </Link>
+          <button
+            onClick={handleSignOut}
+            className="text-xs uppercase tracking-widest text-muted-foreground hover:text-primary"
+          >
+            Abmelden
+          </button>
+        </div>
       </div>
 
       <div className="mt-8 flex flex-wrap items-center gap-2">
