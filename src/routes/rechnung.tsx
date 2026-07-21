@@ -536,23 +536,19 @@ function RechnungPage() {
           </table>
         </div>
 
-        <div className="mt-10 flex flex-col items-center gap-2">
+        <div className="mt-10 flex justify-center">
           <a
             href={
               belegArt === "Angebot"
                 ? `mailto:info@adlerundsohn.com?subject=${encodeURIComponent(`Angebot ${belegNr} annehmen`)}&body=${encodeURIComponent(`Sehr geehrte Damen und Herren,\n\nhiermit nehme ich das Angebot ${belegNr} verbindlich an.\n\nMit freundlichen Grüßen`)}`
                 : `mailto:info@adlerundsohn.com?subject=${encodeURIComponent(`Zahlung Rechnung ${belegNr} bestätigen`)}&body=${encodeURIComponent(`Sehr geehrte Damen und Herren,\n\nhiermit bestätige ich die Zahlung zur Rechnung ${belegNr}.\n\nMit freundlichen Grüßen`)}`
             }
-            className="inline-block bg-primary px-10 py-4 text-xs uppercase tracking-[0.25em] text-primary-foreground hover:bg-primary/90"
+            className="inline-block whitespace-nowrap bg-primary px-6 py-3 text-xs uppercase tracking-[0.2em] text-primary-foreground hover:bg-primary/90"
           >
             {belegArt === "Angebot" ? "Angebot annehmen" : "Zahlung bestätigen"}
           </a>
-          <div className="text-[0.65rem] uppercase tracking-[0.15em] text-muted-foreground">
-            {belegArt === "Angebot"
-              ? "Klicken zum verbindlichen Annehmen"
-              : "Klicken sobald überwiesen"}
-          </div>
         </div>
+
 
         {belegArt === "Rechnung" && (
           <div className="mt-8 grid gap-6 border-t border-border pt-6 text-xs sm:grid-cols-2">
