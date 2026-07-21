@@ -85,5 +85,15 @@ export const loadBelegByToken = createServerFn({ method: "GET" })
 
     if (itemsErr) throw new Error(itemsErr.message);
 
-    return { offer: offerRow, items: (items ?? []) as BelegDbPosition[] };
+    // Bankdaten mit env-Fallbacks anreichern, damit die Bankverbindung im Beleg
+    // auch dann vollständig ist, wenn die Datensatz-Spalten noch leer sind.
+    const withBankDefaults: BelegDbOffer = {
+      ...offerRow,
+      bank_inhaber: offerRow.bank_inhaber || process.env.BANK_INHABER || "Kanzlei Adler und Sohn",
+      bank_name: offerRow.bank_name || process.env.BANK_NAME || "Sparkasse Trier",
+      bank_iban: offerRow.bank_iban || process.env.BANK_IBAN || "DE00 0000 0000 0000 0000 00",
+      bank_bic: offerRow.bank_bic || process.env.BANK_BIC || "TRISDE55XXX",
+    };
+
+    return { offer: withBankDefaults, items: (items ?? []) as BelegDbPosition[] };
   });
