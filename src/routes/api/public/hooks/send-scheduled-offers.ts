@@ -19,6 +19,7 @@ export const Route = createFileRoute("/api/public/hooks/send-scheduled-offers")(
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { renderOfferHtml, sendOfferEmail } = await import("@/lib/offer-email.server");
+        const { renderOfferPdf, toBase64 } = await import("@/lib/pdf.server");
 
         const nowIso = new Date().toISOString();
 
