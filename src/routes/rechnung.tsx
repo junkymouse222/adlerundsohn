@@ -5,37 +5,6 @@ import { BelegView, belegPrintStyles, type BelegViewPosition } from "@/component
 
 
 const printStyles = belegPrintStyles;
-  @page { margin: 0; size: auto; }
-  @media print {
-    body * { visibility: hidden; }
-    .beleg, .beleg * { visibility: visible; }
-    .beleg {
-      position: absolute;
-      inset: 0;
-      margin: 0;
-      padding: 16mm 18mm 20mm 18mm;
-      width: 100%;
-      min-height: 100%;
-      box-sizing: border-box;
-    }
-    .no-print { display: none !important; }
-    .print-only { display: inline; }
-    .site-footer { display: none !important; }
-    .accept-btn {
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-      color-adjust: exact !important;
-      appearance: none !important;
-      background: var(--primary) !important;
-      background-color: var(--primary) !important;
-      background-image: linear-gradient(var(--primary), var(--primary)) !important;
-      box-shadow: inset 0 0 0 999px var(--primary) !important;
-      color: var(--primary-foreground) !important;
-      border: 1.5px solid var(--primary) !important;
-      text-decoration: none !important;
-    }
-  }
-`;
 
 
 export const Route = createFileRoute("/rechnung")({
