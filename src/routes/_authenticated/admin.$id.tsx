@@ -181,6 +181,11 @@ function AdminDetailPage() {
   }
 
   async function handlePreviewInvoice() {
+    const bankErr = validateBank();
+    if (bankErr) {
+      setInvoiceResult({ ok: false, msg: bankErr });
+      return;
+    }
     setPreviewing("invoice");
     try {
       const res = await previewInvoicePdf({
