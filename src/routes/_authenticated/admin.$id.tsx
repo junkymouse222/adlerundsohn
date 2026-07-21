@@ -381,14 +381,23 @@ function AdminDetailPage() {
             </label>
           </div>
 
+          <p className="mt-4 border-l-4 border-gold bg-parchment/60 px-3 py-2 text-xs text-primary">
+            <strong>Achtung:</strong> Bankverbindung je Mandat prüfen — Anderkonten wechseln.
+            Es gibt bewusst <strong>keine Vorbelegung</strong>, damit keine alte IBAN versehentlich mitgeschickt wird.
+          </p>
+
           <div className="mt-5 flex flex-wrap gap-2">
-            <button onClick={handleInvoiceConfirmed} className="bg-primary px-4 py-2 text-xs uppercase tracking-widest text-primary-foreground hover:bg-primary/90">
+            <button
+              onClick={handleInvoiceConfirmed}
+              disabled={!!validateBank()}
+              className="bg-primary px-4 py-2 text-xs uppercase tracking-widest text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               Ja, Rechnung senden
             </button>
             <button
               onClick={handlePreviewInvoice}
-              disabled={previewing === "invoice"}
-              className="border border-border px-4 py-2 text-xs uppercase tracking-widest text-primary hover:border-primary disabled:opacity-60"
+              disabled={previewing === "invoice" || !!validateBank()}
+              className="border border-border px-4 py-2 text-xs uppercase tracking-widest text-primary hover:border-primary disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {previewing === "invoice" ? "…" : "Nur PDF ansehen"}
             </button>
