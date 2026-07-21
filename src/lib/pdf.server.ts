@@ -432,7 +432,7 @@ async function renderBeleg(
       const existing = page.node.get(PDFName.of("Annots"));
       if (existing instanceof PDFArray) existing.push(link);
       else page.node.set(PDFName.of("Annots"), pdf.context.obj([link]));
-      drawText(hint, bx + (bw - font.widthOfTextAtSize(hint, 8)) / 2, by - 12, { size: 8, color: MUTED });
+      // Hinweistext entfernt — /rechnung zeigt unter dem Button ebenfalls keinen.
     }
     y = by - 24;
   };
