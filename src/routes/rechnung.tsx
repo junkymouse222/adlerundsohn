@@ -129,6 +129,7 @@ function RechnungPage() {
   const netto = zwischensumme - rabattBetrag + lieferkosten;
   const mwst = netto * (mwstSatz / 100);
   const brutto = netto + mwst;
+  const bestaetigungsUrl = `https://adlerundsohn.com/api/public/hooks/confirm-manual?art=${encodeURIComponent(belegArt)}&nr=${encodeURIComponent(belegNr)}&kunde=${encodeURIComponent(kundeName)}&anschrift=${encodeURIComponent(kundeAnschrift)}&total=${encodeURIComponent(brutto.toFixed(2))}`;
 
   const drucken = () => window.print();
 
@@ -551,23 +552,14 @@ function RechnungPage() {
         </div>
 
         <div className="mt-10 flex justify-center">
-          <form
-            method="POST"
-            action="/api/public/hooks/confirm-manual"
+          <a
+            href={bestaetigungsUrl}
             target="_blank"
+            rel="noreferrer"
+            className="accept-btn inline-block whitespace-nowrap bg-primary px-6 py-3 text-xs uppercase tracking-[0.2em] text-primary-foreground no-underline hover:bg-primary/90"
           >
-            <input type="hidden" name="art" value={belegArt} />
-            <input type="hidden" name="nr" value={belegNr} />
-            <input type="hidden" name="kunde" value={kundeName} />
-            <input type="hidden" name="anschrift" value={kundeAnschrift} />
-            <input type="hidden" name="total" value={brutto.toFixed(2)} />
-            <button
-              type="submit"
-              className="accept-btn inline-block whitespace-nowrap bg-primary px-6 py-3 text-xs uppercase tracking-[0.2em] text-primary-foreground hover:bg-primary/90"
-            >
-              {belegArt === "Angebot" ? "Angebot annehmen" : "Zahlung bestätigen"}
-            </button>
-          </form>
+            {belegArt === "Angebot" ? "Angebot annehmen" : "Zahlung bestätigen"}
+          </a>
         </div>
 
 
