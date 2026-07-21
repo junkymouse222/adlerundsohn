@@ -24,9 +24,14 @@ const printStyles = `
       -webkit-print-color-adjust: exact !important;
       print-color-adjust: exact !important;
       color-adjust: exact !important;
-      background: hsl(var(--primary)) !important;
-      color: hsl(var(--primary-foreground)) !important;
-      border: 1px solid hsl(var(--primary)) !important;
+      appearance: none !important;
+      background: var(--primary) !important;
+      background-color: var(--primary) !important;
+      background-image: linear-gradient(var(--primary), var(--primary)) !important;
+      box-shadow: inset 0 0 0 999px var(--primary) !important;
+      color: var(--primary-foreground) !important;
+      border: 1.5px solid var(--primary) !important;
+      text-decoration: none !important;
     }
   }
 `;
