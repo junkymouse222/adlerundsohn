@@ -52,10 +52,12 @@ export const Route = createFileRoute("/api/public/hooks/send-scheduled-offers")(
 
           try {
             const html = renderOfferHtml(row as never, (items ?? []) as never);
+            const pdfBytes = await renderOfferPdf(row as never, (items ?? []) as never);
             const send = await sendOfferEmail({
               to: row.customer_email as string,
               subject: `Ihr Angebot ${row.angebot_nr as string} — Kanzlei Adler und Sohn`,
               html,
+              attachments: [{ filename: `Angebot-${row.angebot_nr}.pdf`, content: toBase64(pdfBytes) }],
             });
 
             if (send.ok) {
