@@ -285,26 +285,22 @@ async function renderBeleg(
   };
   const nameWidth = cols.menge - cols.name - 6;
 
-  // Kopfzeile
-  page.drawRectangle({
-    x: MARGIN.l,
-    y: y - 4,
-    width: A4.w - MARGIN.l - MARGIN.r,
-    height: 20,
-    color: NAVY,
-  });
-  const headY = y + 4;
-  const white = rgb(1, 1, 1);
-  drawText("Pos.", cols.pos + 4, headY, { font: bold, size: 9, color: white });
-  drawText("Artikel", cols.artikel, headY, { font: bold, size: 9, color: white });
-  drawText("Bezeichnung", cols.name, headY, { font: bold, size: 9, color: white });
-  const mText = "Menge";
-  drawText(mText, cols.ep - font.widthOfTextAtSize(mText, 9) - 4, headY, { font: bold, size: 9, color: white });
-  const epText = "Einzelpreis";
-  drawText(epText, cols.ges - font.widthOfTextAtSize(epText, 9) - 4, headY, { font: bold, size: 9, color: white });
-  const gText = "Gesamt";
-  drawText(gText, cols.end - font.widthOfTextAtSize(gText, 9) - 4, headY, { font: bold, size: 9, color: white });
-  y -= 22;
+  // Kopfzeile — heller Stil wie in /rechnung: dünne Linien oben/unten, muted Uppercase-Labels
+  const headTopY = y + 14;
+  const headBotY = y - 6;
+  page.drawLine({ start: { x: MARGIN.l, y: headTopY }, end: { x: A4.w - MARGIN.r, y: headTopY }, thickness: 0.75, color: LINE });
+  page.drawLine({ start: { x: MARGIN.l, y: headBotY }, end: { x: A4.w - MARGIN.r, y: headBotY }, thickness: 0.75, color: LINE });
+  const headY = y + 2;
+  drawText("POS.", cols.pos, headY, { font: bold, size: 8, color: MUTED });
+  drawText("ARTIKEL", cols.artikel, headY, { font: bold, size: 8, color: MUTED });
+  drawText("BEZEICHNUNG", cols.name, headY, { font: bold, size: 8, color: MUTED });
+  const mText = "MENGE";
+  drawText(mText, cols.ep - font.widthOfTextAtSize(mText, 8) - 4, headY, { font: bold, size: 8, color: MUTED });
+  const epText = "EINZEL NETTO";
+  drawText(epText, cols.ges - font.widthOfTextAtSize(epText, 8) - 4, headY, { font: bold, size: 8, color: MUTED });
+  const gText = "SUMME NETTO";
+  drawText(gText, cols.end - font.widthOfTextAtSize(gText, 8) - 4, headY, { font: bold, size: 8, color: MUTED });
+  y -= 16;
 
   // Bei kurzen Belegen (≤5 Positionen) CTA auf Seite 1 halten
   // (Angebot annehmen / Zahlung bestätigen) — ohne großen Reservestreifen unten.
