@@ -20,8 +20,17 @@ const printStyles = `
     .no-print { display: none !important; }
     .print-only { display: inline; }
     .site-footer { display: none !important; }
+    .accept-btn {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      color-adjust: exact !important;
+      background: hsl(var(--primary)) !important;
+      color: hsl(var(--primary-foreground)) !important;
+      border: 1px solid hsl(var(--primary)) !important;
+    }
   }
 `;
+
 
 export const Route = createFileRoute("/rechnung")({
   head: () => ({
