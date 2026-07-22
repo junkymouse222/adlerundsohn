@@ -130,6 +130,18 @@ function AngebotAnfordernPage() {
             E-Mail — in der Regel innerhalb weniger Stunden während unserer
             Geschäftszeiten (Mo–Fr 07:00–19:00).
           </p>
+          <div className="mt-8">
+            <a
+              href="/verwertungskatalog.pdf"
+              target="_blank"
+              rel="noopener"
+              download
+              className="inline-flex items-center gap-3 border border-primary bg-white px-6 py-3 text-xs uppercase tracking-[0.2em] text-primary hover:bg-primary hover:text-primary-foreground"
+            >
+              <span aria-hidden>↓</span>
+              Aktuellen Verwertungskatalog (PDF) herunterladen
+            </a>
+          </div>
         </div>
       </section>
 
