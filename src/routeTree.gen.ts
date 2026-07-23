@@ -27,6 +27,7 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as JuliAngeboteFilenameRouteImport } from './routes/juli.angebote.$filename'
 import { Route as BelegPrintArtTokenRouteImport } from './routes/beleg-print.$art.$token'
+import { Route as AuthenticatedAdminTrafficRouteImport } from './routes/_authenticated/admin.traffic'
 import { Route as AuthenticatedAdminManuellRouteImport } from './routes/_authenticated/admin.manuell'
 import { Route as AuthenticatedAdminIdRouteImport } from './routes/_authenticated/admin.$id'
 import { Route as ApiPublicHooksTrackRouteImport } from './routes/api/public/hooks/track'
@@ -126,6 +127,12 @@ const BelegPrintArtTokenRoute = BelegPrintArtTokenRouteImport.update({
   path: '/beleg-print/$art/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminTrafficRoute =
+  AuthenticatedAdminTrafficRouteImport.update({
+    id: '/traffic',
+    path: '/traffic',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminManuellRoute =
   AuthenticatedAdminManuellRouteImport.update({
     id: '/manuell',
@@ -194,6 +201,7 @@ export interface FileRoutesByFullPath {
   '/angebot-anfordern/': typeof AngebotAnfordernIndexRoute
   '/admin/$id': typeof AuthenticatedAdminIdRoute
   '/admin/manuell': typeof AuthenticatedAdminManuellRoute
+  '/admin/traffic': typeof AuthenticatedAdminTrafficRoute
   '/beleg-print/$art/$token': typeof BelegPrintArtTokenRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -221,6 +229,7 @@ export interface FileRoutesByTo {
   '/angebot-anfordern': typeof AngebotAnfordernIndexRoute
   '/admin/$id': typeof AuthenticatedAdminIdRoute
   '/admin/manuell': typeof AuthenticatedAdminManuellRoute
+  '/admin/traffic': typeof AuthenticatedAdminTrafficRoute
   '/beleg-print/$art/$token': typeof BelegPrintArtTokenRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -251,6 +260,7 @@ export interface FileRoutesById {
   '/angebot-anfordern/': typeof AngebotAnfordernIndexRoute
   '/_authenticated/admin/$id': typeof AuthenticatedAdminIdRoute
   '/_authenticated/admin/manuell': typeof AuthenticatedAdminManuellRoute
+  '/_authenticated/admin/traffic': typeof AuthenticatedAdminTrafficRoute
   '/beleg-print/$art/$token': typeof BelegPrintArtTokenRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -281,6 +291,7 @@ export interface FileRouteTypes {
     | '/angebot-anfordern/'
     | '/admin/$id'
     | '/admin/manuell'
+    | '/admin/traffic'
     | '/beleg-print/$art/$token'
     | '/juli/angebote/$filename'
     | '/admin/'
@@ -308,6 +319,7 @@ export interface FileRouteTypes {
     | '/angebot-anfordern'
     | '/admin/$id'
     | '/admin/manuell'
+    | '/admin/traffic'
     | '/beleg-print/$art/$token'
     | '/juli/angebote/$filename'
     | '/admin'
@@ -337,6 +349,7 @@ export interface FileRouteTypes {
     | '/angebot-anfordern/'
     | '/_authenticated/admin/$id'
     | '/_authenticated/admin/manuell'
+    | '/_authenticated/admin/traffic'
     | '/beleg-print/$art/$token'
     | '/juli/angebote/$filename'
     | '/_authenticated/admin/'
@@ -503,6 +516,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BelegPrintArtTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/traffic': {
+      id: '/_authenticated/admin/traffic'
+      path: '/traffic'
+      fullPath: '/admin/traffic'
+      preLoaderRoute: typeof AuthenticatedAdminTrafficRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/manuell': {
       id: '/_authenticated/admin/manuell'
       path: '/manuell'
@@ -572,12 +592,14 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminIdRoute: typeof AuthenticatedAdminIdRoute
   AuthenticatedAdminManuellRoute: typeof AuthenticatedAdminManuellRoute
+  AuthenticatedAdminTrafficRoute: typeof AuthenticatedAdminTrafficRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminIdRoute: AuthenticatedAdminIdRoute,
   AuthenticatedAdminManuellRoute: AuthenticatedAdminManuellRoute,
+  AuthenticatedAdminTrafficRoute: AuthenticatedAdminTrafficRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 
