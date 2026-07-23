@@ -524,3 +524,88 @@ export const listManualConfirmations = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return { rows: (data ?? []) as ManualConfirmationRow[] };
   });
+
+// ============ TRAFFIC ============
+
+export type PageViewRow = {
+  id: string;
+  created_at: string;
+  path: string;
+  ip: string | null;
+  country: string | null;
+  country_code: string | null;
+  referrer: string | null;
+  user_agent: string | null;
+};
+
+export type TrafficStats = {
+  total: number;
+  last24h: number;
+  last7d: number;
+  uniqueIps: number;
+  topCountries: Array<{ country: string; count: number }>;
+  topPaths: Array<{ path: string; count: number }>;
+  topReferrers: Array<{ referrer: string; count: number }>;
+  recent: PageViewRow[];
+};
+
+export const listPageViews = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<TrafficStats> => {
+    await assertAdmin(context.supabase as never, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const admin = supabaseAdmin as any;
+
+    const since7d = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
+    const { data, error } = await admin
+      .from("page_views")
+      .select("*")
+      .gte("created_at", since7d)
+      .order("created_at", { ascending: false })
+      .limit(5000);
+    if (error) throw new Error(error.message);
+    const rows = (data ?? []) as PageViewRow[];
+
+    const { count: totalAll } = await admin
+      .from("page_views")
+      .select("id", { count: "exact", head: true });
+
+    const now = Date.now();
+    const last24h = rows.filter((r) => now - new Date(r.created_at).getTime() < 24 * 3600 * 1000).length;
+    const last7d = rows.length;
+    const uniqueIps = new Set(rows.map((r) => r.ip).filter(Boolean) as string[]).size;
+
+    const bump = (m: Map<string, number>, k: string) => m.set(k, (m.get(k) ?? 0) + 1);
+    const countries = new Map<string, number>();
+    const paths = new Map<string, number>();
+    const referrers = new Map<string, number>();
+    for (const r of rows) {
+      bump(countries, r.country || "Unbekannt");
+      bump(paths, r.path || "/");
+      let refHost = "Direkt";
+      if (r.referrer) {
+        try {
+          refHost = new URL(r.referrer.startsWith("http") ? r.referrer : `https://${r.referrer}`).host || "Direkt";
+        } catch {
+          refHost = r.referrer;
+        }
+      }
+      bump(referrers, refHost);
+    }
+    const toTop = <K extends string>(m: Map<string, number>, key: K) =>
+      Array.from(m.entries())
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10)
+        .map(([k, count]) => ({ [key]: k, count })) as Array<Record<K, string> & { count: number }>;
+
+    return {
+      total: totalAll ?? rows.length,
+      last24h,
+      last7d,
+      uniqueIps,
+      topCountries: toTop(countries, "country"),
+      topPaths: toTop(paths, "path"),
+      topReferrers: toTop(referrers, "referrer"),
+      recent: rows.slice(0, 200),
+    };
+  });
