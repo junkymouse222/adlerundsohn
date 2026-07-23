@@ -294,3 +294,29 @@ BEGIN
   END IF;
 END $$;
 
+
+-- ---------- page_views (Traffic-Counter) ------------------------------------
+CREATE TABLE IF NOT EXISTS public.page_views (
+  id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_at   timestamptz NOT NULL DEFAULT now(),
+  path         text NOT NULL,
+  ip           text,
+  country      text,
+  country_code text,
+  referrer     text,
+  user_agent   text
+);
+CREATE INDEX IF NOT EXISTS page_views_created_at_idx ON public.page_views (created_at DESC);
+CREATE INDEX IF NOT EXISTS page_views_country_idx    ON public.page_views (country);
+CREATE INDEX IF NOT EXISTS page_views_path_idx       ON public.page_views (path);
+
+GRANT SELECT ON public.page_views TO authenticated;
+GRANT ALL    ON public.page_views TO service_role;
+
+ALTER TABLE public.page_views ENABLE ROW LEVEL SECURITY;
+
+DO $$ BEGIN
+  CREATE POLICY "Admins can read page_views"
+    ON public.page_views FOR SELECT TO authenticated
+    USING (public.has_role(auth.uid(), 'admin'));
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
