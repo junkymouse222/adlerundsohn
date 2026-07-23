@@ -54,6 +54,12 @@ function AdminListPage() {
         </div>
         <div className="flex items-center gap-4">
           <Link
+            to="/admin/traffic"
+            className="border border-primary px-4 py-2 text-xs uppercase tracking-widest text-primary hover:bg-primary hover:text-primary-foreground"
+          >
+            Traffic
+          </Link>
+          <Link
             to="/admin/manuell"
             className="border border-primary px-4 py-2 text-xs uppercase tracking-widest text-primary hover:bg-primary hover:text-primary-foreground"
           >

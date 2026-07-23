@@ -219,6 +219,32 @@ function RootComponent() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isPrint = pathname.startsWith("/beleg-print");
 
+  // Traffic-Tracker: bei jedem Pfadwechsel einen Ping an den öffentlichen Endpoint.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (
+      pathname.startsWith("/admin") ||
+      pathname.startsWith("/auth") ||
+      pathname.startsWith("/beleg-print") ||
+      pathname.startsWith("/api/")
+    ) {
+      return;
+    }
+    try {
+      fetch("/api/public/hooks/track", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        keepalive: true,
+        body: JSON.stringify({
+          path: pathname,
+          referrer: document.referrer || null,
+        }),
+      }).catch(() => {});
+    } catch {
+      /* ignore */
+    }
+  }, [pathname]);
+
   if (isPrint) {
     return (
       <QueryClientProvider client={queryClient}>

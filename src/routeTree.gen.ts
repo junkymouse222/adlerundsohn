@@ -27,8 +27,10 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as JuliAngeboteFilenameRouteImport } from './routes/juli.angebote.$filename'
 import { Route as BelegPrintArtTokenRouteImport } from './routes/beleg-print.$art.$token'
+import { Route as AuthenticatedAdminTrafficRouteImport } from './routes/_authenticated/admin.traffic'
 import { Route as AuthenticatedAdminManuellRouteImport } from './routes/_authenticated/admin.manuell'
 import { Route as AuthenticatedAdminIdRouteImport } from './routes/_authenticated/admin.$id'
+import { Route as ApiPublicHooksTrackRouteImport } from './routes/api/public/hooks/track'
 import { Route as ApiPublicHooksSendScheduledOffersRouteImport } from './routes/api/public/hooks/send-scheduled-offers'
 import { Route as ApiPublicHooksMarkPaidRouteImport } from './routes/api/public/hooks/mark-paid'
 import { Route as ApiPublicHooksConfirmManualRouteImport } from './routes/api/public/hooks/confirm-manual'
@@ -125,6 +127,12 @@ const BelegPrintArtTokenRoute = BelegPrintArtTokenRouteImport.update({
   path: '/beleg-print/$art/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminTrafficRoute =
+  AuthenticatedAdminTrafficRouteImport.update({
+    id: '/traffic',
+    path: '/traffic',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminManuellRoute =
   AuthenticatedAdminManuellRouteImport.update({
     id: '/manuell',
@@ -135,6 +143,11 @@ const AuthenticatedAdminIdRoute = AuthenticatedAdminIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const ApiPublicHooksTrackRoute = ApiPublicHooksTrackRouteImport.update({
+  id: '/api/public/hooks/track',
+  path: '/api/public/hooks/track',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicHooksSendScheduledOffersRoute =
   ApiPublicHooksSendScheduledOffersRouteImport.update({
@@ -188,6 +201,7 @@ export interface FileRoutesByFullPath {
   '/angebot-anfordern/': typeof AngebotAnfordernIndexRoute
   '/admin/$id': typeof AuthenticatedAdminIdRoute
   '/admin/manuell': typeof AuthenticatedAdminManuellRoute
+  '/admin/traffic': typeof AuthenticatedAdminTrafficRoute
   '/beleg-print/$art/$token': typeof BelegPrintArtTokenRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -197,6 +211,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/confirm-manual': typeof ApiPublicHooksConfirmManualRoute
   '/api/public/hooks/mark-paid': typeof ApiPublicHooksMarkPaidRoute
   '/api/public/hooks/send-scheduled-offers': typeof ApiPublicHooksSendScheduledOffersRoute
+  '/api/public/hooks/track': typeof ApiPublicHooksTrackRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -214,6 +229,7 @@ export interface FileRoutesByTo {
   '/angebot-anfordern': typeof AngebotAnfordernIndexRoute
   '/admin/$id': typeof AuthenticatedAdminIdRoute
   '/admin/manuell': typeof AuthenticatedAdminManuellRoute
+  '/admin/traffic': typeof AuthenticatedAdminTrafficRoute
   '/beleg-print/$art/$token': typeof BelegPrintArtTokenRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -223,6 +239,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/confirm-manual': typeof ApiPublicHooksConfirmManualRoute
   '/api/public/hooks/mark-paid': typeof ApiPublicHooksMarkPaidRoute
   '/api/public/hooks/send-scheduled-offers': typeof ApiPublicHooksSendScheduledOffersRoute
+  '/api/public/hooks/track': typeof ApiPublicHooksTrackRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -243,6 +260,7 @@ export interface FileRoutesById {
   '/angebot-anfordern/': typeof AngebotAnfordernIndexRoute
   '/_authenticated/admin/$id': typeof AuthenticatedAdminIdRoute
   '/_authenticated/admin/manuell': typeof AuthenticatedAdminManuellRoute
+  '/_authenticated/admin/traffic': typeof AuthenticatedAdminTrafficRoute
   '/beleg-print/$art/$token': typeof BelegPrintArtTokenRoute
   '/juli/angebote/$filename': typeof JuliAngeboteFilenameRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -252,6 +270,7 @@ export interface FileRoutesById {
   '/api/public/hooks/confirm-manual': typeof ApiPublicHooksConfirmManualRoute
   '/api/public/hooks/mark-paid': typeof ApiPublicHooksMarkPaidRoute
   '/api/public/hooks/send-scheduled-offers': typeof ApiPublicHooksSendScheduledOffersRoute
+  '/api/public/hooks/track': typeof ApiPublicHooksTrackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -272,6 +291,7 @@ export interface FileRouteTypes {
     | '/angebot-anfordern/'
     | '/admin/$id'
     | '/admin/manuell'
+    | '/admin/traffic'
     | '/beleg-print/$art/$token'
     | '/juli/angebote/$filename'
     | '/admin/'
@@ -281,6 +301,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/confirm-manual'
     | '/api/public/hooks/mark-paid'
     | '/api/public/hooks/send-scheduled-offers'
+    | '/api/public/hooks/track'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -298,6 +319,7 @@ export interface FileRouteTypes {
     | '/angebot-anfordern'
     | '/admin/$id'
     | '/admin/manuell'
+    | '/admin/traffic'
     | '/beleg-print/$art/$token'
     | '/juli/angebote/$filename'
     | '/admin'
@@ -307,6 +329,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/confirm-manual'
     | '/api/public/hooks/mark-paid'
     | '/api/public/hooks/send-scheduled-offers'
+    | '/api/public/hooks/track'
   id:
     | '__root__'
     | '/'
@@ -326,6 +349,7 @@ export interface FileRouteTypes {
     | '/angebot-anfordern/'
     | '/_authenticated/admin/$id'
     | '/_authenticated/admin/manuell'
+    | '/_authenticated/admin/traffic'
     | '/beleg-print/$art/$token'
     | '/juli/angebote/$filename'
     | '/_authenticated/admin/'
@@ -335,6 +359,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/confirm-manual'
     | '/api/public/hooks/mark-paid'
     | '/api/public/hooks/send-scheduled-offers'
+    | '/api/public/hooks/track'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -360,6 +385,7 @@ export interface RootRouteChildren {
   ApiPublicHooksConfirmManualRoute: typeof ApiPublicHooksConfirmManualRoute
   ApiPublicHooksMarkPaidRoute: typeof ApiPublicHooksMarkPaidRoute
   ApiPublicHooksSendScheduledOffersRoute: typeof ApiPublicHooksSendScheduledOffersRoute
+  ApiPublicHooksTrackRoute: typeof ApiPublicHooksTrackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -490,6 +516,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BelegPrintArtTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/traffic': {
+      id: '/_authenticated/admin/traffic'
+      path: '/traffic'
+      fullPath: '/admin/traffic'
+      preLoaderRoute: typeof AuthenticatedAdminTrafficRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/manuell': {
       id: '/_authenticated/admin/manuell'
       path: '/manuell'
@@ -503,6 +536,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/$id'
       preLoaderRoute: typeof AuthenticatedAdminIdRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/api/public/hooks/track': {
+      id: '/api/public/hooks/track'
+      path: '/api/public/hooks/track'
+      fullPath: '/api/public/hooks/track'
+      preLoaderRoute: typeof ApiPublicHooksTrackRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/send-scheduled-offers': {
       id: '/api/public/hooks/send-scheduled-offers'
@@ -552,12 +592,14 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminIdRoute: typeof AuthenticatedAdminIdRoute
   AuthenticatedAdminManuellRoute: typeof AuthenticatedAdminManuellRoute
+  AuthenticatedAdminTrafficRoute: typeof AuthenticatedAdminTrafficRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminIdRoute: AuthenticatedAdminIdRoute,
   AuthenticatedAdminManuellRoute: AuthenticatedAdminManuellRoute,
+  AuthenticatedAdminTrafficRoute: AuthenticatedAdminTrafficRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 
@@ -599,17 +641,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksMarkPaidRoute: ApiPublicHooksMarkPaidRoute,
   ApiPublicHooksSendScheduledOffersRoute:
     ApiPublicHooksSendScheduledOffersRoute,
+  ApiPublicHooksTrackRoute: ApiPublicHooksTrackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
