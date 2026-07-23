@@ -29,6 +29,7 @@ import { Route as JuliAngeboteFilenameRouteImport } from './routes/juli.angebote
 import { Route as BelegPrintArtTokenRouteImport } from './routes/beleg-print.$art.$token'
 import { Route as AuthenticatedAdminManuellRouteImport } from './routes/_authenticated/admin.manuell'
 import { Route as AuthenticatedAdminIdRouteImport } from './routes/_authenticated/admin.$id'
+import { Route as ApiPublicHooksTrackRouteImport } from './routes/api/public/hooks/track'
 import { Route as ApiPublicHooksSendScheduledOffersRouteImport } from './routes/api/public/hooks/send-scheduled-offers'
 import { Route as ApiPublicHooksMarkPaidRouteImport } from './routes/api/public/hooks/mark-paid'
 import { Route as ApiPublicHooksConfirmManualRouteImport } from './routes/api/public/hooks/confirm-manual'
@@ -136,6 +137,11 @@ const AuthenticatedAdminIdRoute = AuthenticatedAdminIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const ApiPublicHooksTrackRoute = ApiPublicHooksTrackRouteImport.update({
+  id: '/api/public/hooks/track',
+  path: '/api/public/hooks/track',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksSendScheduledOffersRoute =
   ApiPublicHooksSendScheduledOffersRouteImport.update({
     id: '/api/public/hooks/send-scheduled-offers',
@@ -197,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/confirm-manual': typeof ApiPublicHooksConfirmManualRoute
   '/api/public/hooks/mark-paid': typeof ApiPublicHooksMarkPaidRoute
   '/api/public/hooks/send-scheduled-offers': typeof ApiPublicHooksSendScheduledOffersRoute
+  '/api/public/hooks/track': typeof ApiPublicHooksTrackRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -223,6 +230,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/confirm-manual': typeof ApiPublicHooksConfirmManualRoute
   '/api/public/hooks/mark-paid': typeof ApiPublicHooksMarkPaidRoute
   '/api/public/hooks/send-scheduled-offers': typeof ApiPublicHooksSendScheduledOffersRoute
+  '/api/public/hooks/track': typeof ApiPublicHooksTrackRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -252,6 +260,7 @@ export interface FileRoutesById {
   '/api/public/hooks/confirm-manual': typeof ApiPublicHooksConfirmManualRoute
   '/api/public/hooks/mark-paid': typeof ApiPublicHooksMarkPaidRoute
   '/api/public/hooks/send-scheduled-offers': typeof ApiPublicHooksSendScheduledOffersRoute
+  '/api/public/hooks/track': typeof ApiPublicHooksTrackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -281,6 +290,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/confirm-manual'
     | '/api/public/hooks/mark-paid'
     | '/api/public/hooks/send-scheduled-offers'
+    | '/api/public/hooks/track'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -307,6 +317,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/confirm-manual'
     | '/api/public/hooks/mark-paid'
     | '/api/public/hooks/send-scheduled-offers'
+    | '/api/public/hooks/track'
   id:
     | '__root__'
     | '/'
@@ -335,6 +346,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/confirm-manual'
     | '/api/public/hooks/mark-paid'
     | '/api/public/hooks/send-scheduled-offers'
+    | '/api/public/hooks/track'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -360,6 +372,7 @@ export interface RootRouteChildren {
   ApiPublicHooksConfirmManualRoute: typeof ApiPublicHooksConfirmManualRoute
   ApiPublicHooksMarkPaidRoute: typeof ApiPublicHooksMarkPaidRoute
   ApiPublicHooksSendScheduledOffersRoute: typeof ApiPublicHooksSendScheduledOffersRoute
+  ApiPublicHooksTrackRoute: typeof ApiPublicHooksTrackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -504,6 +517,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIdRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/api/public/hooks/track': {
+      id: '/api/public/hooks/track'
+      path: '/api/public/hooks/track'
+      fullPath: '/api/public/hooks/track'
+      preLoaderRoute: typeof ApiPublicHooksTrackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/send-scheduled-offers': {
       id: '/api/public/hooks/send-scheduled-offers'
       path: '/api/public/hooks/send-scheduled-offers'
@@ -599,6 +619,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksMarkPaidRoute: ApiPublicHooksMarkPaidRoute,
   ApiPublicHooksSendScheduledOffersRoute:
     ApiPublicHooksSendScheduledOffersRoute,
+  ApiPublicHooksTrackRoute: ApiPublicHooksTrackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
