@@ -116,7 +116,7 @@ export function BelegView(props: BelegViewProps) {
           <div className="mt-4 text-xs leading-relaxed text-muted-foreground">
             Kanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt
             <br />
-            Telefon +49 6591 6659636 · info@adlerundsohn.de
+            Telefon +49 4651 8544007 · info@adlerundsohn.de
           </div>
         </div>
         <div className="text-right">
@@ -282,7 +282,7 @@ export function BelegView(props: BelegViewProps) {
       )}
 
       <div className="beleg-footer mt-10 border-t border-border pt-4 text-[0.65rem] uppercase tracking-[0.15em] text-muted-foreground">
-        Kanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt · +49 6591 6659636 · info@adlerundsohn.de · USt-IdNr. DE271552088
+        Kanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt · +49 4651 8544007 · info@adlerundsohn.de · USt-IdNr. DE271552088
       </div>
     </article>
   );
