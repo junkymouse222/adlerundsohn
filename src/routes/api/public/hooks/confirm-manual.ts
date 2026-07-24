@@ -41,7 +41,7 @@ function page(
   <div class="rule"></div>
   <h1>${title}</h1>
   <p>${message}</p>
-  <a class="btn" href="https://adlerundsohn.com">Zur Kanzlei</a>
+  <a class="btn" href="https://adlerundsohn.de">Zur Kanzlei</a>
   <div class="foot">Kanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt · info@adlerundsohn.com</div>
 </div></div></body></html>`;
 

@@ -99,7 +99,7 @@ function RechnungPage() {
   const netto = zwischensumme - rabattBetrag + lieferkosten;
   const mwst = netto * (mwstSatz / 100);
   const brutto = netto + mwst;
-  const bestaetigungsUrl = `https://adlerundsohn.com/api/public/hooks/confirm-manual?art=${encodeURIComponent(belegArt)}&nr=${encodeURIComponent(belegNr)}&kunde=${encodeURIComponent(kundeName)}&anschrift=${encodeURIComponent(kundeAnschrift)}&total=${encodeURIComponent(brutto.toFixed(2))}`;
+  const bestaetigungsUrl = `https://adlerundsohn.de/api/public/hooks/confirm-manual?art=${encodeURIComponent(belegArt)}&nr=${encodeURIComponent(belegNr)}&kunde=${encodeURIComponent(kundeName)}&anschrift=${encodeURIComponent(kundeAnschrift)}&total=${encodeURIComponent(brutto.toFixed(2))}`;
 
   const drucken = () => window.print();
 
