@@ -13,7 +13,7 @@ function page(status: "ok" | "already" | "invalid", rechnungNr?: string): Respon
       : "Zahlung bestätigt";
   const message =
     status === "invalid"
-      ? "Der Link ist ungültig oder abgelaufen. Bitte kontaktieren Sie uns unter info@adlerundsohn.com."
+      ? "Der Link ist ungültig oder abgelaufen. Bitte kontaktieren Sie uns unter info@adlerundsohn.de."
       : status === "already"
       ? "Vielen Dank – Ihre Zahlungsbestätigung liegt uns bereits vor."
       : `Vielen Dank für Ihre Zahlung${rechnungNr ? ` zu Rechnung ${rechnungNr}` : ""}. Wir haben Ihre Bestätigung erhalten und prüfen den Zahlungseingang.`;
@@ -34,8 +34,8 @@ function page(status: "ok" | "already" | "invalid", rechnungNr?: string): Respon
   <div class="rule"></div>
   <h1>${title}</h1>
   <p>${message}</p>
-  <a class="btn" href="https://adlerundsohn.com">Zur Kanzlei</a>
-  <div class="foot">Kanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt · info@adlerundsohn.com</div>
+  <a class="btn" href="https://adlerundsohn.de">Zur Kanzlei</a>
+  <div class="foot">Kanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt · info@adlerundsohn.de</div>
 </div></div></body></html>`;
 
   return new Response(html, {

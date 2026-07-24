@@ -51,9 +51,9 @@ function KontaktPage() {
             <div className="grid grid-cols-[8rem_1fr] gap-4">
               <dt className="text-muted-foreground">E-Mail</dt>
               <dd>
-                <a href="mailto:info@adlerundsohn.com" className="text-primary hover:text-gold">info@adlerundsohn.com</a>
+                <a href="mailto:info@adlerundsohn.de" className="text-primary hover:text-gold">info@adlerundsohn.de</a>
                 <br />
-                <a href="mailto:info@adlerundsohn.com" className="text-primary hover:text-gold">info@adlerundsohn.com</a>
+                <a href="mailto:info@adlerundsohn.de" className="text-primary hover:text-gold">info@adlerundsohn.de</a>
               </dd>
             </div>
             <div className="grid grid-cols-[8rem_1fr] gap-4">
