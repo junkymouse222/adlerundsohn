@@ -13,7 +13,7 @@ function page(status: "ok" | "already" | "invalid", angebotNr?: string): Respons
       : "Angebot angenommen";
   const message =
     status === "invalid"
-      ? "Der Link ist ungültig oder abgelaufen. Bitte kontaktieren Sie uns unter info@adlerundsohn.com."
+      ? "Der Link ist ungültig oder abgelaufen. Bitte kontaktieren Sie uns unter info@adlerundsohn.de."
       : status === "already"
       ? "Vielen Dank – dieses Angebot wurde bereits angenommen. Wir sind bereits an der Umsetzung."
       : `Vielen Dank für Ihr Vertrauen. Wir haben Ihre Annahme${angebotNr ? ` zu Angebot ${angebotNr}` : ""} erhalten und melden uns in Kürze mit der Rechnung und den nächsten Schritten.`;
@@ -35,7 +35,7 @@ function page(status: "ok" | "already" | "invalid", angebotNr?: string): Respons
   <h1>${title}</h1>
   <p>${message}</p>
   <a class="btn" href="https://adlerundsohn.de">Zur Kanzlei</a>
-  <div class="foot">Kanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt · info@adlerundsohn.com</div>
+  <div class="foot">Kanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt · info@adlerundsohn.de</div>
 </div></div></body></html>`;
 
   return new Response(html, {

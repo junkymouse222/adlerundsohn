@@ -159,7 +159,7 @@ function renderBelegHtml(offer: OfferRow, items: ItemRow[], opts: BelegOptions):
               <img src="${logoUrl()}" alt="Kanzlei Adler und Sohn" height="64" style="display:block;height:64px;width:auto;border:0;" />
               <div style="margin-top:14px;font-size:11px;line-height:1.6;color:#6b6455;">
                 Kanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt<br/>
-                Telefon +49 6591 6659636 · info@adlerundsohn.com
+                Telefon +49 6591 6659636 · info@adlerundsohn.de
               </div>
             </td>
             <td style="vertical-align:top;text-align:right;">
@@ -225,7 +225,7 @@ function renderBelegHtml(offer: OfferRow, items: ItemRow[], opts: BelegOptions):
         <!-- Footer -->
         <tr><td style="padding:24px 40px 32px 40px;border-top:1px solid #ece8de;">
           <p style="margin:0;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#8a8578;line-height:1.7;">
-            Kanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt · +49 6591 6659636 · info@adlerundsohn.com · USt-IdNr. DE271552088
+            Kanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt · +49 6591 6659636 · info@adlerundsohn.de · USt-IdNr. DE271552088
           </p>
         </td></tr>
 
