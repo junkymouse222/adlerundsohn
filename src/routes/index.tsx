@@ -18,7 +18,7 @@ export const Route = createFileRoute("/")({
         name: "Rechtsanwaltskanzlei Adler und Sohn",
         description: "Fachanwaltskanzlei für Insolvenzrecht und Insolvenzverwaltung.",
         url: "https://adlerundsohn.com",
-        telephone: "+49-30-40551290",
+        telephone: "+49-4651-8544007",
         address: {
           "@type": "PostalAddress",
           streetAddress: "Strandstraße 14",

@@ -191,7 +191,7 @@ function Footer() {
           <ul className="mt-4 space-y-2 text-sm text-primary-foreground/80">
             <li>Strandstraße 14</li>
             <li>25980 Westerland/Sylt</li>
-            <li>+49 6591 6659636</li>
+            <li>+49 4651 8544007</li>
             <li>info@adlerundsohn.de</li>
             <li>Verkauf & Verwertung: info@adlerundsohn.de</li>
           </ul>

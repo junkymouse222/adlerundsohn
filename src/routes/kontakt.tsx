@@ -42,7 +42,7 @@ function KontaktPage() {
           <dl className="mt-8 space-y-4 border-t border-border pt-8 text-sm">
             <div className="grid grid-cols-[8rem_1fr] gap-4">
               <dt className="text-muted-foreground">Telefon</dt>
-              <dd><a href="tel:+4965916659636" className="text-primary hover:text-gold">+49 6591 6659636</a></dd>
+              <dd><a href="tel:+4946518544007" className="text-primary hover:text-gold">+49 4651 8544007</a></dd>
             </div>
             <div className="grid grid-cols-[8rem_1fr] gap-4">
               <dt className="text-muted-foreground">Telefax</dt>
