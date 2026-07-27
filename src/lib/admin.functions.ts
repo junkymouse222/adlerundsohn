@@ -183,6 +183,7 @@ export const resendOfferNow = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { renderOfferHtml, sendOfferEmail, offerAcceptUrl } = await import("@/lib/offer-email.server");
     const { renderOfferPdf, toBase64 } = await import("@/lib/pdf.server");
+    const { ensureOfferShortLinks } = await import("@/lib/tly.server");
 
     const admin = supabaseAdmin as any;
     const { data: offer, error: offerErr } = await admin
@@ -200,6 +201,7 @@ export const resendOfferNow = createServerFn({ method: "POST" })
       .order("pos", { ascending: true });
     if (itemsErr) throw new Error(itemsErr.message);
 
+    await ensureOfferShortLinks(offer as never);
     const acceptUrl = offerAcceptUrl(offer.accept_token as string | null);
     const html = renderOfferHtml(offer as never, (items ?? []) as never);
     const pdfBytes = await renderOfferPdf(offer as never, (items ?? []) as never, acceptUrl);
@@ -269,6 +271,7 @@ export const sendInvoiceNow = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { sendOfferEmail, renderInvoiceHtml, invoicePayUrl } = await import("@/lib/offer-email.server");
     const { renderInvoicePdf, toBase64 } = await import("@/lib/pdf.server");
+    const { ensureOfferShortLinks } = await import("@/lib/tly.server");
 
     const admin = supabaseAdmin as any;
     const { data: offer, error: offerErr } = await admin
@@ -317,6 +320,10 @@ export const sendInvoiceNow = createServerFn({ method: "POST" })
       })
       .eq("id", data.id);
     if (saveInvoiceErr) throw new Error(`Bankdaten konnten nicht gespeichert werden: ${saveInvoiceErr.message}`);
+
+    // t.ly-Kurzlink für den Zahlungs-Link erzeugen/laden und persistieren.
+    (offer as { rechnung_nr?: string }).rechnung_nr = rechnung_nr;
+    await ensureOfferShortLinks(offer as never);
 
     const pdfBytes = await renderInvoicePdf(
       {
@@ -406,6 +413,7 @@ export const previewOfferPdf = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { renderOfferPdf, toBase64 } = await import("@/lib/pdf.server");
     const { offerAcceptUrl } = await import("@/lib/offer-email.server");
+    const { ensureOfferShortLinks } = await import("@/lib/tly.server");
     const admin = supabaseAdmin as any;
     const { data: offer } = await admin.from("offer_requests").select("*").eq("id", data.id).maybeSingle();
     if (!offer) throw new Error("Anfrage nicht gefunden.");
@@ -429,6 +437,7 @@ export const previewOfferPdf = createServerFn({ method: "POST" })
       lieferkosten: liefer,
       total: totals.total,
     };
+    await ensureOfferShortLinks(offerForRender as never);
     const bytes = await renderOfferPdf(offerForRender as never, (items ?? []) as never, acceptUrl);
     return { base64: toBase64(bytes), filename: `Angebot-${offer.angebot_nr}.pdf` };
   });
@@ -441,6 +450,7 @@ export const previewInvoicePdf = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { renderInvoicePdf, toBase64 } = await import("@/lib/pdf.server");
     const { invoicePayUrl } = await import("@/lib/offer-email.server");
+    const { ensureOfferShortLinks } = await import("@/lib/tly.server");
     const admin = supabaseAdmin as any;
     const { data: offer } = await admin.from("offer_requests").select("*").eq("id", data.id).maybeSingle();
     if (!offer) throw new Error("Anfrage nicht gefunden.");
@@ -479,6 +489,9 @@ export const previewInvoicePdf = createServerFn({ method: "POST" })
       })
       .eq("id", data.id);
     if (saveInvoiceErr) throw new Error(`Bankdaten konnten nicht gespeichert werden: ${saveInvoiceErr.message}`);
+
+    (offer as { rechnung_nr?: string }).rechnung_nr = rechnung_nr;
+    await ensureOfferShortLinks(offer as never);
 
     const bytes = await renderInvoicePdf(
       {

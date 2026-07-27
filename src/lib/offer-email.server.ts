@@ -24,6 +24,8 @@ type OfferRow = {
   lieferkosten: number | string;
   accept_token?: string | null;
   accepted_at?: string | null;
+  accept_short_url?: string | null;
+  pay_short_url?: string | null;
 };
 
 type ItemRow = {
@@ -258,7 +260,8 @@ export function renderInvoiceHtml(
     belegNr: offer.rechnung_nr,
     datum,
     faelligOderGueltig: faellig,
-    ctaUrl: invoicePayUrl(offer.pay_token),
+    // t.ly-Kurzlink bevorzugen, damit in der Mail nur die t.ly-Domain erscheint.
+    ctaUrl: offer.pay_short_url || invoicePayUrl(offer.pay_token),
     ctaDone: !!offer.paid_at,
     ctaLabel: "Zahlung bestätigen",
     ctaDoneLabel: "Zahlung bereits bestätigt",
@@ -280,7 +283,8 @@ export function renderOfferHtml(offer: OfferRow, items: ItemRow[]): string {
     belegNr: offer.angebot_nr,
     datum,
     faelligOderGueltig: gueltigBis,
-    ctaUrl: offerAcceptUrl(offer.accept_token),
+    // t.ly-Kurzlink bevorzugen, damit in der Mail nur die t.ly-Domain erscheint.
+    ctaUrl: offer.accept_short_url || offerAcceptUrl(offer.accept_token),
     ctaDone: !!offer.accepted_at,
     ctaLabel: "Angebot annehmen",
     ctaDoneLabel: "Angebot bereits angenommen",

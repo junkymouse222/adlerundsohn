@@ -63,10 +63,13 @@ function BelegPrintPage() {
       ? (offer.rechnung_faellig_am ?? new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10))
       : new Date(new Date(offer.created_at).getTime() + 7 * 86400000).toISOString().slice(0, 10);
 
+  // t.ly-Kurzlink bevorzugen, damit im PDF/Beleg nur die t.ly-Domain erscheint.
+  const shortUrl = art === "Angebot" ? offer.accept_short_url : offer.pay_short_url;
   const bestaetigungsUrl =
-    art === "Angebot"
+    shortUrl ||
+    (art === "Angebot"
       ? `${siteBase()}/api/public/hooks/accept-offer?token=${encodeURIComponent(offer.accept_token ?? "")}`
-      : `${siteBase()}/api/public/hooks/mark-paid?token=${encodeURIComponent(offer.pay_token ?? "")}`;
+      : `${siteBase()}/api/public/hooks/mark-paid?token=${encodeURIComponent(offer.pay_token ?? "")}`);
 
   const bereitsBestaetigt = art === "Angebot" ? !!offer.accepted_at : !!offer.paid_at;
 
