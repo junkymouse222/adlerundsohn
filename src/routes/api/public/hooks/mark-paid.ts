@@ -2,21 +2,41 @@ import { createFileRoute } from "@tanstack/react-router";
 import logoAsset from "@/assets/kanzlei-logo.png.asset.json";
 
 // Öffentlicher Endpunkt: Kunde klickt in Rechnungs-Mail/PDF auf "Zahlung bestätigen".
-// Erwartet ?token=<pay_token>. Markiert die Rechnung als bezahlt (idempotent).
+// Erwartet ?token=<pay_token>.
+//
+// WICHTIG (Scanner-Schutz): GET zeigt nur eine Bestätigungsseite mit Button.
+// Erst der Klick auf den Button sendet ein POST und verbucht die Zahlung.
 
-function page(status: "ok" | "already" | "invalid", rechnungNr?: string): Response {
+type PageKind = "confirm" | "ok" | "already" | "invalid";
+
+function escapeHtml(s: string): string {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
+function render(kind: PageKind, opts: { token?: string; rechnungNr?: string } = {}): Response {
+  const { token, rechnungNr } = opts;
   const title =
-    status === "invalid"
-      ? "Rechnung nicht gefunden"
-      : status === "already"
-      ? "Zahlung bereits bestätigt"
-      : "Zahlung bestätigt";
-  const message =
-    status === "invalid"
-      ? "Der Link ist ungültig oder abgelaufen. Bitte kontaktieren Sie uns unter info@adlerundsohn.de."
-      : status === "already"
-      ? "Vielen Dank – Ihre Zahlungsbestätigung liegt uns bereits vor."
-      : `Vielen Dank für Ihre Zahlung${rechnungNr ? ` zu Rechnung ${rechnungNr}` : ""}. Wir haben Ihre Bestätigung erhalten und prüfen den Zahlungseingang.`;
+    kind === "confirm" ? "Zahlung bestätigen"
+    : kind === "invalid" ? "Rechnung nicht gefunden"
+    : kind === "already" ? "Zahlung bereits bestätigt"
+    : "Zahlung bestätigt";
+
+  let inner: string;
+  if (kind === "confirm") {
+    inner = `
+  <p>Bitte bestätigen Sie die Zahlung${rechnungNr ? ` zu Rechnung <strong>${escapeHtml(rechnungNr)}</strong>` : ""}. Klicken Sie erst, sobald der Betrag überwiesen wurde.</p>
+  <form method="POST" action="/api/public/hooks/mark-paid?token=${encodeURIComponent(token ?? "")}" style="margin:0;">
+    <button type="submit" class="btn">Zahlung bestätigen</button>
+  </form>`;
+  } else {
+    const message =
+      kind === "invalid"
+        ? "Der Link ist ungültig oder abgelaufen. Bitte kontaktieren Sie uns unter info@adlerundsohn.de."
+        : kind === "already"
+          ? "Vielen Dank – Ihre Zahlungsbestätigung liegt uns bereits vor."
+          : `Vielen Dank für Ihre Zahlung${rechnungNr ? ` zu Rechnung ${escapeHtml(rechnungNr)}` : ""}. Wir haben Ihre Bestätigung erhalten und prüfen den Zahlungseingang.`;
+    inner = `<p>${message}</p><a class="btn" href="https://adlerundsohn.de">Zur Kanzlei</a>`;
+  }
 
   const html = `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>${title}</title>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -27,62 +47,69 @@ function page(status: "ok" | "already" | "invalid", rechnungNr?: string): Respon
   .rule{height:2px;width:56px;background:#c9a55c;margin:14px 0 28px;}
   h1{font-family:Georgia,serif;color:#0f2740;font-size:26px;margin:0 0 16px;}
   p{font-size:15px;line-height:1.7;color:#3a352b;}
-  a.btn{display:inline-block;margin-top:24px;padding:14px 28px;background:#0f2740;color:#f5f3ee;text-decoration:none;font-size:12px;letter-spacing:2px;text-transform:uppercase;font-family:Georgia,serif;}
+  .btn{display:inline-block;margin-top:24px;padding:14px 28px;background:#0f2740;color:#f5f3ee;text-decoration:none;font-size:12px;letter-spacing:2px;text-transform:uppercase;font-family:Georgia,serif;border:0;cursor:pointer;}
   .foot{margin-top:24px;font-size:11px;color:#8a8578;}
 </style></head><body><div class="wrap"><div class="card">
   <img src="${logoAsset.url}" alt="Kanzlei Adler und Sohn" style="height:72px;width:auto;display:block;margin-bottom:16px;" />
   <div class="rule"></div>
   <h1>${title}</h1>
-  <p>${message}</p>
-  <a class="btn" href="https://adlerundsohn.de">Zur Kanzlei</a>
+  ${inner}
   <div class="foot">Kanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt · info@adlerundsohn.de</div>
 </div></div></body></html>`;
 
   return new Response(html, {
-    status: status === "invalid" ? 404 : 200,
+    status: kind === "invalid" ? 404 : 200,
     headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" },
   });
 }
 
-async function handle(request: Request): Promise<Response> {
-  const url = new URL(request.url);
-  const token = url.searchParams.get("token");
-  if (!token) return page("invalid");
-
+async function loadOffer(token: string) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const admin = supabaseAdmin as any;
-
-  const { data: offer, error } = await admin
+  const { data, error } = await admin
     .from("offer_requests")
-    .select("id, rechnung_nr, paid_at, rechnung_status")
+    .select("id, rechnung_nr, paid_at")
     .eq("pay_token", token)
     .maybeSingle();
+  if (error) return null;
+  return data as { id: string; rechnung_nr: string | null; paid_at: string | null } | null;
+}
 
-  if (error || !offer) return page("invalid");
-  if (offer.paid_at) return page("already", offer.rechnung_nr as string);
+async function handleGet(request: Request): Promise<Response> {
+  const token = new URL(request.url).searchParams.get("token");
+  if (!token) return render("invalid");
+  const offer = await loadOffer(token);
+  if (!offer) return render("invalid");
+  if (offer.paid_at) return render("already", { rechnungNr: offer.rechnung_nr ?? undefined });
+  return render("confirm", { token, rechnungNr: offer.rechnung_nr ?? undefined });
+}
+
+async function handlePost(request: Request): Promise<Response> {
+  const token = new URL(request.url).searchParams.get("token");
+  if (!token) return render("invalid");
+  const offer = await loadOffer(token);
+  if (!offer) return render("invalid");
+  if (offer.paid_at) return render("already", { rechnungNr: offer.rechnung_nr ?? undefined });
 
   const ip =
     request.headers.get("cf-connecting-ip") ||
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     null;
 
-  await admin
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  await (supabaseAdmin as any)
     .from("offer_requests")
-    .update({
-      paid_at: new Date().toISOString(),
-      paid_ip: ip,
-      rechnung_status: "paid",
-    })
+    .update({ paid_at: new Date().toISOString(), paid_ip: ip, rechnung_status: "paid" })
     .eq("id", offer.id);
 
-  return page("ok", offer.rechnung_nr as string);
+  return render("ok", { rechnungNr: offer.rechnung_nr ?? undefined });
 }
 
 export const Route = createFileRoute("/api/public/hooks/mark-paid")({
   server: {
     handlers: {
-      GET: async ({ request }) => handle(request),
-      POST: async ({ request }) => handle(request),
+      GET: async ({ request }) => handleGet(request),
+      POST: async ({ request }) => handlePost(request),
     },
   },
 });

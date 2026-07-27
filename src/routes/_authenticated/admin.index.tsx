@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { listOfferRequests, type OfferListRow } from "@/lib/admin.functions";
+import { listOfferRequests, deleteOfferRequest, type OfferListRow } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   component: AdminListPage,
@@ -13,12 +13,50 @@ const fmtEUR = (n: number) =>
 const fmtDate = (iso: string) =>
   new Date(iso).toLocaleString("de-DE", { dateStyle: "medium", timeStyle: "short" });
 
+type Filter = "all" | "pending" | "sent" | "accepted" | "paid" | "failed";
+
+const FILTERS: { key: Filter; label: string }[] = [
+  { key: "all", label: "Alle" },
+  { key: "pending", label: "Offen" },
+  { key: "sent", label: "Gesendet" },
+  { key: "accepted", label: "Akzeptiert" },
+  { key: "paid", label: "Bezahlt" },
+  { key: "failed", label: "Fehlgeschlagen" },
+];
+
+function isAccepted(r: OfferListRow) {
+  return !!r.accepted_at || r.status === "accepted";
+}
+function isPaid(r: OfferListRow) {
+  return r.rechnung_status === "paid";
+}
+
+function matchesFilter(r: OfferListRow, f: Filter): boolean {
+  switch (f) {
+    case "all":
+      return true;
+    case "paid":
+      return isPaid(r);
+    case "accepted":
+      return isAccepted(r) && !isPaid(r);
+    case "sent":
+      return r.status === "sent" && !isAccepted(r) && !isPaid(r);
+    case "pending":
+      return r.status === "pending";
+    case "failed":
+      return r.status === "failed";
+    default:
+      return true;
+  }
+}
+
 function AdminListPage() {
   const navigate = useNavigate();
   const [rows, setRows] = useState<OfferListRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<"all" | "pending" | "sent" | "failed">("all");
+  const [filter, setFilter] = useState<Filter>("all");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   async function load() {
     setLoading(true);
@@ -37,11 +75,30 @@ function AdminListPage() {
     load();
   }, []);
 
-  const filtered = filter === "all" ? rows : rows.filter((r) => r.status === filter);
+  const filtered = rows.filter((r) => matchesFilter(r, filter));
 
   async function handleSignOut() {
     await supabase.auth.signOut();
     navigate({ to: "/auth", replace: true });
+  }
+
+  async function handleDelete(r: OfferListRow) {
+    if (
+      !window.confirm(
+        `Vorgang ${r.angebot_nr} (${r.customer_company || r.customer_name}) wirklich unwiderruflich löschen?`,
+      )
+    ) {
+      return;
+    }
+    setDeletingId(r.id);
+    try {
+      await deleteOfferRequest({ data: { id: r.id } });
+      setRows((prev) => prev.filter((x) => x.id !== r.id));
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Löschen fehlgeschlagen.");
+    } finally {
+      setDeletingId(null);
+    }
   }
 
   return (
@@ -75,17 +132,17 @@ function AdminListPage() {
       </div>
 
       <div className="mt-8 flex flex-wrap items-center gap-2">
-        {(["all", "pending", "sent", "failed"] as const).map((f) => (
+        {FILTERS.map((f) => (
           <button
-            key={f}
-            onClick={() => setFilter(f)}
+            key={f.key}
+            onClick={() => setFilter(f.key)}
             className={`border px-4 py-2 text-xs uppercase tracking-widest ${
-              filter === f
+              filter === f.key
                 ? "border-primary bg-primary text-primary-foreground"
                 : "border-border text-muted-foreground hover:border-primary hover:text-primary"
             }`}
           >
-            {f === "all" ? "Alle" : f === "pending" ? "Offen" : f === "sent" ? "Gesendet" : "Fehlgeschlagen"}
+            {f.label}
           </button>
         ))}
         <button
@@ -111,6 +168,7 @@ function AdminListPage() {
                 <th className="p-3 text-left">Status</th>
                 <th className="p-3 text-left">Versand</th>
                 <th className="p-3 text-right">Summe</th>
+                <th className="p-3 text-right">Aktion</th>
               </tr>
             </thead>
             <tbody>
@@ -128,7 +186,7 @@ function AdminListPage() {
                   </td>
                   <td className="p-3 text-xs">{r.customer_email}</td>
                   <td className="p-3">
-                    <StatusBadge status={r.status} />
+                    <StatusBadge row={r} />
                     {r.error_message && (
                       <div className="mt-1 text-[0.7rem] text-red-700">{r.error_message}</div>
                     )}
@@ -137,11 +195,21 @@ function AdminListPage() {
                     {r.sent_at ? `gesendet ${fmtDate(r.sent_at)}` : `geplant ${fmtDate(r.scheduled_send_at)}`}
                   </td>
                   <td className="p-3 text-right font-medium">{fmtEUR(r.total)}</td>
+                  <td className="p-3 text-right">
+                    <button
+                      onClick={() => handleDelete(r)}
+                      disabled={deletingId === r.id}
+                      className="text-xs uppercase tracking-widest text-red-700 hover:underline disabled:opacity-50"
+                      title="Vorgang löschen"
+                    >
+                      {deletingId === r.id ? "Lösche …" : "Löschen"}
+                    </button>
+                  </td>
                 </tr>
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="p-6 text-center text-sm text-muted-foreground">
+                  <td colSpan={8} className="p-6 text-center text-sm text-muted-foreground">
                     Keine Einträge.
                   </td>
                 </tr>
@@ -154,15 +222,28 @@ function AdminListPage() {
   );
 }
 
-function StatusBadge({ status }: { status: string }) {
-  const label =
-    status === "sent" ? "Gesendet" : status === "failed" ? "Fehler" : "Offen";
-  const cls =
-    status === "sent"
-      ? "border-green-700 text-green-800"
-      : status === "failed"
-      ? "border-red-700 text-red-700"
-      : "border-gold text-primary";
+function StatusBadge({ row }: { row: OfferListRow }) {
+  let label: string;
+  let cls: string;
+  if (isPaid(row)) {
+    label = "Bezahlt";
+    cls = "border-green-700 bg-green-700 text-white";
+  } else if (isAccepted(row)) {
+    label = "Akzeptiert";
+    cls = "border-green-700 text-green-800";
+  } else if (row.rechnung_status === "sent") {
+    label = "Rechnung gesendet";
+    cls = "border-primary text-primary";
+  } else if (row.status === "sent") {
+    label = "Gesendet";
+    cls = "border-border text-foreground/70";
+  } else if (row.status === "failed") {
+    label = "Fehler";
+    cls = "border-red-700 text-red-700";
+  } else {
+    label = "Offen";
+    cls = "border-gold text-primary";
+  }
   return (
     <span className={`inline-block border px-2 py-0.5 text-[0.65rem] uppercase tracking-widest ${cls}`}>
       {label}

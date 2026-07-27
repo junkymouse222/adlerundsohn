@@ -174,6 +174,20 @@ export const updateOfferStatus = createServerFn({ method: "POST" })
   });
 
 
+export const deleteOfferRequest = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ context, data }): Promise<{ ok: true }> => {
+    await assertAdmin(context.supabase as never, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const admin = supabaseAdmin as any;
+    // Zuerst Positionen (FK), dann den Vorgang löschen.
+    await admin.from("offer_request_items").delete().eq("request_id", data.id);
+    const { error } = await admin.from("offer_requests").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 export const resendOfferNow = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))

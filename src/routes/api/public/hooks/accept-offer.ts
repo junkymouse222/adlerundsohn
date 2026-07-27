@@ -2,21 +2,43 @@ import { createFileRoute } from "@tanstack/react-router";
 import logoAsset from "@/assets/kanzlei-logo.png.asset.json";
 
 // Öffentlicher Endpunkt: Kunde klickt in Angebots-Mail/PDF auf "Angebot annehmen".
-// Erwartet ?token=<accept_token>. Markiert das Angebot als angenommen (idempotent).
+// Erwartet ?token=<accept_token>.
+//
+// WICHTIG (Scanner-Schutz): GET zeigt nur eine Bestätigungsseite mit Button.
+// Erst der bewusste Klick auf den Button sendet ein POST und verbucht die
+// (rechtsverbindliche) Annahme. Automatische E-Mail-Link-Scanner führen nur
+// GET aus und lösen dadurch KEINE Annahme mehr aus.
 
-function page(status: "ok" | "already" | "invalid", angebotNr?: string): Response {
+type PageKind = "confirm" | "ok" | "already" | "invalid";
+
+function escapeHtml(s: string): string {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
+function render(kind: PageKind, opts: { token?: string; angebotNr?: string } = {}): Response {
+  const { token, angebotNr } = opts;
   const title =
-    status === "invalid"
-      ? "Angebot nicht gefunden"
-      : status === "already"
-      ? "Angebot bereits angenommen"
-      : "Angebot angenommen";
-  const message =
-    status === "invalid"
-      ? "Der Link ist ungültig oder abgelaufen. Bitte kontaktieren Sie uns unter info@adlerundsohn.de."
-      : status === "already"
-      ? "Vielen Dank – dieses Angebot wurde bereits angenommen. Wir sind bereits an der Umsetzung."
-      : `Vielen Dank für Ihr Vertrauen. Wir haben Ihre Annahme${angebotNr ? ` zu Angebot ${angebotNr}` : ""} erhalten und melden uns in Kürze mit der Rechnung und den nächsten Schritten.`;
+    kind === "confirm" ? "Angebot annehmen"
+    : kind === "invalid" ? "Angebot nicht gefunden"
+    : kind === "already" ? "Angebot bereits angenommen"
+    : "Angebot angenommen";
+
+  let inner: string;
+  if (kind === "confirm") {
+    inner = `
+  <p>Bitte bestätigen Sie die verbindliche Annahme${angebotNr ? ` des Angebots <strong>${escapeHtml(angebotNr)}</strong>` : ""}. Mit dem Klick auf den Button nehmen Sie das Angebot rechtsverbindlich an.</p>
+  <form method="POST" action="/api/public/hooks/accept-offer?token=${encodeURIComponent(token ?? "")}" style="margin:0;">
+    <button type="submit" class="btn">Angebot verbindlich annehmen</button>
+  </form>`;
+  } else {
+    const message =
+      kind === "invalid"
+        ? "Der Link ist ungültig oder abgelaufen. Bitte kontaktieren Sie uns unter info@adlerundsohn.de."
+        : kind === "already"
+          ? "Vielen Dank – dieses Angebot wurde bereits angenommen. Wir sind bereits an der Umsetzung."
+          : `Vielen Dank für Ihr Vertrauen. Wir haben Ihre Annahme${angebotNr ? ` zu Angebot ${escapeHtml(angebotNr)}` : ""} erhalten und melden uns in Kürze mit der Rechnung und den nächsten Schritten.`;
+    inner = `<p>${message}</p><a class="btn" href="https://adlerundsohn.de">Zur Kanzlei</a>`;
+  }
 
   const html = `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>${title}</title>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -27,58 +49,71 @@ function page(status: "ok" | "already" | "invalid", angebotNr?: string): Respons
   .rule{height:2px;width:56px;background:#c9a55c;margin:14px 0 28px;}
   h1{font-family:Georgia,serif;color:#0f2740;font-size:26px;margin:0 0 16px;}
   p{font-size:15px;line-height:1.7;color:#3a352b;}
-  a.btn{display:inline-block;margin-top:24px;padding:14px 28px;background:#0f2740;color:#f5f3ee;text-decoration:none;font-size:12px;letter-spacing:2px;text-transform:uppercase;font-family:Georgia,serif;}
+  .btn{display:inline-block;margin-top:24px;padding:14px 28px;background:#0f2740;color:#f5f3ee;text-decoration:none;font-size:12px;letter-spacing:2px;text-transform:uppercase;font-family:Georgia,serif;border:0;cursor:pointer;}
   .foot{margin-top:24px;font-size:11px;color:#8a8578;}
 </style></head><body><div class="wrap"><div class="card">
   <img src="${logoAsset.url}" alt="Kanzlei Adler und Sohn" style="height:72px;width:auto;display:block;margin-bottom:16px;" />
   <div class="rule"></div>
   <h1>${title}</h1>
-  <p>${message}</p>
-  <a class="btn" href="https://adlerundsohn.de">Zur Kanzlei</a>
+  ${inner}
   <div class="foot">Kanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt · info@adlerundsohn.de</div>
 </div></div></body></html>`;
 
   return new Response(html, {
-    status: status === "invalid" ? 404 : 200,
+    status: kind === "invalid" ? 404 : 200,
     headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" },
   });
 }
 
-async function handle(request: Request): Promise<Response> {
-  const url = new URL(request.url);
-  const token = url.searchParams.get("token");
-  if (!token) return page("invalid");
-
+async function loadOffer(token: string) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const admin = supabaseAdmin as any;
-
-  const { data: offer, error } = await admin
+  const { data, error } = await admin
     .from("offer_requests")
     .select("id, angebot_nr, accepted_at")
     .eq("accept_token", token)
     .maybeSingle();
+  if (error) return null;
+  return data as { id: string; angebot_nr: string; accepted_at: string | null } | null;
+}
 
-  if (error || !offer) return page("invalid");
-  if (offer.accepted_at) return page("already", offer.angebot_nr as string);
+// GET: nur anzeigen (Bestätigungsseite / Status), niemals verbuchen.
+async function handleGet(request: Request): Promise<Response> {
+  const token = new URL(request.url).searchParams.get("token");
+  if (!token) return render("invalid");
+  const offer = await loadOffer(token);
+  if (!offer) return render("invalid");
+  if (offer.accepted_at) return render("already", { angebotNr: offer.angebot_nr });
+  return render("confirm", { token, angebotNr: offer.angebot_nr });
+}
+
+// POST: verbindliche Annahme verbuchen (idempotent).
+async function handlePost(request: Request): Promise<Response> {
+  const token = new URL(request.url).searchParams.get("token");
+  if (!token) return render("invalid");
+  const offer = await loadOffer(token);
+  if (!offer) return render("invalid");
+  if (offer.accepted_at) return render("already", { angebotNr: offer.angebot_nr });
 
   const ip =
     request.headers.get("cf-connecting-ip") ||
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     null;
 
-  await admin
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  await (supabaseAdmin as any)
     .from("offer_requests")
-    .update({ accepted_at: new Date().toISOString(), accepted_ip: ip })
+    .update({ accepted_at: new Date().toISOString(), accepted_ip: ip, status: "accepted" })
     .eq("id", offer.id);
 
-  return page("ok", offer.angebot_nr as string);
+  return render("ok", { angebotNr: offer.angebot_nr });
 }
 
 export const Route = createFileRoute("/api/public/hooks/accept-offer")({
   server: {
     handlers: {
-      GET: async ({ request }) => handle(request),
-      POST: async ({ request }) => handle(request),
+      GET: async ({ request }) => handleGet(request),
+      POST: async ({ request }) => handlePost(request),
     },
   },
 });
