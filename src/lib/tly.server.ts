@@ -12,12 +12,11 @@ import { offerAcceptUrl, invoicePayUrl } from "@/lib/offer-email.server";
 
 const TLY_SHORTEN_ENDPOINT = "https://api.t.ly/api/v1/link/shorten";
 
-// Erzeugt einen t.ly-Kurzlink für die übergebene URL. Gibt null zurück, wenn
-// kein Token gesetzt ist oder die API fehlschlägt (Aufrufer nutzt dann Fallback).
-export async function shortenUrl(longUrl: string, description?: string): Promise<string | null> {
-  const token = process.env.TLY_API_TOKEN?.trim();
-  if (!token) return null;
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+type ShortenAttempt = { shortUrl: string } | { shortUrl: null; retryable: boolean };
+
+async function shortenOnce(longUrl: string, description: string | undefined, token: string): Promise<ShortenAttempt> {
   const timeoutMs = Number(process.env.TLY_TIMEOUT_MS || 15000);
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
@@ -40,21 +39,41 @@ export async function shortenUrl(longUrl: string, description?: string): Promise
 
     const text = await res.text();
     if (!res.ok) {
-      console.error(`[t.ly] shorten failed [${res.status}]: ${text.slice(0, 300)}`);
-      return null;
+      // 429 (Rate-Limit) und 5xx sind transient -> erneut versuchen.
+      const retryable = res.status === 429 || res.status >= 500;
+      console.error(`[t.ly] shorten failed [${res.status}]${retryable ? " (retry)" : ""}: ${text.slice(0, 300)}`);
+      return { shortUrl: null, retryable };
     }
     const data = JSON.parse(text) as { short_url?: string };
     if (!data.short_url) {
       console.error(`[t.ly] response ohne short_url: ${text.slice(0, 200)}`);
-      return null;
+      return { shortUrl: null, retryable: false };
     }
-    return data.short_url;
+    return { shortUrl: data.short_url };
   } catch (error) {
-    console.error(`[t.ly] shorten error: ${error instanceof Error ? error.message : String(error)}`);
-    return null;
+    // Netzwerkfehler/Timeout -> transient.
+    console.error(`[t.ly] shorten error (retry): ${error instanceof Error ? error.message : String(error)}`);
+    return { shortUrl: null, retryable: true };
   } finally {
     clearTimeout(timer);
   }
+}
+
+// Erzeugt einen t.ly-Kurzlink für die übergebene URL. Wiederholt bei transienten
+// Fehlern (Rate-Limit/Netzwerk) mit Backoff. Gibt null zurück, wenn kein Token
+// gesetzt ist oder es endgültig fehlschlägt (Aufrufer nutzt dann Fallback).
+export async function shortenUrl(longUrl: string, description?: string): Promise<string | null> {
+  const token = process.env.TLY_API_TOKEN?.trim();
+  if (!token) return null;
+
+  const maxAttempts = 3;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const result = await shortenOnce(longUrl, description, token);
+    if (result.shortUrl) return result.shortUrl;
+    if (!result.retryable || attempt === maxAttempts) return null;
+    await sleep(500 * attempt);
+  }
+  return null;
 }
 
 type OfferLinkRow = {
@@ -75,11 +94,14 @@ type OfferLinkRow = {
 // sodass Resends/Vorschauen keine Duplikate bei t.ly erzeugen.
 export async function ensureOfferShortLinks(
   offer: OfferLinkRow,
+  opts: { accept?: boolean; pay?: boolean } = { accept: true, pay: true },
 ): Promise<{ acceptUrl: string | null; payUrl: string | null }> {
+  const wantAccept = opts.accept ?? false;
+  const wantPay = opts.pay ?? false;
   const patch: Record<string, string> = {};
 
   let acceptUrl: string | null = offer.accept_short_url ?? null;
-  if (!acceptUrl && offer.accept_token) {
+  if (wantAccept && !acceptUrl && offer.accept_token) {
     const long = offerAcceptUrl(offer.accept_token);
     const short = long ? await shortenUrl(long, offer.angebot_nr ? `Angebot ${offer.angebot_nr}` : undefined) : null;
     if (short) {
@@ -90,7 +112,7 @@ export async function ensureOfferShortLinks(
   }
 
   let payUrl: string | null = offer.pay_short_url ?? null;
-  if (!payUrl && offer.pay_token) {
+  if (wantPay && !payUrl && offer.pay_token) {
     const long = invoicePayUrl(offer.pay_token);
     const label = offer.rechnung_nr
       ? `Rechnung ${offer.rechnung_nr}`

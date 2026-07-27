@@ -201,7 +201,7 @@ export const resendOfferNow = createServerFn({ method: "POST" })
       .order("pos", { ascending: true });
     if (itemsErr) throw new Error(itemsErr.message);
 
-    await ensureOfferShortLinks(offer as never);
+    await ensureOfferShortLinks(offer as never, { accept: true });
     const acceptUrl = offerAcceptUrl(offer.accept_token as string | null);
     const html = renderOfferHtml(offer as never, (items ?? []) as never);
     const pdfBytes = await renderOfferPdf(offer as never, (items ?? []) as never, acceptUrl);
@@ -323,7 +323,7 @@ export const sendInvoiceNow = createServerFn({ method: "POST" })
 
     // t.ly-Kurzlink für den Zahlungs-Link erzeugen/laden und persistieren.
     (offer as { rechnung_nr?: string }).rechnung_nr = rechnung_nr;
-    await ensureOfferShortLinks(offer as never);
+    await ensureOfferShortLinks(offer as never, { pay: true });
 
     const pdfBytes = await renderInvoicePdf(
       {
@@ -437,7 +437,7 @@ export const previewOfferPdf = createServerFn({ method: "POST" })
       lieferkosten: liefer,
       total: totals.total,
     };
-    await ensureOfferShortLinks(offerForRender as never);
+    await ensureOfferShortLinks(offerForRender as never, { accept: true });
     const bytes = await renderOfferPdf(offerForRender as never, (items ?? []) as never, acceptUrl);
     return { base64: toBase64(bytes), filename: `Angebot-${offer.angebot_nr}.pdf` };
   });
@@ -491,7 +491,7 @@ export const previewInvoicePdf = createServerFn({ method: "POST" })
     if (saveInvoiceErr) throw new Error(`Bankdaten konnten nicht gespeichert werden: ${saveInvoiceErr.message}`);
 
     (offer as { rechnung_nr?: string }).rechnung_nr = rechnung_nr;
-    await ensureOfferShortLinks(offer as never);
+    await ensureOfferShortLinks(offer as never, { pay: true });
 
     const bytes = await renderInvoicePdf(
       {

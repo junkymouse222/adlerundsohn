@@ -52,7 +52,7 @@ export const Route = createFileRoute("/api/public/hooks/send-scheduled-offers")(
           }
 
           try {
-            await ensureOfferShortLinks(row as never);
+            await ensureOfferShortLinks(row as never, { accept: true });
             const html = renderOfferHtml(row as never, (items ?? []) as never);
             const pdfBytes = await renderOfferPdf(row as never, (items ?? []) as never);
             const send = await sendOfferEmail({
