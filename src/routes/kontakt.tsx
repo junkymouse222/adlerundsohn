@@ -46,7 +46,7 @@ function KontaktPage() {
             </div>
             <div className="grid grid-cols-[8rem_1fr] gap-4">
               <dt className="text-muted-foreground">Telefax</dt>
-              <dd>+49 (0)30 40 55 12 91</dd>
+              <dd>+49 4651 8544008</dd>
             </div>
             <div className="grid grid-cols-[8rem_1fr] gap-4">
               <dt className="text-muted-foreground">E-Mail</dt>
