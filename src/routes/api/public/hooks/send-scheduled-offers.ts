@@ -20,6 +20,7 @@ export const Route = createFileRoute("/api/public/hooks/send-scheduled-offers")(
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { renderOfferHtml, sendOfferEmail } = await import("@/lib/offer-email.server");
         const { renderOfferPdf, toBase64 } = await import("@/lib/pdf.server");
+        const { ensureOfferShortLinks } = await import("@/lib/tly.server");
 
         const nowIso = new Date().toISOString();
 
@@ -51,6 +52,7 @@ export const Route = createFileRoute("/api/public/hooks/send-scheduled-offers")(
           }
 
           try {
+            await ensureOfferShortLinks(row as never, { accept: true });
             const html = renderOfferHtml(row as never, (items ?? []) as never);
             const pdfBytes = await renderOfferPdf(row as never, (items ?? []) as never);
             const send = await sendOfferEmail({

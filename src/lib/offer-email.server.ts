@@ -24,6 +24,8 @@ type OfferRow = {
   lieferkosten: number | string;
   accept_token?: string | null;
   accepted_at?: string | null;
+  accept_short_url?: string | null;
+  pay_short_url?: string | null;
 };
 
 type ItemRow = {
@@ -159,7 +161,7 @@ function renderBelegHtml(offer: OfferRow, items: ItemRow[], opts: BelegOptions):
               <img src="${logoUrl()}" alt="Kanzlei Adler und Sohn" height="64" style="display:block;height:64px;width:auto;border:0;" />
               <div style="margin-top:14px;font-size:11px;line-height:1.6;color:#6b6455;">
                 Kanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt<br/>
-                Telefon +49 4651 8544007 · info@adlerundsohn.de
+                Telefon +49 4651 8544007
               </div>
             </td>
             <td style="vertical-align:top;text-align:right;">
@@ -225,7 +227,7 @@ function renderBelegHtml(offer: OfferRow, items: ItemRow[], opts: BelegOptions):
         <!-- Footer -->
         <tr><td style="padding:24px 40px 32px 40px;border-top:1px solid #ece8de;">
           <p style="margin:0;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#8a8578;line-height:1.7;">
-            Kanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt · +49 4651 8544007 · info@adlerundsohn.de · USt-IdNr. DE271552088
+            Kanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt · +49 4651 8544007 · USt-IdNr. DE271552088
           </p>
         </td></tr>
 
@@ -258,7 +260,8 @@ export function renderInvoiceHtml(
     belegNr: offer.rechnung_nr,
     datum,
     faelligOderGueltig: faellig,
-    ctaUrl: invoicePayUrl(offer.pay_token),
+    // t.ly-Kurzlink bevorzugen, damit in der Mail nur die t.ly-Domain erscheint.
+    ctaUrl: offer.pay_short_url || invoicePayUrl(offer.pay_token),
     ctaDone: !!offer.paid_at,
     ctaLabel: "Zahlung bestätigen",
     ctaDoneLabel: "Zahlung bereits bestätigt",
@@ -280,7 +283,8 @@ export function renderOfferHtml(offer: OfferRow, items: ItemRow[]): string {
     belegNr: offer.angebot_nr,
     datum,
     faelligOderGueltig: gueltigBis,
-    ctaUrl: offerAcceptUrl(offer.accept_token),
+    // t.ly-Kurzlink bevorzugen, damit in der Mail nur die t.ly-Domain erscheint.
+    ctaUrl: offer.accept_short_url || offerAcceptUrl(offer.accept_token),
     ctaDone: !!offer.accepted_at,
     ctaLabel: "Angebot annehmen",
     ctaDoneLabel: "Angebot bereits angenommen",

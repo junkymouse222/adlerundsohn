@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { offerAcceptUrl, renderInvoiceHtml, renderOfferHtml, sendOfferEmail, invoicePayUrl } from "@/lib/offer-email.server";
+import { ensureOfferShortLinks } from "@/lib/tly.server";
 import { renderInvoicePdf, renderOfferPdf, toBase64 } from "@/lib/pdf.server";
 import { DEFAULT_MWST_RATE, DEFAULT_NEUKUNDEN_RABATT, computeOfferTotals } from "@/lib/offer-totals";
 
@@ -120,6 +121,9 @@ export async function sendOfferFromAdmin(request: Request, input: unknown): Prom
 
   let html = "";
   try {
+    // t.ly-Kurzlinks erzeugen/laden und am Datensatz speichern, damit sowohl die
+    // E-Mail als auch das (über /beleg-print gerenderte) PDF den Kurzlink zeigen.
+    await ensureOfferShortLinks(offerForRender as never, { accept: true });
     const acceptUrl = offerAcceptUrl(offer.accept_token as string | null);
     html = renderOfferHtml(offerForRender as never, (items ?? []) as never);
     const pdfBytes = await renderOfferPdf(offerForRender as never, (items ?? []) as never, acceptUrl);
@@ -205,6 +209,11 @@ export async function sendInvoiceFromAdmin(request: Request, input: unknown): Pr
       })
       .eq("id", data.id);
     if (saveInvoiceErr) throw new AdminSendError(`Bankdaten konnten nicht gespeichert werden: ${saveInvoiceErr.message}`, 500);
+
+    // t.ly-Kurzlink für den Zahlungs-Link erzeugen/laden und persistieren, bevor
+    // PDF (via /beleg-print) und E-Mail gerendert werden.
+    (offer as { rechnung_nr?: string }).rechnung_nr = rechnung_nr;
+    await ensureOfferShortLinks(offer as never, { pay: true });
 
     const pdfBytes = await renderInvoicePdf(
       {

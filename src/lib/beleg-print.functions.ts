@@ -30,6 +30,8 @@ export type BelegDbOffer = {
   accepted_at: string | null;
   pay_token: string | null;
   paid_at: string | null;
+  accept_short_url: string | null;
+  pay_short_url: string | null;
   rechnung_nr: string | null;
   rechnung_faellig_am: string | null;
   bank_inhaber: string | null;
