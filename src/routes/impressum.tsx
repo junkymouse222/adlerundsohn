@@ -27,12 +27,8 @@ function ImpressumPage() {
             <p className="mt-3">Rechtsanwaltskanzlei Adler und Sohn<br />Dr. Friedrich Adler<br />Strandstraße 14<br />25980 Westerland/Sylt</p>
           </div>
           <div>
-            <p className="text-[0.7rem] uppercase tracking-[0.22em] text-muted-foreground">Zweite Firma</p>
-            <p className="mt-3">Fritz Krause GmbH<br />Friedrichstraße 32<br />25980 Sylt</p>
-          </div>
-          <div>
             <p className="text-[0.7rem] uppercase tracking-[0.22em] text-muted-foreground">Kontakt</p>
-            <p className="mt-3">Telefon: +49 4651 8544007<br />Telefax: +49 (0)30 40 55 12 91<br />E-Mail: info@adlerundsohn.de · info@adlerundsohn.de</p>
+            <p className="mt-3">Telefon: +49 4651 8544007<br />Telefax: +49 4651 8544008<br />E-Mail: info@adlerundsohn.de</p>
           </div>
           <div>
             <p className="text-[0.7rem] uppercase tracking-[0.22em] text-muted-foreground">USt-IdNr.</p>
