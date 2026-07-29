@@ -49,7 +49,7 @@ async function shortenOnce(longUrl: string, description: string | undefined, tok
       console.error(`[t.ly] response ohne short_url: ${text.slice(0, 200)}`);
       return { shortUrl: null, retryable: false };
     }
-    return { shortUrl: data.short_url };
+    return { shortUrl: data.short_url, retryable: false };
   } catch (error) {
     // Netzwerkfehler/Timeout -> transient.
     console.error(`[t.ly] shorten error (retry): ${error instanceof Error ? error.message : String(error)}`);
