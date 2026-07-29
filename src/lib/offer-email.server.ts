@@ -306,7 +306,6 @@ export function renderPaymentConfirmationHtml(offer: {
     ? `<div style="margin-top:4px;font-size:13px;color:#6b6656;">${escapeHtml(offer.customer_company.trim())}</div>`
     : "";
   const belegNr = escapeHtml(offer.rechnung_nr || offer.angebot_nr);
-  const belegLabel = offer.rechnung_nr ? "Rechnung" : "Angebot";
   const betrag =
     offer.total != null && Number.isFinite(Number(offer.total))
       ? fmtEUR(Number(offer.total))
@@ -341,7 +340,7 @@ export function renderPaymentConfirmationHtml(offer: {
           ${firma}
           <p style="margin:18px 0 0 0;">
             vielen Dank. Wir bestätigen den Zahlungseingang zu Ihrer
-            <strong>${belegLabel} ${belegNr}</strong>${betrag ? ` (${betrag})` : ""}
+            <strong>Rechnung ${belegNr}</strong>${betrag ? ` (${betrag})` : ""}
             vom ${paidAt}.
           </p>
           <p style="margin:18px 0 0 0;">
