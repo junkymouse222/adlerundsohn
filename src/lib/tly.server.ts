@@ -14,7 +14,7 @@ const TLY_SHORTEN_ENDPOINT = "https://api.t.ly/api/v1/link/shorten";
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-type ShortenAttempt = { shortUrl: string } | { shortUrl: null; retryable: boolean };
+type ShortenAttempt = { shortUrl: string | null; retryable: boolean };
 
 async function shortenOnce(longUrl: string, description: string | undefined, token: string): Promise<ShortenAttempt> {
   const timeoutMs = Number(process.env.TLY_TIMEOUT_MS || 15000);
