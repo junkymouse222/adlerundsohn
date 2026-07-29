@@ -292,6 +292,82 @@ export function renderOfferHtml(offer: OfferRow, items: ItemRow[]): string {
   });
 }
 
+/** Kurze Bestätigungsmail nach Zahlungseingang — ohne PDF/CTA. */
+export function renderPaymentConfirmationHtml(offer: {
+  customer_name: string;
+  customer_company?: string | null;
+  angebot_nr: string;
+  rechnung_nr?: string | null;
+  total?: number | string | null;
+  paid_at?: string | null;
+}): string {
+  const anredeName = escapeHtml(offer.customer_name.trim() || "Kunde");
+  const firma = offer.customer_company?.trim()
+    ? `<div style="margin-top:4px;font-size:13px;color:#6b6656;">${escapeHtml(offer.customer_company.trim())}</div>`
+    : "";
+  const belegNr = escapeHtml(offer.rechnung_nr || offer.angebot_nr);
+  const belegLabel = offer.rechnung_nr ? "Rechnung" : "Angebot";
+  const betrag =
+    offer.total != null && Number.isFinite(Number(offer.total))
+      ? fmtEUR(Number(offer.total))
+      : null;
+  const paidAt = offer.paid_at
+    ? new Date(offer.paid_at).toLocaleDateString("de-DE", { dateStyle: "medium" })
+    : new Date().toLocaleDateString("de-DE", { dateStyle: "medium" });
+
+  return `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Zahlungseingang bestätigt</title></head>
+<body style="margin:0;padding:0;background:#efece4;font-family:'Helvetica Neue',Arial,sans-serif;color:#1a1a1a;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#efece4;padding:32px 12px;">
+    <tr><td align="center">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border:1px solid #e7e2d4;">
+
+        <tr><td style="padding:36px 40px 20px 40px;border-bottom:1px solid #c9a55c;">
+          <img src="${logoUrl()}" alt="Kanzlei Adler und Sohn" height="56" style="display:block;height:56px;width:auto;border:0;" />
+          <div style="margin-top:14px;font-size:11px;line-height:1.6;color:#6b6455;">
+            Kanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt<br/>
+            Telefon +49 4651 8544007
+          </div>
+        </td></tr>
+
+        <tr><td style="padding:36px 40px 8px 40px;">
+          <div style="font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#8a8578;">Zahlungseingang</div>
+          <h1 style="margin:10px 0 0 0;font-family:Georgia,serif;font-size:26px;font-weight:600;color:#0f2740;line-height:1.25;">
+            Zahlungseingang bestätigt
+          </h1>
+        </td></tr>
+
+        <tr><td style="padding:20px 40px 0 40px;font-size:14px;line-height:1.7;color:#3a352b;">
+          <p style="margin:0;">Sehr geehrte/r ${anredeName},</p>
+          ${firma}
+          <p style="margin:18px 0 0 0;">
+            vielen Dank. Wir bestätigen den Zahlungseingang zu Ihrer
+            <strong>${belegLabel} ${belegNr}</strong>${betrag ? ` (${betrag})` : ""}
+            vom ${paidAt}.
+          </p>
+          <p style="margin:18px 0 0 0;">
+            Unsere Spedition wird sich in Kürze bei Ihnen melden, um einen Liefertermin zu vereinbaren.
+          </p>
+          <p style="margin:18px 0 0 0;">
+            Bei Rückfragen erreichen Sie uns unter Telefon +49 4651 8544007.
+          </p>
+          <p style="margin:28px 0 0 0;">
+            Mit freundlichen Grüßen<br/>
+            <strong>Kanzlei Adler und Sohn</strong>
+          </p>
+        </td></tr>
+
+        <tr><td style="padding:32px 40px 32px 40px;border-top:1px solid #ece8de;margin-top:24px;">
+          <p style="margin:0;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#8a8578;line-height:1.7;">
+            Kanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt · +49 4651 8544007 · USt-IdNr. DE271552088
+          </p>
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body></html>`;
+}
+
 function escapeHtml(s: string): string {
   return String(s)
     .replace(/&/g, "&amp;")
