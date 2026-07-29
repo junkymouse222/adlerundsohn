@@ -168,8 +168,8 @@ export const PRODUKTE: Produkt[] = [
   { pos: 120, artikel: "P120", name: "Toilettenpapier Isabella 3-lagig (1.152 Rollen)", beschreibung: "extra weiß, 250 Blatt/Rolle", einzelpreis: 331.76, einheit: "Stk.", kategorie: KATEGORIEN[10] },
 
   // XII. Elektronik & IT
-  { pos: 121, artikel: "P121", name: "Apple MacBook Pro 14\" M4, 16 GB / 512 GB", beschreibung: "Space Schwarz, wie neu", einzelpreis: 1050.00, einheit: "Stk.", kategorie: KATEGORIEN[11] },
-  { pos: 122, artikel: "P122", name: "Mitsubishi Electric Split-Klima MUZ/MSZ-HR35VF", beschreibung: "3,4 kW, bis 35 m²", einzelpreis: 780.00, einheit: "Stk.", kategorie: KATEGORIEN[11] },
-  { pos: 123, artikel: "P123", name: "Daikin Perfera FTXM+RXM Quick Connect", beschreibung: "3,5 kW, A+++, WiFi", einzelpreis: 1700.00, einheit: "Stk.", kategorie: KATEGORIEN[11] },
+  { pos: 121, artikel: "P121", name: "Apple MacBook Pro 14\" M4, 16 GB / 512 GB", beschreibung: "Space Schwarz, wie neu", einzelpreis: 546.00, einheit: "Stk.", kategorie: KATEGORIEN[11] },
+  { pos: 122, artikel: "P122", name: "Mitsubishi Electric Split-Klima MUZ/MSZ-HR35VF", beschreibung: "3,4 kW, bis 35 m²", einzelpreis: 1190.00, einheit: "Stk.", kategorie: KATEGORIEN[11] },
+  { pos: 123, artikel: "P123", name: "Daikin Perfera FTXM+RXM Quick Connect", beschreibung: "3,5 kW, A+++, WiFi", einzelpreis: 1015.00, einheit: "Stk.", kategorie: KATEGORIEN[11] },
   { pos: 124, artikel: "P124", name: "Bosch CL7000i 53 E Split-Klima Quick-Connect", beschreibung: "5,0 kW, bis 55 m²", einzelpreis: 1450.00, einheit: "Stk.", kategorie: KATEGORIEN[11] },
 ];
