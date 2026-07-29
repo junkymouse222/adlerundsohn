@@ -127,6 +127,8 @@ export type Database = {
           paid_at: string | null
           paid_ip: string | null
           pay_token: string
+          payment_confirm_message_id: string | null
+          payment_confirm_sent_at: string | null
           rechnung_error: string | null
           rechnung_faellig_am: string | null
           rechnung_message_id: string | null
@@ -168,6 +170,8 @@ export type Database = {
           paid_at?: string | null
           paid_ip?: string | null
           pay_token?: string
+          payment_confirm_message_id?: string | null
+          payment_confirm_sent_at?: string | null
           rechnung_error?: string | null
           rechnung_faellig_am?: string | null
           rechnung_message_id?: string | null
@@ -209,6 +213,8 @@ export type Database = {
           paid_at?: string | null
           paid_ip?: string | null
           pay_token?: string
+          payment_confirm_message_id?: string | null
+          payment_confirm_sent_at?: string | null
           rechnung_error?: string | null
           rechnung_faellig_am?: string | null
           rechnung_message_id?: string | null

@@ -86,6 +86,8 @@ function AdminDetailPage() {
   const [bankIban, setBankIban] = useState("");
   const [bankBic, setBankBic] = useState("");
   const [invoiceResult, setInvoiceResult] = useState<{ ok: boolean; msg: string } | null>(null);
+  const [paymentConfirming, setPaymentConfirming] = useState(false);
+  const [paymentConfirmResult, setPaymentConfirmResult] = useState<{ ok: boolean; msg: string } | null>(null);
 
   async function load() {
     setLoading(true);
@@ -163,6 +165,28 @@ function AdminDetailPage() {
       setInvoiceResult({ ok: false, msg: e instanceof Error ? e.message : "Fehler beim Rechnungsversand." });
     } finally {
       setInvoicing(false);
+    }
+  }
+
+  async function handlePaymentConfirmation() {
+    setPaymentConfirming(true);
+    setPaymentConfirmResult(null);
+    try {
+      const res = await postAdminJson<{ ok: true; messageId?: string }>("/api/public/admin/send-payment-confirmation", {
+        id,
+      });
+      await load();
+      setPaymentConfirmResult({
+        ok: true,
+        msg: `Zahlungsbestätigung versendet${res.messageId ? ` (ID: ${res.messageId})` : ""}.`,
+      });
+    } catch (e) {
+      setPaymentConfirmResult({
+        ok: false,
+        msg: e instanceof Error ? e.message : "Fehler beim Versand der Zahlungsbestätigung.",
+      });
+    } finally {
+      setPaymentConfirming(false);
     }
   }
 
@@ -478,6 +502,12 @@ function AdminDetailPage() {
             {offer.rechnung_sent_at && <div className="flex justify-between"><dt className="text-muted-foreground">Rechnung gesendet</dt><dd>{fmtDate(offer.rechnung_sent_at)}</dd></div>}
             {offer.rechnung_faellig_am && <div className="flex justify-between"><dt className="text-muted-foreground">Fällig am</dt><dd>{new Date(offer.rechnung_faellig_am).toLocaleDateString("de-DE")}</dd></div>}
             {offer.paid_at && <div className="flex justify-between border-t border-border pt-2"><dt className="text-muted-foreground">Bezahlt</dt><dd className="text-green-800 font-medium">{fmtDate(offer.paid_at)}</dd></div>}
+            {offer.payment_confirm_sent_at && (
+              <div className="flex justify-between">
+                <dt className="text-muted-foreground">Zahlungsbestätigung</dt>
+                <dd>{fmtDate(offer.payment_confirm_sent_at)}</dd>
+              </div>
+            )}
             <div className="border-t border-border pt-3 flex flex-wrap gap-2">
               {!offer.paid_at ? (
                 <button
@@ -508,7 +538,23 @@ function AdminDetailPage() {
                   Bezahlt-Status entfernen
                 </button>
               )}
+              <button
+                onClick={handlePaymentConfirmation}
+                disabled={paymentConfirming}
+                className="border border-gold bg-parchment px-3 py-1.5 text-[0.65rem] uppercase tracking-widest text-primary hover:bg-primary hover:text-primary-foreground disabled:opacity-60"
+              >
+                {paymentConfirming
+                  ? "Wird gesendet …"
+                  : offer.payment_confirm_sent_at
+                    ? "Zahlungsbestätigung erneut senden"
+                    : "Zahlungsbestätigung senden"}
+              </button>
             </div>
+            {paymentConfirmResult && (
+              <div className={`mt-3 border p-3 text-xs ${paymentConfirmResult.ok ? "border-green-700 bg-green-50 text-green-900" : "border-red-700 bg-red-50 text-red-800"}`}>
+                {paymentConfirmResult.msg}
+              </div>
+            )}
             {offer.rechnung_error && <div className="mt-2 border-t border-border pt-2 text-red-700">{offer.rechnung_error}</div>}
             {offer.error_message && <div className="mt-2 border-t border-border pt-2 text-red-700">{offer.error_message}</div>}
           </dl>

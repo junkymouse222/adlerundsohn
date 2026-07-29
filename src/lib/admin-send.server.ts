@@ -1,7 +1,14 @@
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { offerAcceptUrl, renderInvoiceHtml, renderOfferHtml, sendOfferEmail, invoicePayUrl } from "@/lib/offer-email.server";
+import {
+  offerAcceptUrl,
+  renderInvoiceHtml,
+  renderOfferHtml,
+  renderPaymentConfirmationHtml,
+  sendOfferEmail,
+  invoicePayUrl,
+} from "@/lib/offer-email.server";
 import { ensureOfferShortLinks } from "@/lib/tly.server";
 import { renderInvoicePdf, renderOfferPdf, toBase64 } from "@/lib/pdf.server";
 import { DEFAULT_MWST_RATE, DEFAULT_NEUKUNDEN_RABATT, computeOfferTotals } from "@/lib/offer-totals";
@@ -283,4 +290,61 @@ export async function sendInvoiceFromAdmin(request: Request, input: unknown): Pr
     if (error instanceof AdminSendError) throw error;
     throw new AdminSendError(message, 500);
   }
+}
+
+/** Bestätigung an den Kunden: Zahlungseingang OK, Spedition meldet sich zum Liefertermin. */
+export async function sendPaymentConfirmationFromAdmin(
+  request: Request,
+  input: unknown,
+): Promise<AdminSendResult> {
+  await assertAdminRequest(request);
+  const { id } = IdSchema.parse(input);
+  const admin = supabaseAdmin as any;
+
+  const { data: offer, error: offerErr } = await admin.from("offer_requests").select("*").eq("id", id).maybeSingle();
+  if (offerErr) throw new AdminSendError(offerErr.message, 500);
+  if (!offer) throw new AdminSendError("Anfrage nicht gefunden.", 404);
+
+  if (!offer.customer_email) throw new AdminSendError("Keine Kunden-E-Mail hinterlegt.", 400);
+
+  // Ohne paid_at trotzdem erlauben, aber Status auf paid setzen — Admin hat bewusst geklickt.
+  const paidAt = (offer.paid_at as string | null) ?? new Date().toISOString();
+  if (!offer.paid_at) {
+    await admin
+      .from("offer_requests")
+      .update({ paid_at: paidAt, rechnung_status: "paid" })
+      .eq("id", id);
+  }
+
+  const belegRef = (offer.rechnung_nr as string | null) || (offer.angebot_nr as string);
+  const html = renderPaymentConfirmationHtml({
+    customer_name: offer.customer_name as string,
+    customer_company: offer.customer_company as string | null,
+    angebot_nr: offer.angebot_nr as string,
+    rechnung_nr: offer.rechnung_nr as string | null,
+    total: offer.total as number | string | null,
+    paid_at: paidAt,
+  });
+
+  const send = await sendOfferEmail({
+    to: offer.customer_email as string,
+    subject: `Zahlungseingang bestätigt — ${belegRef} — Kanzlei Adler und Sohn`,
+    html,
+  });
+
+  if (!send.ok) throw new AdminSendError(send.error, 502);
+
+  const { error: trackErr } = await admin
+    .from("offer_requests")
+    .update({
+      payment_confirm_sent_at: new Date().toISOString(),
+      payment_confirm_message_id: send.messageId,
+    })
+    .eq("id", id);
+  if (trackErr) {
+    // Mail ist raus — Tracking-Spalten fehlen ggf. noch (Migration). Versand trotzdem ok.
+    console.warn("[admin-payment-confirm] tracking update failed:", trackErr.message);
+  }
+
+  return { ok: true, messageId: send.messageId, rechnung_nr: offer.rechnung_nr as string | undefined };
 }
