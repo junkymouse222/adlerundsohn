@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import logoAsset from "@/assets/kanzlei-logo.png.asset.json";
+import { SITE, SITE_FOOTER_LINE } from "@/lib/site";
 
 // Öffentlicher Endpunkt: Kunde klickt im manuell erstellten Beleg (/rechnung)
 // auf "Angebot annehmen" oder "Zahlung bestätigen". Da es keinen zugehörigen
@@ -20,7 +20,7 @@ function page(
       : "Zahlung bestätigt";
   const message =
     status === "invalid"
-      ? "Der Link ist ungültig. Bitte kontaktieren Sie uns unter info@adlerundsohn.de."
+      ? `Der Link ist ungültig. Bitte kontaktieren Sie uns unter ${SITE.email}.`
       : isAngebot
       ? `Vielen Dank für Ihr Vertrauen. Wir haben Ihre Annahme${belegNr ? ` zu Angebot ${belegNr}` : ""} erhalten und melden uns in Kürze mit der Rechnung und den nächsten Schritten.`
       : `Vielen Dank für Ihre Zahlung${belegNr ? ` zu Rechnung ${belegNr}` : ""}. Wir haben Ihre Bestätigung erhalten und prüfen den Zahlungseingang.`;
@@ -36,13 +36,14 @@ function page(
   p{font-size:15px;line-height:1.7;color:#3a352b;}
   a.btn{display:inline-block;margin-top:24px;padding:14px 28px;background:#0f2740;color:#f5f3ee;text-decoration:none;font-size:12px;letter-spacing:2px;text-transform:uppercase;font-family:Georgia,serif;}
   .foot{margin-top:24px;font-size:11px;color:#8a8578;}
+  .brand{font-family:Georgia,serif;font-size:24px;font-weight:600;color:#0f2740;margin-bottom:8px;}
 </style></head><body><div class="wrap"><div class="card">
-  <img src="${logoAsset.url}" alt="Kanzlei Adler und Sohn" style="height:72px;width:auto;display:block;margin-bottom:16px;" />
+  <div class="brand">Kanzlei Laumann</div>
   <div class="rule"></div>
   <h1>${title}</h1>
   <p>${message}</p>
-  <a class="btn" href="https://adlerundsohn.de">Zur Kanzlei</a>
-  <div class="foot">Kanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt · info@adlerundsohn.de</div>
+  <a class="btn" href="${SITE.baseUrl}">Zur Kanzlei</a>
+  <div class="foot">${SITE_FOOTER_LINE}</div>
 </div></div></body></html>`;
 
   return new Response(html, {
