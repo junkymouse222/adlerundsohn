@@ -1,14 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { SITE } from "@/lib/site";
 
 export const Route = createFileRoute("/datenschutz")({
   head: () => ({
     meta: [
-      { title: "Datenschutz — Rechtsanwaltskanzlei Adler und Sohn" },
-      { name: "description", content: "Datenschutzerklärung der Rechtsanwaltskanzlei Adler und Sohn." },
+      { title: "Datenschutz — Kanzlei Laumann" },
+      { name: "description", content: "Datenschutzerklärung der Kanzlei Laumann." },
       { name: "robots", content: "noindex" },
-      { property: "og:url", content: "https://adlerundsohn.com/datenschutz" },
+      { property: "og:url", content: `${SITE.baseUrl}/datenschutz` },
     ],
-    links: [{ rel: "canonical", href: "https://adlerundsohn.com/datenschutz" }],
+    links: [{ rel: "canonical", href: `${SITE.baseUrl}/datenschutz` }],
   }),
   component: DatenschutzPage,
 });
@@ -24,9 +25,9 @@ function DatenschutzPage() {
         <div>
           <h2 className="text-2xl">1. Verantwortlicher</h2>
           <p className="mt-4">
-            Verantwortlich für die Datenverarbeitung auf dieser Website ist die
-            Rechtsanwaltskanzlei Adler und Sohn, Strandstraße 14, 25980 Westerland/Sylt
-            (Kontaktdaten siehe Impressum).
+            Verantwortlich für die Datenverarbeitung auf dieser Website ist
+            {" "}Erik Laumann, Rechtsanwalt und Insolvenzverwalter, {SITE.street},
+            {" "}{SITE.postalCode} {SITE.city} (Kontaktdaten siehe Impressum).
           </p>
         </div>
         <div>

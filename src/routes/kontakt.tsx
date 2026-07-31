@@ -1,16 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { SITE } from "@/lib/site";
 
 export const Route = createFileRoute("/kontakt")({
   head: () => ({
     meta: [
-      { title: "Kontakt — Rechtsanwaltskanzlei Adler und Sohn Sylt" },
-      { name: "description", content: "Kontakt zur Rechtsanwaltskanzlei Adler und Sohn auf Sylt. Vertrauliches Erstgespräch, Termin nach Vereinbarung." },
-      { property: "og:title", content: "Kontakt — Kanzlei Adler und Sohn" },
-      { property: "og:description", content: "Vertrauliches Erstgespräch, Termin nach Vereinbarung." },
-      { property: "og:url", content: "https://adlerundsohn.com/kontakt" },
+      { title: "Kontakt — Kanzlei Laumann Düsseldorf" },
+      { name: "description", content: "Kontakt zur Kanzlei Laumann in Düsseldorf. Anfragen zur Verwertung aus der Insolvenzmasse werden vertraulich behandelt." },
+      { property: "og:title", content: "Kontakt — Kanzlei Laumann" },
+      { property: "og:description", content: "Anfragen werden vertraulich und in der Reihenfolge ihres Eingangs bearbeitet." },
+      { property: "og:url", content: `${SITE.baseUrl}/kontakt` },
     ],
-    links: [{ rel: "canonical", href: "https://adlerundsohn.com/kontakt" }],
+    links: [{ rel: "canonical", href: `${SITE.baseUrl}/kontakt` }],
   }),
   component: KontaktPage,
 });
@@ -31,58 +32,52 @@ function KontaktPage() {
 
       <section className="container-prose grid gap-16 py-20 md:grid-cols-2 md:py-28">
         <div>
-          <h2 className="text-3xl">Kanzlei Sylt</h2>
+          <h2 className="text-3xl">Kanzlei Düsseldorf</h2>
           <span className="rule-gold mt-6" />
           <address className="mt-8 space-y-1 not-italic text-base text-foreground/80">
-            <p>Rechtsanwaltskanzlei Adler und Sohn</p>
-            <p>Strandstraße 14</p>
-            <p>25980 Westerland/Sylt</p>
+            <p>{SITE.legalName}</p>
+            <p>{SITE.street}</p>
+            <p>{SITE.postalCode} {SITE.city}</p>
           </address>
 
           <dl className="mt-8 space-y-4 border-t border-border pt-8 text-sm">
             <div className="grid grid-cols-[8rem_1fr] gap-4">
-              <dt className="text-muted-foreground">Telefon</dt>
-              <dd><a href="tel:+4946518544007" className="text-primary hover:text-gold">+49 4651 8544007</a></dd>
-            </div>
-            <div className="grid grid-cols-[8rem_1fr] gap-4">
-              <dt className="text-muted-foreground">Telefax</dt>
-              <dd>+49 4651 8544008</dd>
-            </div>
-            <div className="grid grid-cols-[8rem_1fr] gap-4">
               <dt className="text-muted-foreground">E-Mail</dt>
               <dd>
-                <a href="mailto:info@adlerundsohn.de" className="text-primary hover:text-gold">info@adlerundsohn.de</a>
-                <br />
-                <a href="mailto:info@adlerundsohn.de" className="text-primary hover:text-gold">info@adlerundsohn.de</a>
+                <a href={`mailto:${SITE.email}`} className="text-primary hover:text-gold">{SITE.email}</a>
               </dd>
             </div>
             <div className="grid grid-cols-[8rem_1fr] gap-4">
               <dt className="text-muted-foreground">Web</dt>
-              <dd>adlerundsohn.com</dd>
+              <dd>{SITE.domain}</dd>
+            </div>
+            <div className="grid grid-cols-[8rem_1fr] gap-4">
+              <dt className="text-muted-foreground">Aktenzeichen</dt>
+              <dd>{SITE.aktenzeichen}</dd>
             </div>
           </dl>
 
           <div className="mt-10 border-t border-border pt-8">
-            <p className="text-[0.7rem] uppercase tracking-[0.22em] text-muted-foreground">Sprechzeiten</p>
+            <p className="text-[0.7rem] uppercase tracking-[0.22em] text-muted-foreground">Bitte angeben</p>
             <ul className="mt-4 space-y-2 text-sm text-foreground/80">
               <li className="flex justify-between border-b border-border pb-2">
-                <span>Montag – Donnerstag</span><span>08:30 – 18:00</span>
+                <span>Losnummer</span>
               </li>
               <li className="flex justify-between border-b border-border pb-2">
-                <span>Freitag</span><span>08:30 – 16:00</span>
+                <span>Produktbezeichnung</span>
               </li>
               <li className="flex justify-between">
-                <span>Termine außerhalb</span><span>nach Vereinbarung</span>
+                <span>Gewünschte Stückzahl</span>
               </li>
             </ul>
           </div>
 
           <div className="mt-10 border-t border-border pt-8">
-            <p className="text-[0.7rem] uppercase tracking-[0.22em] text-muted-foreground">Anfahrt</p>
+            <p className="text-[0.7rem] uppercase tracking-[0.22em] text-muted-foreground">Hinweis</p>
             <p className="mt-4 text-sm text-foreground/80">
-              Bahn: Bahnhof Westerland (Sylt) — 5 Gehminuten<br />
-              Auto: A7 bis Niebüll, Sylt Shuttle nach Westerland<br />
-              Flug: Flughafen Sylt (GWT) — 10 Minuten mit dem Taxi
+              Jede Anfrage wird vertraulich behandelt und in der Reihenfolge ihres
+              Eingangs bearbeitet. Verbindlich wird ein Erwerb erst mit
+              schriftlicher Bestätigung.
             </p>
           </div>
         </div>

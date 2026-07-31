@@ -35,9 +35,9 @@ import { Route as ApiPublicHooksSendScheduledOffersRouteImport } from './routes/
 import { Route as ApiPublicHooksMarkPaidRouteImport } from './routes/api/public/hooks/mark-paid'
 import { Route as ApiPublicHooksConfirmManualRouteImport } from './routes/api/public/hooks/confirm-manual'
 import { Route as ApiPublicHooksAcceptOfferRouteImport } from './routes/api/public/hooks/accept-offer'
+import { Route as ApiPublicAdminSendPaymentConfirmationRouteImport } from './routes/api/public/admin/send-payment-confirmation'
 import { Route as ApiPublicAdminSendOfferRouteImport } from './routes/api/public/admin/send-offer'
 import { Route as ApiPublicAdminSendInvoiceRouteImport } from './routes/api/public/admin/send-invoice'
-import { Route as ApiPublicAdminSendPaymentConfirmationRouteImport } from './routes/api/public/admin/send-payment-confirmation'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -173,6 +173,12 @@ const ApiPublicHooksAcceptOfferRoute =
     path: '/api/public/hooks/accept-offer',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicAdminSendPaymentConfirmationRoute =
+  ApiPublicAdminSendPaymentConfirmationRouteImport.update({
+    id: '/api/public/admin/send-payment-confirmation',
+    path: '/api/public/admin/send-payment-confirmation',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicAdminSendOfferRoute = ApiPublicAdminSendOfferRouteImport.update({
   id: '/api/public/admin/send-offer',
   path: '/api/public/admin/send-offer',
@@ -182,12 +188,6 @@ const ApiPublicAdminSendInvoiceRoute =
   ApiPublicAdminSendInvoiceRouteImport.update({
     id: '/api/public/admin/send-invoice',
     path: '/api/public/admin/send-invoice',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicAdminSendPaymentConfirmationRoute =
-  ApiPublicAdminSendPaymentConfirmationRouteImport.update({
-    id: '/api/public/admin/send-payment-confirmation',
-    path: '/api/public/admin/send-payment-confirmation',
     getParentRoute: () => rootRouteImport,
   } as any)
 
@@ -586,6 +586,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksAcceptOfferRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/admin/send-payment-confirmation': {
+      id: '/api/public/admin/send-payment-confirmation'
+      path: '/api/public/admin/send-payment-confirmation'
+      fullPath: '/api/public/admin/send-payment-confirmation'
+      preLoaderRoute: typeof ApiPublicAdminSendPaymentConfirmationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/admin/send-offer': {
       id: '/api/public/admin/send-offer'
       path: '/api/public/admin/send-offer'
@@ -598,13 +605,6 @@ declare module '@tanstack/react-router' {
       path: '/api/public/admin/send-invoice'
       fullPath: '/api/public/admin/send-invoice'
       preLoaderRoute: typeof ApiPublicAdminSendInvoiceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/admin/send-payment-confirmation': {
-      id: '/api/public/admin/send-payment-confirmation'
-      path: '/api/public/admin/send-payment-confirmation'
-      fullPath: '/api/public/admin/send-payment-confirmation'
-      preLoaderRoute: typeof ApiPublicAdminSendPaymentConfirmationRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -669,3 +669,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

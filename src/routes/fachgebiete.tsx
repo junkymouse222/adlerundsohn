@@ -1,15 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { SITE } from "@/lib/site";
 
 export const Route = createFileRoute("/fachgebiete")({
   head: () => ({
     meta: [
-      { title: "Fachgebiete — Insolvenzrecht & Insolvenzverwaltung | Kanzlei Adler und Sohn" },
-      { name: "description", content: "Regelinsolvenzverfahren, Eigenverwaltung, Schutzschirm, Gläubigervertretung, Verbraucherinsolvenz und Insolvenzverwaltung — spezialisiert seit 1998." },
-      { property: "og:title", content: "Fachgebiete — Kanzlei Adler und Sohn" },
-      { property: "og:description", content: "Alle Bereiche des Insolvenzrechts unter einem Dach." },
-      { property: "og:url", content: "https://adlerundsohn.com/fachgebiete" },
+      { title: "Tätigkeitsfelder — Insolvenzverwaltung & Verwertung | Kanzlei Laumann" },
+      { name: "description", content: "Regelinsolvenzverfahren, Insolvenzverwaltung, Eigenverwaltung, Verwertung, Gläubigervertretung und Verbraucherinsolvenz." },
+      { property: "og:title", content: "Tätigkeitsfelder — Kanzlei Laumann" },
+      { property: "og:description", content: "Insolvenzverwaltung und Verwertung aus einer Hand." },
+      { property: "og:url", content: `${SITE.baseUrl}/fachgebiete` },
     ],
-    links: [{ rel: "canonical", href: "https://adlerundsohn.com/fachgebiete" }],
+    links: [{ rel: "canonical", href: `${SITE.baseUrl}/fachgebiete` }],
   }),
   component: FachgebietePage,
 });
@@ -31,7 +32,7 @@ const bereiche = [
   {
     kennung: "II",
     title: "Insolvenzverwaltung",
-    intro: "Als bestellte Insolvenzverwalter, Sachwalter und Treuhänder arbeiten wir mit den Amtsgerichten Niebüll, Flensburg und Husum zusammen.",
+    intro: "Als gerichtlich bestellter Insolvenzverwalter, Sachwalter und Treuhänder übernehmen wir die Verwaltung und bestmögliche Verwertung der Insolvenzmasse im Interesse aller Gläubiger.",
     leistungen: [
       "Übernahme der Verwaltungs- und Verfügungsbefugnis",
       "Fortführungs- und Verwertungskonzepte",

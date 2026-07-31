@@ -1,14 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { SITE } from "@/lib/site";
 
 export const Route = createFileRoute("/impressum")({
   head: () => ({
     meta: [
-      { title: "Impressum — Rechtsanwaltskanzlei Adler und Sohn" },
-      { name: "description", content: "Impressum und Angaben gemäß § 5 TMG der Rechtsanwaltskanzlei Adler und Sohn." },
+      { title: "Impressum — Kanzlei Laumann" },
+      { name: "description", content: "Impressum und Angaben gemäß § 5 TMG der Kanzlei Laumann, Erik Laumann, Rechtsanwalt und Insolvenzverwalter." },
       { name: "robots", content: "noindex" },
-      { property: "og:url", content: "https://adlerundsohn.com/impressum" },
+      { property: "og:url", content: `${SITE.baseUrl}/impressum` },
     ],
-    links: [{ rel: "canonical", href: "https://adlerundsohn.com/impressum" }],
+    links: [{ rel: "canonical", href: `${SITE.baseUrl}/impressum` }],
   }),
   component: ImpressumPage,
 });
@@ -24,19 +25,19 @@ function ImpressumPage() {
         <div className="space-y-10 text-sm leading-relaxed text-foreground/85">
           <div>
             <p className="text-[0.7rem] uppercase tracking-[0.22em] text-muted-foreground">Anbieter</p>
-            <p className="mt-3">Rechtsanwaltskanzlei Adler und Sohn<br />Dr. Friedrich Adler<br />Strandstraße 14<br />25980 Westerland/Sylt</p>
-          </div>
-          <div>
-            <p className="text-[0.7rem] uppercase tracking-[0.22em] text-muted-foreground">Zweite Firma</p>
-            <p className="mt-3">Fritz Krause GmbH<br />Friedrichstraße 32<br />25980 Sylt</p>
+            <p className="mt-3">Erik Laumann<br />Rechtsanwalt · Insolvenzverwalter<br />{SITE.street}<br />{SITE.postalCode} {SITE.city}</p>
           </div>
           <div>
             <p className="text-[0.7rem] uppercase tracking-[0.22em] text-muted-foreground">Kontakt</p>
-            <p className="mt-3">Telefon: +49 4651 8544007<br />Telefax: +49 4651 8544008<br />E-Mail: info@adlerundsohn.de</p>
+            <p className="mt-3">E-Mail: {SITE.email}<br />Web: {SITE.domain}</p>
           </div>
           <div>
             <p className="text-[0.7rem] uppercase tracking-[0.22em] text-muted-foreground">USt-IdNr.</p>
-            <p className="mt-3">DE 271 552 088</p>
+            <p className="mt-3">{SITE.ustId}</p>
+          </div>
+          <div>
+            <p className="text-[0.7rem] uppercase tracking-[0.22em] text-muted-foreground">Verfahren</p>
+            <p className="mt-3">Aktenzeichen {SITE.aktenzeichen}</p>
           </div>
         </div>
 
@@ -44,9 +45,9 @@ function ImpressumPage() {
           <div>
             <h2 className="text-2xl">Berufsrechtliche Angaben</h2>
             <p className="mt-4">
-              Die in der Kanzlei tätigen Rechtsanwältinnen und Rechtsanwälte
-              sind in der Bundesrepublik Deutschland zugelassen und Mitglieder
-              der Rechtsanwaltskammer Schleswig-Holstein, Gottorfstraße 13, 24837 Schleswig.
+              Die gesetzliche Berufsbezeichnung „Rechtsanwalt" wurde in der
+              Bundesrepublik Deutschland verliehen. Herr Erik Laumann ist Mitglied
+              der {SITE.kammer}, {SITE.kammerAnschrift}.
             </p>
             <p className="mt-4">Es gelten folgende berufsrechtliche Regelungen:</p>
             <ul className="mt-3 space-y-1 pl-4">
@@ -64,24 +65,24 @@ function ImpressumPage() {
           <div>
             <h2 className="text-2xl">Berufshaftpflichtversicherung</h2>
             <p className="mt-4">
-              HDI Versicherung AG, HDI-Platz 1, 30659 Hannover.<br />
-              Räumlicher Geltungsbereich: weltweit (im Rahmen der
-              Versicherungsbedingungen).
+              [Versicherer und Anschrift bitte ergänzen].<br />
+              Räumlicher Geltungsbereich: mindestens Deutschland und die
+              Mitgliedstaaten der Europäischen Union.
             </p>
           </div>
 
           <div>
             <h2 className="text-2xl">Verantwortlich i. S. d. § 18 Abs. 2 MStV</h2>
-            <p className="mt-4">Dr. Friedrich Adler, Anschrift wie oben.</p>
+            <p className="mt-4">Erik Laumann, Anschrift wie oben.</p>
           </div>
 
           <div>
             <h2 className="text-2xl">Streitschlichtung</h2>
             <p className="mt-4">
               Zur außergerichtlichen Beilegung von Streitigkeiten zwischen
-              Mandanten und Rechtsanwälten besteht auf Antrag die Möglichkeit
-              der Schlichtung bei der Schlichtungsstelle der Rechtsanwaltschaft
-              (Gottorfstraße 13, 24837 Schleswig).
+              Mandanten und Rechtsanwälten besteht auf Antrag die Möglichkeit der
+              Schlichtung bei der Schlichtungsstelle der Rechtsanwaltschaft
+              (Neue Grünstraße 17, 10179 Berlin).
             </p>
             <p className="mt-4">
               Wir sind nicht bereit oder verpflichtet, an einem
