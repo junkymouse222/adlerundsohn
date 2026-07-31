@@ -1,19 +1,24 @@
 #!/usr/bin/env bash
 # =============================================================================
-# Adler und Sohn - Self-Hosted-Supabase + App Installer für Ubuntu 22.04/24.04
+# Kanzlei Laumann - Self-Hosted-Supabase + App Installer für Ubuntu 22.04/24.04
 # =============================================================================
+# ACHTUNG: Dieses Script ist für einen FRISCHEN, EIGENEN Server gedacht. Es
+# setzt UFW zurück und überschreibt /etc/caddy/Caddyfile komplett. Wenn auf dem
+# Server bereits eine andere Seite (z. B. adlerundsohn.de) über Caddy läuft,
+# NICHT dieses Script verwenden, sondern deploy/install-second-site.sh.
+#
 # Ergebnis nach dem Lauf:
-#   https://adlerundsohn.com          -> die App (systemd-Service, Node)
-#   https://supabase.adlerundsohn.com -> Supabase Studio (Basic-Auth)
+#   https://kanzlei-laumann.de          -> die App (systemd-Service, Node)
+#   https://supabase.kanzlei-laumann.de -> Supabase Studio (Basic-Auth)
 #   Supabase-Stack (Postgres, Auth, PostgREST, Storage, Realtime, Studio) via
 #   Docker Compose unter /opt/supabase
 #
 # Voraussetzungen VOR dem Start:
-#   - DNS A-Records auf 45.149.145.6:
-#       adlerundsohn.com
-#       www.adlerundsohn.com
-#       supabase.adlerundsohn.com
-#     (prüfen: dig +short adlerundsohn.com)
+#   - DNS A-Records auf die Server-IP:
+#       kanzlei-laumann.de
+#       www.kanzlei-laumann.de
+#       supabase.kanzlei-laumann.de
+#     (prüfen: dig +short kanzlei-laumann.de)
 #   - App-Repo-URL bereit (GitHub)
 #   - RESEND_API_KEY bereit
 #
@@ -25,11 +30,12 @@
 
 set -euo pipefail
 
-DOMAIN="adlerundsohn.com"
-STUDIO_DOMAIN="supabase.adlerundsohn.com"
-APP_USER="adler"
-APP_DIR="/opt/adlerundsohn"
-APP_PORT="3000"
+DOMAIN="${DOMAIN:-kanzlei-laumann.de}"
+STUDIO_DOMAIN="${STUDIO_DOMAIN:-supabase.kanzlei-laumann.de}"
+APP_USER="${APP_USER:-laumann}"
+APP_DIR="${APP_DIR:-/opt/kanzlei-laumann}"
+APP_SERVICE="${APP_SERVICE:-kanzlei-laumann}"
+APP_PORT="${APP_PORT:-3000}"
 SUPA_DIR="/opt/supabase"
 SUPA_KONG_HTTP_PORT="8000"   # Kong (API-Gateway) - für App-Backend
 SUPA_STUDIO_PORT="3001"      # Studio-UI
@@ -177,12 +183,12 @@ if [[ ! -f .env ]]; then
   sed -i "s|^# *STUDIO_HOST=.*|STUDIO_HOST=127.0.0.1|"                                    .env || true
 
   # SMTP für Auth-Mails via Resend (Port 587)
-  sed -i "s|^SMTP_ADMIN_EMAIL=.*|SMTP_ADMIN_EMAIL=info@adlerundsohn-mail.de|"             .env
+  sed -i "s|^SMTP_ADMIN_EMAIL=.*|SMTP_ADMIN_EMAIL=kontakt@kanzlei-laumann.de|"             .env
   sed -i "s|^SMTP_HOST=.*|SMTP_HOST=smtp.resend.com|"                                     .env
   sed -i "s|^SMTP_PORT=.*|SMTP_PORT=587|"                                                 .env
   sed -i "s|^SMTP_USER=.*|SMTP_USER=resend|"                                              .env
   sed -i "s|^SMTP_PASS=.*|SMTP_PASS=$RESEND_KEY|"                                         .env
-  sed -i "s|^SMTP_SENDER_NAME=.*|SMTP_SENDER_NAME=Kanzlei Adler und Sohn|"                .env
+  sed -i "s|^SMTP_SENDER_NAME=.*|SMTP_SENDER_NAME=Kanzlei Laumann|"                       .env
 
   chmod 600 .env
 
@@ -306,9 +312,9 @@ sudo -u "$APP_USER" bash -c "cd $APP_DIR && NITRO_PRESET=node-server bun run bui
 [[ -f "$APP_DIR/.output/server/index.mjs" ]] || fail "Build-Output fehlt."
 
 # ---------- systemd ---------------------------------------------------------
-cat > /etc/systemd/system/adlerundsohn.service <<EOF
+cat > /etc/systemd/system/${APP_SERVICE}.service <<EOF
 [Unit]
-Description=Adler und Sohn App (TanStack Start / Nitro)
+Description=Kanzlei Laumann App (TanStack Start / Nitro)
 After=network.target docker.service
 Requires=docker.service
 
@@ -325,7 +331,7 @@ RestartSec=5
 WantedBy=multi-user.target
 EOF
 systemctl daemon-reload
-systemctl enable --now adlerundsohn
+systemctl enable --now "$APP_SERVICE"
 
 # ---------- Caddy -----------------------------------------------------------
 log "Caddy konfigurieren…"
@@ -408,7 +414,7 @@ echo "  '$ADMIN_EMAIL' registrieren, oder Rolle direkt setzen:"
 echo "    docker exec -it supabase-db psql -U postgres -d postgres \\"
 echo "      -c \"INSERT INTO public.user_roles(user_id,role) SELECT id,'admin' FROM auth.users WHERE email='$ADMIN_EMAIL';\""
 echo
-echo "  Logs:    journalctl -u adlerundsohn -f"
+echo "  Logs:    journalctl -u $APP_SERVICE -f"
 echo "  Supa:    docker compose -f $SUPA_DIR/docker-compose.yml logs -f"
 echo
 warn "Jetzt: 'passwd' für Root-Passwort ändern + SSH-Key-Login aktivieren!"

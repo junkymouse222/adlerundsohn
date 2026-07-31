@@ -1,79 +1,123 @@
-# Self-Hosting auf eigenem Ubuntu-Server
+# Deployment – Kanzlei Laumann (kanzlei-laumann.de)
 
-Dieser Ordner enthält alles zum Umzug der App auf einen eigenen Server mit **Self-Hosted Supabase**.
+Dieser Ordner enthält alles, um die App zu betreiben. Zwei Szenarien:
 
-## Was wird installiert
-- Docker + Self-Hosted Supabase (Postgres, Auth, PostgREST, Storage, Realtime, Studio)
-- Node.js 22 + Bun
-- Die App als systemd-Service (Nitro `node-server`, Port 3000)
-- Caddy als Reverse Proxy mit automatischem Let's-Encrypt-SSL
-- UFW-Firewall (nur 22/80/443 offen)
+- **A) Neben adlerundsohn.de auf demselben OVH-Server** → `install-second-site.sh`
+  (nicht-destruktiv, empfohlen für deinen Fall).
+- **B) Eigener frischer Server mit Self-Hosted-Supabase** → `install-ubuntu.sh`
+  (destruktiv: setzt UFW zurück und überschreibt den Caddyfile).
 
-## Endzustand
-- `https://adlerundsohn.com` → die App
-- `https://supabase.adlerundsohn.com` → Supabase Studio (Basic Auth)
+---
 
-## Vor dem Start
-1. **Root-Passwort SOFORT ändern** (`passwd`) und SSH-Keys statt Passwort einrichten.
-2. **DNS A-Records auf `45.149.145.6`** setzen — die drei müssen auflösen:
-   - `adlerundsohn.com`
-   - `www.adlerundsohn.com`
-   - `supabase.adlerundsohn.com`
-   Prüfen: `dig +short adlerundsohn.com`
-3. **Repo auf GitHub bereit** (in Lovable: „Connect to GitHub").
-4. **Resend-API-Key** parat.
+## A) Co-Hosting neben adlerundsohn.de (dein Fall)
 
-## Ausführen
-Auf dem Server als `root`:
+Der Server `145.239.77.117` betreibt bereits adlerundsohn.de über Caddy. Die
+zweite Seite läuft daneben auf einem eigenen Port (Default `3100`), mit eigenem
+System-User, eigenem systemd-Service und einem zusätzlichen Caddy-vHost.
+adlerundsohn.de wird dabei **nicht** angefasst.
+
+### Vorbereitung
+1. **DNS:** A-Record (und ggf. AAAA) für `kanzlei-laumann.de` **und**
+   `www.kanzlei-laumann.de` auf `145.239.77.117` setzen.
+   Prüfen: `dig +short kanzlei-laumann.de`
+2. **Repo:** GitHub-URL + Branch bereithalten.
+3. **Supabase:** eigenes Projekt empfohlen (siehe unten), Keys bereithalten.
+4. **Resend:** eigener API-Key mit verifizierter Absender-Domain.
+
+### Ausführen (als root auf dem Server)
 ```bash
-# Script hochladen (aus dem ZIP entpacken, dann):
-cd /root
-bash /pfad/zu/deploy/install-ubuntu.sh
+cd /opt   # o. Ä.
+git clone -b <branch> <repo-url> kanzlei-laumann-src   # nur für die Scripts
+bash kanzlei-laumann-src/deploy/install-second-site.sh
 ```
-Das Script fragt interaktiv nach: Repo-URL, Branch, Resend-Key, Studio-Basic-Auth-Zugangsdaten, deine Admin-E-Mail.
+Das Script fragt interaktiv nach Repo, Branch, Supabase-Keys, Resend-Key und
+Absender-E-Mail, baut die App und richtet Caddy + systemd ein.
 
-## Nach dem Lauf
-- Supabase-Keys liegen unter `/root/supabase-credentials.txt` (chmod 600). Sichern und dann löschen.
-- Ersten Admin-User: in der App auf `/auth` registrieren mit der beim Setup angegebenen E-Mail — der DB-Trigger `grant_admin_for_designated_email` weist automatisch die Rolle `admin` zu (die ist auf `s.schipplick@atomicmail.io` fest verdrahtet — bei Bedarf in `deploy/schema.sql` anpassen, bevor du das Script laufen lässt).
-- Alternativ manuell:
-  ```bash
-  docker exec -it supabase-db psql -U postgres -d postgres \
-    -c "INSERT INTO public.user_roles(user_id,role) SELECT id,'admin' FROM auth.users WHERE email='DEINE@MAIL';"
-  ```
+### Nach dem Lauf
+- Seite: `https://kanzlei-laumann.de` (Service `kanzlei-laumann`, Port 3100)
+- Logs: `journalctl -u kanzlei-laumann -f`
+- Caddy-vHost: `/etc/caddy/sites.d/kanzlei-laumann.caddy`
+- **Schema einspielen** (siehe „Datenbank") und ersten Admin anlegen.
 
-## Bestehende Daten migrieren
-Ich habe **keinen Zugriff** auf deine aktuelle Lovable-Cloud-DB. Wenn du bestehende Angebote/Rechnungen mitnehmen willst:
-1. In der Lovable-Cloud-Oberfläche (Backend-Ansicht) die Tabellen `offer_requests`, `offer_request_items`, `user_roles` als CSV exportieren.
-2. Auf dem neuen Server via Studio-UI oder `psql \copy` importieren.
-
-Wenn du willst, mach ich das später Schritt für Schritt mit dir.
-
-## Update-Ablauf (späteres Deploy)
+### Update-Ablauf (späteres Deploy)
 ```bash
-cd /opt/adlerundsohn
-sudo -u adler git pull
-sudo -u adler bun install
-sudo -u adler NITRO_PRESET=node-server bun run build
-systemctl restart adlerundsohn
+cd /opt/kanzlei-laumann
+sudo -u laumann git pull
+sudo -u laumann bun install
+sudo -u laumann NITRO_PRESET=node-server bun run build
+systemctl restart kanzlei-laumann
 ```
 
-## Mailversand testen
-Wenn „Angebot senden" oder „Rechnung senden" hängt, zuerst Logs öffnen:
-```bash
-journalctl -u adlerundsohn -f
+---
+
+## Datenbank (Supabase)
+
+Die App braucht die Tabellen `offer_requests`, `offer_request_items`,
+`user_roles` u. a. (siehe `schema.sql`) sowie einen Storage-Bucket
+(`storage-bucket.sql`).
+
+**Empfehlung:** ein **eigenes** Supabase-Projekt für die Kanzlei Laumann, damit
+die Daten (Angebote/Rechnungen) sauber von adlerundsohn.de getrennt sind.
+
+1. Neues Projekt auf supabase.com anlegen.
+2. Im SQL-Editor `deploy/schema.sql` und danach `deploy/storage-bucket.sql`
+   ausführen. **Vorher** in `schema.sql` die Auto-Admin-E-Mail auf die
+   gewünschte Login-Adresse anpassen (Standard: `kontakt@kanzlei-laumann.de`).
+3. `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` (anon) und
+   `SUPABASE_SERVICE_ROLE_KEY` aus den Projekt-Settings übernehmen.
+
+> Alternativ lässt sich das bestehende Supabase-Projekt von adlerundsohn.de
+> mitbenutzen (Werte aus dessen `.env`). Dann landen aber beide Kanzleien in
+> **derselben** `offer_requests`-Tabelle – nur als Übergangslösung sinnvoll.
+
+Ersten Admin anlegen: auf `https://kanzlei-laumann.de/auth` mit der oben
+hinterlegten E-Mail registrieren (der DB-Trigger vergibt die Rolle `admin`).
+Alternativ manuell:
+```sql
+INSERT INTO public.user_roles(user_id, role)
+SELECT id, 'admin' FROM auth.users WHERE email = 'DEINE@MAIL';
 ```
 
-Danach isoliert prüfen, ob der Server Resend erreicht:
-```bash
-cd /opt/adlerundsohn
-bash deploy/test-resend.sh deine@email.de
-```
-Erwartet ist `HTTP 200` und eine Resend-ID. Bei `Timeout` oder Verbindungsfehler blockiert DNS/Firewall/Outbound-HTTPS auf dem Server; bei `401/403` ist der API-Key oder die Absender-Domain falsch.
+---
 
-## Rollback / Deinstall
+## E-Mail-Versand (Resend)
+
+- Eigener Resend-API-Key nötig.
+- Die Absender-Domain (z. B. `kanzlei-laumann.de`) muss in Resend **verifiziert**
+  sein (SPF/DKIM-Records setzen), sonst werden Angebots-/Rechnungsmails
+  abgelehnt.
+- `OFFER_FROM_EMAIL` in der `.env` steuert den Absender
+  (Default: `Kanzlei Laumann <kontakt@kanzlei-laumann.de>`).
+
+Test:
 ```bash
-systemctl disable --now adlerundsohn
-rm /etc/systemd/system/adlerundsohn.service
-docker compose -f /opt/supabase/docker-compose.yml down -v
-rm -rf /opt/adlerundsohn /opt/supabase
+APP_DIR=/opt/kanzlei-laumann bash /opt/kanzlei-laumann/deploy/test-resend.sh deine@mail.de
 ```
+Erwartet `HTTP 200` + Resend-ID. Bei `401/403`: Key/Absender-Domain falsch.
+Bei `Timeout`: Outbound-HTTPS/DNS auf dem Server blockiert.
+
+---
+
+## B) Frischer, eigener Server
+
+`install-ubuntu.sh` richtet Docker + Self-Hosted-Supabase + App + Caddy +
+UFW ein. **Nur auf einem leeren Server verwenden**, da es UFW zurücksetzt und
+den Caddyfile überschreibt.
+
+```bash
+bash deploy/install-ubuntu.sh
+```
+DNS-Records vorher setzen: `kanzlei-laumann.de`, `www.kanzlei-laumann.de`,
+`supabase.kanzlei-laumann.de`.
+
+---
+
+## Rollback / Deinstall (Co-Hosting)
+```bash
+systemctl disable --now kanzlei-laumann kanzlei-laumann-send-scheduled.timer
+rm -f /etc/systemd/system/kanzlei-laumann*.service /etc/systemd/system/kanzlei-laumann*.timer
+rm -f /etc/caddy/sites.d/kanzlei-laumann.caddy
+systemctl reload caddy
+rm -rf /opt/kanzlei-laumann
+```
+adlerundsohn.de bleibt davon unberührt.

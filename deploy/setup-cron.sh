@@ -5,9 +5,15 @@
 #
 # Ausführen als root:
 #   bash deploy/setup-cron.sh
+#
+# Konfigurierbar per Env:
+#   APP_DIR              (Default: /opt/kanzlei-laumann)
+#   SERVICE_NAME         (Default: kanzlei-laumann)
+#   SCHEDULED_OFFERS_URL (Default: https://kanzlei-laumann.de/api/public/hooks/send-scheduled-offers)
 set -euo pipefail
 
-APP_DIR="${APP_DIR:-/opt/adlerundsohn}"
+APP_DIR="${APP_DIR:-/opt/kanzlei-laumann}"
+SERVICE_NAME="${SERVICE_NAME:-kanzlei-laumann}"
 ENV_FILE="$APP_DIR/.env"
 
 if [[ ! -f "$ENV_FILE" ]]; then
@@ -26,9 +32,11 @@ if [[ -z "$ANON" ]]; then
   exit 1
 fi
 
-URL="${SCHEDULED_OFFERS_URL:-https://adlerundsohn.com/api/public/hooks/send-scheduled-offers}"
+URL="${SCHEDULED_OFFERS_URL:-https://kanzlei-laumann.de/api/public/hooks/send-scheduled-offers}"
 
-cat >/usr/local/bin/adlerundsohn-send-scheduled <<EOF
+TRIGGER="/usr/local/bin/${SERVICE_NAME}-send-scheduled"
+
+cat >"$TRIGGER" <<EOF
 #!/usr/bin/env bash
 set -euo pipefail
 curl -fsS -X POST "$URL" \\
@@ -38,27 +46,27 @@ curl -fsS -X POST "$URL" \\
   --max-time 60 \\
   -d '{}' || exit 0
 EOF
-chmod 700 /usr/local/bin/adlerundsohn-send-scheduled
+chmod 700 "$TRIGGER"
 
-cat >/etc/systemd/system/adlerundsohn-send-scheduled.service <<'EOF'
+cat >"/etc/systemd/system/${SERVICE_NAME}-send-scheduled.service" <<EOF
 [Unit]
-Description=Adler und Sohn - Automatischer Angebotsversand (Trigger)
-After=network-online.target adlerundsohn.service
+Description=${SERVICE_NAME} - Automatischer Angebotsversand (Trigger)
+After=network-online.target ${SERVICE_NAME}.service
 Wants=network-online.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/local/bin/adlerundsohn-send-scheduled
+ExecStart=${TRIGGER}
 EOF
 
-cat >/etc/systemd/system/adlerundsohn-send-scheduled.timer <<'EOF'
+cat >"/etc/systemd/system/${SERVICE_NAME}-send-scheduled.timer" <<EOF
 [Unit]
-Description=Adler und Sohn - Trigger alle 5 Minuten
+Description=${SERVICE_NAME} - Trigger alle 5 Minuten
 
 [Timer]
 OnBootSec=2min
 OnUnitActiveSec=5min
-Unit=adlerundsohn-send-scheduled.service
+Unit=${SERVICE_NAME}-send-scheduled.service
 Persistent=true
 
 [Install]
@@ -66,12 +74,12 @@ WantedBy=timers.target
 EOF
 
 systemctl daemon-reload
-systemctl enable --now adlerundsohn-send-scheduled.timer
+systemctl enable --now "${SERVICE_NAME}-send-scheduled.timer"
 
 echo
 echo "Fertig. Status:"
-systemctl list-timers adlerundsohn-send-scheduled.timer --no-pager || true
+systemctl list-timers "${SERVICE_NAME}-send-scheduled.timer" --no-pager || true
 echo
 echo "Test-Lauf jetzt:"
-systemctl start adlerundsohn-send-scheduled.service
-journalctl -u adlerundsohn-send-scheduled.service -n 30 --no-pager
+systemctl start "${SERVICE_NAME}-send-scheduled.service"
+journalctl -u "${SERVICE_NAME}-send-scheduled.service" -n 30 --no-pager
