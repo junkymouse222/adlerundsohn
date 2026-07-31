@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { PRODUKTE, KATEGORIEN, type Produkt } from "@/lib/katalog";
+import { SITE } from "@/lib/site";
 import { submitOfferRequest } from "@/lib/offer.functions";
 
 type Position = { produkt: Produkt; menge: number };
@@ -11,7 +12,7 @@ const fmtEUR = (n: number) =>
 export const Route = createFileRoute("/angebot-anfordern/")({
   head: () => ({
     meta: [
-      { title: "Angebot anfordern — Kanzlei Adler und Sohn" },
+      { title: "Angebot anfordern — Kanzlei Laumann" },
       { name: "description", content: "Fordern Sie ein individuelles Angebot aus dem aktuellen Verwertungskatalog an. Wir melden uns per E-Mail innerhalb weniger Stunden." },
       { name: "robots", content: "noindex, nofollow" },
     ],
@@ -59,7 +60,7 @@ function AngebotAnfordernPage() {
     () => positionen.reduce((s, p) => s + p.produkt.einzelpreis * p.menge, 0),
     [positionen],
   );
-  const lieferkosten = subtotal >= 3000 ? 0 : 89;
+  const lieferkosten = subtotal >= SITE.versandFreiAbNetto ? 0 : SITE.versandPauschale;
   const netto = subtotal + lieferkosten;
   const mwst = netto * 0.19;
   const total = netto + mwst;
@@ -125,21 +126,22 @@ function AngebotAnfordernPage() {
           <h1 className="mt-6 max-w-3xl text-4xl md:text-5xl">Angebot anfordern</h1>
           <span className="rule-gold mt-8" />
           <p className="mt-6 max-w-2xl text-base leading-relaxed text-foreground/75">
-            Wählen Sie die gewünschten Positionen aus dem Katalog und übermitteln
-            Sie Ihre Kontaktdaten. Sie erhalten Ihr individuelles Angebot per
-            E-Mail — in der Regel innerhalb weniger Stunden während unserer
-            Geschäftszeiten (Mo–Fr 07:00–19:00).
+            Bitte geben Sie Losnummer, Produktbezeichnung und gewünschte Stückzahl
+            an. Wählen Sie die Positionen aus dem Katalog und übermitteln Sie Ihre
+            Kontaktdaten — Sie erhalten Ihr individuelles Angebot per E-Mail. Jede
+            Anfrage wird vertraulich und in der Reihenfolge ihres Eingangs
+            bearbeitet.
           </p>
           <div className="mt-8">
             <a
-              href="/bestandskatalog-q3-2026.pdf"
+              href={SITE.katalogPdf}
               target="_blank"
               rel="noopener"
               download
               className="inline-flex items-center gap-3 border border-primary bg-white px-6 py-3 text-xs uppercase tracking-[0.2em] text-primary hover:bg-primary hover:text-primary-foreground"
             >
               <span aria-hidden>↓</span>
-              Aktuellen Bestandskatalog Q3 2026 (PDF) herunterladen
+              Bestandskatalog (PDF) herunterladen
             </a>
           </div>
         </div>
@@ -154,7 +156,7 @@ function AngebotAnfordernPage() {
           <div className="mt-6 grid gap-3 md:grid-cols-2">
             <input
               type="text"
-              placeholder="Suche nach Position, Name oder Artikelnummer …"
+              placeholder="Suche nach Losnummer, Name oder Kategorie …"
               value={suche}
               onChange={(e) => setSuche(e.target.value)}
               className="border border-border bg-white px-4 py-3 text-sm"
@@ -180,11 +182,27 @@ function AngebotAnfordernPage() {
                 className="flex w-full items-start justify-between gap-4 border-b border-border px-4 py-3 text-left hover:bg-parchment"
               >
                 <div>
-                  <div className="text-xs font-mono text-muted-foreground">Pos. {p.pos}</div>
+                  <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
+                    <span>Los {String(p.pos).padStart(2, "0")}</span>
+                    {p.verfuegbar != null && <span>· {p.verfuegbar} Stück verfügbar</span>}
+                  </div>
                   <div className="text-sm font-medium">{p.name}</div>
                   <div className="text-xs text-muted-foreground">{p.beschreibung}</div>
+                  {p.zustand && (
+                    <div className="mt-1 text-[0.7rem] uppercase tracking-[0.15em] text-muted-foreground">
+                      {p.zustand}
+                    </div>
+                  )}
                 </div>
-                <div className="whitespace-nowrap text-sm font-medium">{fmtEUR(p.einzelpreis)}</div>
+                <div className="whitespace-nowrap text-right">
+                  {p.regulaerVk && (
+                    <div className="text-xs text-muted-foreground line-through">{fmtEUR(p.regulaerVk)}</div>
+                  )}
+                  <div className="text-sm font-semibold text-primary">{fmtEUR(p.einzelpreis)}</div>
+                  {p.nachlassProzent != null && (
+                    <div className="text-[0.7rem] font-medium text-gold">−{p.nachlassProzent}%</div>
+                  )}
+                </div>
               </button>
             ))}
             {gefiltert.length === 0 && (
@@ -283,7 +301,7 @@ function AngebotAnfordernPage() {
             <h3 className="text-sm uppercase tracking-widest text-muted-foreground">Zusammenfassung</h3>
             <dl className="mt-4 space-y-2 text-sm">
               <Row label="Zwischensumme" value={fmtEUR(subtotal)} />
-              <Row label={`Lieferkosten${subtotal >= 3000 ? " (frei)" : ""}`} value={fmtEUR(lieferkosten)} />
+              <Row label={`Lieferkosten${subtotal >= SITE.versandFreiAbNetto ? " (frei Haus)" : ""}`} value={fmtEUR(lieferkosten)} />
               <Row label="zzgl. 19% MwSt." value={fmtEUR(mwst)} />
               <div className="mt-2 border-t border-border pt-2">
                 <Row label={<span className="font-semibold">Gesamtbetrag</span>} value={<span className="font-semibold">{fmtEUR(total)}</span>} />

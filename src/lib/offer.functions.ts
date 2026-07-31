@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { PRODUKTE } from "@/lib/katalog";
+import { SITE } from "@/lib/site";
 import { computeScheduledSendAt } from "@/lib/offer-scheduling";
 import { DEFAULT_MWST_RATE, DEFAULT_NEUKUNDEN_RABATT, computeOfferTotals } from "@/lib/offer-totals";
 
@@ -48,7 +49,7 @@ export const submitOfferRequest = createServerFn({ method: "POST" })
     }
 
     const subtotal = Number(resolved.reduce((s, i) => s + i.position_total, 0).toFixed(2));
-    const lieferkosten = subtotal >= 3000 ? 0 : 89;
+    const lieferkosten = subtotal >= SITE.versandFreiAbNetto ? 0 : SITE.versandPauschale;
     const mwstRate = DEFAULT_MWST_RATE;
     // Standardmäßig immer 5% Neukundenrabatt ausweisen (auch bei automatischen Angeboten).
     const rabattRate = DEFAULT_NEUKUNDEN_RABATT;
