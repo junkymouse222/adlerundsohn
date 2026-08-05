@@ -12,6 +12,7 @@ import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { SITE } from "../lib/site";
 
 function NotFoundComponent() {
   return (
@@ -69,18 +70,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Adler und Sohn— Insolvenzrecht & Insolvenzverwaltung" },
-      { name: "description", content: "Spezialisierte Kanzlei für Insolvenzrecht und Insolvenzverwaltung. Persönliche Beratung von Unternehmen, Gläubigern und Privatpersonen." },
-      { name: "author", content: "Rechtsanwaltskanzlei Adler und Sohn" },
-      { property: "og:title", content: "Adler und Sohn— Insolvenzrecht & Insolvenzverwaltung" },
-      { property: "og:description", content: "Spezialisierte Kanzlei für Insolvenzrecht und Insolvenzverwaltung. Persönliche Beratung von Unternehmen, Gläubigern und Privatpersonen." },
+      { title: "Kanzlei Laumann — Insolvenzverwaltung & Verwertung" },
+      { name: "description", content: "Erik Laumann, Rechtsanwalt und Insolvenzverwalter in Düsseldorf. Freihändiger Verkauf aus der Insolvenzmasse — Premium-Büroausstattung, Design-Klassiker und Kaffeetechnik." },
+      { name: "author", content: SITE.legalName },
+      { property: "og:title", content: "Kanzlei Laumann — Insolvenzverwaltung & Verwertung" },
+      { property: "og:description", content: "Freihändiger Verkauf aus der Insolvenzmasse — originalverpackte Neuware, sofort verfügbar." },
       { property: "og:type", content: "website" },
-      { property: "og:site_name", content: "Rechtsanwaltskanzlei Adler und Sohn" },
+      { property: "og:site_name", content: SITE.brand },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Adler und Sohn— Insolvenzrecht & Insolvenzverwaltung" },
-      { name: "twitter:description", content: "Spezialisierte Kanzlei für Insolvenzrecht und Insolvenzverwaltung. Persönliche Beratung von Unternehmen, Gläubigern und Privatpersonen." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/f6e843e0-b235-45b6-9f3a-7d838694cbf1" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/f6e843e0-b235-45b6-9f3a-7d838694cbf1" },
+      { name: "twitter:title", content: "Kanzlei Laumann — Insolvenzverwaltung & Verwertung" },
+      { name: "twitter:description", content: "Freihändiger Verkauf aus der Insolvenzmasse — originalverpackte Neuware, sofort verfügbar." },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -109,21 +108,27 @@ function RootShell({ children }: { children: ReactNode }) {
 const navItems = [
   { to: "/", label: "Startseite" },
   { to: "/kanzlei", label: "Kanzlei" },
-  { to: "/anwaelte", label: "Anwälte" },
-  { to: "/fachgebiete", label: "Fachgebiete" },
+  { to: "/anwaelte", label: "Verwalter" },
+  { to: "/fachgebiete", label: "Tätigkeitsfelder" },
   { to: "/kontakt", label: "Kontakt" },
   { to: "/angebot-anfordern", label: "Angebot anfordern" },
 ] as const;
 
-import logoAsset from "@/assets/kanzlei-logo.png.asset.json";
+function Wordmark({ className = "" }: { className?: string }) {
+  return (
+    <span className={`font-serif leading-none tracking-[0.02em] ${className}`}>
+      Kanzlei <span className="italic">Laumann</span>
+    </span>
+  );
+}
 
 function Header() {
   const [open, setOpen] = useState(false);
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur">
       <div className="container-prose flex items-center justify-between py-5">
-        <Link to="/" className="group flex items-center" onClick={() => setOpen(false)} aria-label="Adler und Sohn – Startseite">
-          <img src={logoAsset.url} alt="Logo Kanzlei Adler und Sohn" className="h-10 w-auto md:h-12" width={64} height={64} />
+        <Link to="/" className="group flex items-center" onClick={() => setOpen(false)} aria-label={`${SITE.brand} – Startseite`}>
+          <Wordmark className="text-2xl text-primary md:text-[1.7rem]" />
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">
@@ -177,23 +182,20 @@ function Footer() {
       <div className="container-prose grid gap-12 py-16 md:grid-cols-4">
         <div className="md:col-span-2">
           <div className="flex items-center gap-4">
-            <img src={logoAsset.url} alt="Logo Kanzlei Adler und Sohn" className="h-14 w-auto brightness-0 invert" width={96} height={96} />
-            <p className="font-serif text-2xl">Rechtsanwaltskanzlei Adler und Sohn</p>
+            <Wordmark className="text-2xl text-primary-foreground" />
           </div>
           <span className="rule-gold mt-4" />
           <p className="mt-6 max-w-sm text-sm leading-relaxed text-primary-foreground/70">
-            Spezialisiert auf Insolvenzrecht und Insolvenzverwaltung.
-            Verlässliche Beratung für Unternehmen, Gläubiger und Privatpersonen.
+            Erik Laumann · Rechtsanwalt und Insolvenzverwalter. Verwertung und
+            freihändiger Verkauf aus der Insolvenzmasse.
           </p>
         </div>
           <div>
           <p className="text-[0.7rem] uppercase tracking-[0.24em] text-gold">Kontakt</p>
           <ul className="mt-4 space-y-2 text-sm text-primary-foreground/80">
-            <li>Strandstraße 14</li>
-            <li>25980 Westerland/Sylt</li>
-            <li>+49 4651 8544007</li>
-            <li>info@adlerundsohn.de</li>
-            <li>Verkauf & Verwertung: info@adlerundsohn.de</li>
+            <li>{SITE.street}</li>
+            <li>{SITE.postalCode} {SITE.city}</li>
+            <li><a href={`mailto:${SITE.email}`} className="hover:text-gold">{SITE.email}</a></li>
           </ul>
         </div>
         <div>
@@ -206,8 +208,8 @@ function Footer() {
       </div>
       <div className="border-t border-primary-foreground/10">
         <div className="container-prose flex flex-col items-start justify-between gap-3 py-6 text-xs text-primary-foreground/50 md:flex-row md:items-center">
-          <span>© {new Date().getFullYear()} Rechtsanwaltskanzlei Adler und Sohn · adlerundsohn.com</span>
-          <span>Mitglied der Rechtsanwaltskammer Schleswig-Holstein</span>
+          <span>© {new Date().getFullYear()} {SITE.brand} · {SITE.domain}</span>
+          <span>Mitglied der {SITE.kammer}</span>
         </div>
       </div>
     </footer>

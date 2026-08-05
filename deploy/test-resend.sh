@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_DIR="${APP_DIR:-/opt/adlerundsohn}"
+APP_DIR="${APP_DIR:-/opt/kanzlei-laumann}"
 ENV_FILE="$APP_DIR/.env"
 
 if [[ ! -f "$ENV_FILE" ]]; then
@@ -23,7 +23,7 @@ if [[ -z "${RESEND_API_KEY:-}" ]]; then
   exit 1
 fi
 
-FROM="${OFFER_FROM_EMAIL:-Kanzlei Adler und Sohn <info@adlerundsohn-mail.de>}"
+FROM="${OFFER_FROM_EMAIL:-Kanzlei Laumann <kontakt@kanzlei-laumann.de>}"
 export TO FROM
 
 node <<'NODE'
@@ -43,7 +43,7 @@ fetch('https://api.resend.com/emails', {
   body: JSON.stringify({
     from,
     to: [to],
-    subject: 'Testmail Adler und Sohn',
+    subject: 'Testmail Kanzlei Laumann',
     html: '<p>Diese Testmail wurde direkt vom Server über Resend gesendet.</p>',
   }),
   signal: ctrl.signal,

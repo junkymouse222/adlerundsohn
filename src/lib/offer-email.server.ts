@@ -1,5 +1,9 @@
 // Server-only: rendert Angebot als HTML (mit Annahme-Button) und sendet via Resend Connector Gateway.
 import logoAsset from "@/assets/kanzlei-logo.png.asset.json";
+import { SITE, SITE_FOOTER_LINE } from "@/lib/site";
+
+const WORDMARK_HTML =
+  '<div style="font-family:Georgia,serif;font-size:26px;font-weight:600;color:#0f2740;letter-spacing:0.5px;">Kanzlei Laumann</div>';
 
 const fmtEUR = (n: number) =>
   new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(Number(n));
@@ -43,7 +47,7 @@ export function siteBaseUrl(): string {
   return (
     process.env.PUBLIC_SITE_URL ||
     process.env.SITE_URL ||
-    "https://adlerundsohn.lovable.app"
+    SITE.baseUrl
   ).replace(/\/$/, "");
 }
 
@@ -158,10 +162,10 @@ function renderBelegHtml(offer: OfferRow, items: ItemRow[], opts: BelegOptions):
         <tr><td style="padding:36px 40px 20px 40px;border-bottom:1px solid #c9a55c;">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
             <td style="vertical-align:top;">
-              <img src="${logoUrl()}" alt="Kanzlei Adler und Sohn" height="64" style="display:block;height:64px;width:auto;border:0;" />
+              ${WORDMARK_HTML}
               <div style="margin-top:14px;font-size:11px;line-height:1.6;color:#6b6455;">
-                Kanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt<br/>
-                Telefon +49 4651 8544007
+                ${escapeHtml(SITE.legalName)} · ${escapeHtml(SITE.addressLine)}<br/>
+                ${escapeHtml(SITE.email)}
               </div>
             </td>
             <td style="vertical-align:top;text-align:right;">
@@ -227,7 +231,7 @@ function renderBelegHtml(offer: OfferRow, items: ItemRow[], opts: BelegOptions):
         <!-- Footer -->
         <tr><td style="padding:24px 40px 32px 40px;border-top:1px solid #ece8de;">
           <p style="margin:0;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#8a8578;line-height:1.7;">
-            Kanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt · +49 4651 8544007 · USt-IdNr. DE271552088
+            ${escapeHtml(SITE_FOOTER_LINE)} · USt-IdNr. ${escapeHtml(SITE.ustId)}
           </p>
         </td></tr>
 
@@ -322,10 +326,10 @@ export function renderPaymentConfirmationHtml(offer: {
       <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border:1px solid #e7e2d4;">
 
         <tr><td style="padding:36px 40px 20px 40px;border-bottom:1px solid #c9a55c;">
-          <img src="${logoUrl()}" alt="Kanzlei Adler und Sohn" height="56" style="display:block;height:56px;width:auto;border:0;" />
+          ${WORDMARK_HTML}
           <div style="margin-top:14px;font-size:11px;line-height:1.6;color:#6b6455;">
-            Kanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt<br/>
-            Telefon +49 4651 8544007
+            ${escapeHtml(SITE.legalName)} · ${escapeHtml(SITE.addressLine)}<br/>
+            ${escapeHtml(SITE.email)}
           </div>
         </td></tr>
 
@@ -348,17 +352,17 @@ export function renderPaymentConfirmationHtml(offer: {
             Unsere Spedition wird sich in Kürze bei Ihnen melden, um einen Liefertermin zu vereinbaren.
           </p>
           <p style="margin:18px 0 0 0;">
-            Bei Rückfragen erreichen Sie uns unter Telefon +49 4651 8544007.
+            Bei Rückfragen erreichen Sie uns unter ${escapeHtml(SITE.email)}.
           </p>
           <p style="margin:28px 0 0 0;">
             Mit freundlichen Grüßen<br/>
-            <strong>Kanzlei Adler und Sohn</strong>
+            <strong>${escapeHtml(SITE.brand)}</strong>
           </p>
         </td></tr>
 
         <tr><td style="padding:32px 40px 32px 40px;border-top:1px solid #ece8de;margin-top:24px;">
           <p style="margin:0;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#8a8578;line-height:1.7;">
-            Kanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt · +49 4651 8544007 · USt-IdNr. DE271552088
+            ${escapeHtml(SITE_FOOTER_LINE)} · USt-IdNr. ${escapeHtml(SITE.ustId)}
           </p>
         </td></tr>
 
@@ -647,7 +651,7 @@ async function sendViaSmtp(
     const logoBytes = await loadLogoBytesForEmail();
     const logoRef = logoUrl();
     if (logoBytes && html.includes(logoRef)) {
-      const cid = "kanzlei-logo@adlerundsohn";
+      const cid = "kanzlei-logo@kanzlei-laumann";
       html = html.split(logoRef).join(`cid:${cid}`);
       attachments.unshift({
         filename: "kanzlei-logo.png",
@@ -682,7 +686,7 @@ export async function sendOfferEmail(params: {
   attachments?: EmailAttachment[];
 }): Promise<{ ok: true; messageId: string } | { ok: false; error: string }> {
   const RESEND_API_KEY = normalizeResendApiKey(process.env.RESEND_API_KEY);
-  const FROM = process.env.OFFER_FROM_EMAIL || "Kanzlei Adler und Sohn <info@adlerundsohn-mail.de>";
+  const FROM = process.env.OFFER_FROM_EMAIL || SITE.emailFrom;
   const configuredTimeoutMs = Number(process.env.RESEND_TIMEOUT_MS || 0);
   const timeoutMs = Number.isFinite(configuredTimeoutMs) && configuredTimeoutMs > 0 ? configuredTimeoutMs : 120000;
 

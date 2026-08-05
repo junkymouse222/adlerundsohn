@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import logoAsset from "@/assets/kanzlei-logo.png.asset.json";
+import { SITE, SITE_FOOTER_LINE } from "@/lib/site";
 
 // Öffentlicher Endpunkt: Kunde klickt in Angebots-Mail/PDF auf "Angebot annehmen".
 // Erwartet ?token=<accept_token>.
@@ -33,11 +33,11 @@ function render(kind: PageKind, opts: { token?: string; angebotNr?: string } = {
   } else {
     const message =
       kind === "invalid"
-        ? "Der Link ist ungültig oder abgelaufen. Bitte kontaktieren Sie uns unter info@adlerundsohn.de."
+        ? `Der Link ist ungültig oder abgelaufen. Bitte kontaktieren Sie uns unter ${SITE.email}.`
         : kind === "already"
           ? "Vielen Dank – dieses Angebot wurde bereits angenommen. Wir sind bereits an der Umsetzung."
           : `Vielen Dank für Ihr Vertrauen. Wir haben Ihre Annahme${angebotNr ? ` zu Angebot ${escapeHtml(angebotNr)}` : ""} erhalten und melden uns in Kürze mit der Rechnung und den nächsten Schritten.`;
-    inner = `<p>${message}</p><a class="btn" href="https://adlerundsohn.de">Zur Kanzlei</a>`;
+    inner = `<p>${message}</p><a class="btn" href="${SITE.baseUrl}">Zur Kanzlei</a>`;
   }
 
   const html = `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>${title}</title>
@@ -51,12 +51,13 @@ function render(kind: PageKind, opts: { token?: string; angebotNr?: string } = {
   p{font-size:15px;line-height:1.7;color:#3a352b;}
   .btn{display:inline-block;margin-top:24px;padding:14px 28px;background:#0f2740;color:#f5f3ee;text-decoration:none;font-size:12px;letter-spacing:2px;text-transform:uppercase;font-family:Georgia,serif;border:0;cursor:pointer;}
   .foot{margin-top:24px;font-size:11px;color:#8a8578;}
+  .brand{font-family:Georgia,serif;font-size:24px;font-weight:600;color:#0f2740;margin-bottom:8px;}
 </style></head><body><div class="wrap"><div class="card">
-  <img src="${logoAsset.url}" alt="Kanzlei Adler und Sohn" style="height:72px;width:auto;display:block;margin-bottom:16px;" />
+  <div class="brand">Kanzlei Laumann</div>
   <div class="rule"></div>
   <h1>${title}</h1>
   ${inner}
-  <div class="foot">Kanzlei Adler und Sohn · Strandstraße 14 · 25980 Westerland/Sylt · info@adlerundsohn.de</div>
+  <div class="foot">${SITE_FOOTER_LINE}</div>
 </div></div></body></html>`;
 
   return new Response(html, {

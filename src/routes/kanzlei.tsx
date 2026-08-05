@@ -1,15 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { SITE } from "@/lib/site";
 
 export const Route = createFileRoute("/kanzlei")({
   head: () => ({
     meta: [
-      { title: "Die Kanzlei — Rechtsanwaltskanzlei Adler und Sohn" },
-      { name: "description", content: "Seit 1998 spezialisiert auf Insolvenzrecht und Insolvenzverwaltung. Erfahren Sie mehr über die Geschichte und Werte der Kanzlei Adler und Sohn." },
-      { property: "og:title", content: "Die Kanzlei — Rechtsanwaltskanzlei Adler und Sohn" },
-      { property: "og:description", content: "Erfahren Sie mehr über Geschichte und Werte der Kanzlei Adler und Sohn." },
-      { property: "og:url", content: "https://adlerundsohn.com/kanzlei" },
+      { title: "Die Kanzlei — Kanzlei Laumann" },
+      { name: "description", content: "Erik Laumann, Rechtsanwalt und Insolvenzverwalter in Düsseldorf. Verwertung aus der Insolvenzmasse — Ablauf, Konditionen und Grundsätze." },
+      { property: "og:title", content: "Die Kanzlei — Kanzlei Laumann" },
+      { property: "og:description", content: "Verwertung aus der Insolvenzmasse — Ablauf, Konditionen und Grundsätze." },
+      { property: "og:url", content: `${SITE.baseUrl}/kanzlei` },
     ],
-    links: [{ rel: "canonical", href: "https://adlerundsohn.com/kanzlei" }],
+    links: [{ rel: "canonical", href: `${SITE.baseUrl}/kanzlei` }],
   }),
   component: KanzleiPage,
 });
@@ -21,61 +22,59 @@ function KanzleiPage() {
         <div className="container-prose py-24 md:py-32">
           <p className="eyebrow">Die Kanzlei</p>
           <h1 className="mt-6 max-w-3xl text-5xl md:text-6xl">
-            Eine Kanzlei, geführt von einer klaren Überzeugung.
+            Verwertung aus der Insolvenzmasse — geordnet und transparent.
           </h1>
           <span className="rule-gold mt-8" />
         </div>
       </section>
 
       <section className="container-prose grid gap-16 py-24 md:grid-cols-[1fr_2fr] md:py-32">
-        <p className="eyebrow">Über uns</p>
+        <p className="eyebrow">Zum Verkauf</p>
         <div className="space-y-6 text-lg leading-relaxed text-foreground/85">
           <p>
-            Die Rechtsanwaltskanzlei Adler und Sohn wurde 1998 auf Sylt von Dr.
-            Friedrich Adler gegründet. Aus einer Einzelkanzlei mit Fokus auf
-            klassisches Wirtschafts- und Insolvenzrecht ist über die
-            Jahrzehnte eine spezialisierte Sozietät gewachsen, die heute
-            Mandanten aus ganz Deutschland betreut.
+            Die aufgeführten Gegenstände stammen unmittelbar aus dem Bestand
+            eines insolventen Unternehmens: Premium-Büromöbel namhafter Hersteller
+            wie Herman Miller, Vitra, USM und Wilkhahn, moderne IT-Ausstattung
+            von Apple sowie professionelle Kaffeevollautomaten von WMF und
+            La Marzocco.
           </p>
           <p>
-            Wir haben uns bewusst gegen die Breite entschieden — und für die
-            Tiefe. Insolvenzrecht ist kein Randgebiet unserer Arbeit; es ist
-            unser Handwerk. Diese Konzentration erlaubt uns, komplexe
-            Verfahren mit einer Präzision zu führen, die Mandantinnen und
-            Mandanten in wirtschaftlich herausfordernden Situationen die
-            nötige Sicherheit gibt.
+            Es handelt sich, sofern nicht anders vermerkt, ausnahmslos um
+            originalverpackte Neuware in technisch einwandfreiem Zustand.
+            Sämtliche Artikel werden mit ordnungsgemäßer Rechnung und
+            ausgewiesener Mehrwertsteuer verkauft.
           </p>
           <p>
-            Unsere Anwältinnen und Anwälte werden regelmäßig als
-            Insolvenzverwalter, Sachwalter und Treuhänder von den
-            Amtsgerichten Niebüll, Flensburg und Husum
-            bestellt.
+            Der Erwerb aus der Insolvenzmasse bietet die Gelegenheit, hochwertige
+            Designmöbel und Geräte zu einem Bruchteil des regulären Marktpreises
+            zu erwerben. Aufgrund der begrenzten Verfügbarkeit ist eine zeitnahe
+            Rückmeldung empfehlenswert.
           </p>
         </div>
       </section>
 
       <section className="bg-primary text-primary-foreground">
         <div className="container-prose py-24 md:py-32">
-          <p className="text-[0.7rem] uppercase tracking-[0.24em] text-gold">Unsere Werte</p>
+          <p className="text-[0.7rem] uppercase tracking-[0.24em] text-gold">Unsere Grundsätze</p>
           <h2 className="mt-4 max-w-2xl font-serif text-4xl text-primary-foreground md:text-5xl">
-            Drei Prinzipien, die jede Mandatsbeziehung tragen.
+            Drei Prinzipien, die jede Verwertung tragen.
           </h2>
           <div className="mt-16 grid gap-12 md:grid-cols-3">
             {[
               {
                 num: "01",
-                title: "Diskretion",
-                text: "Eine Insolvenz berührt existenzielle Fragen — persönliche wie unternehmerische. Wir arbeiten mit größter Verschwiegenheit und stellen sicher, dass sensible Informationen ausschließlich in dafür berechtigten Händen liegen.",
+                title: "Vertraulichkeit",
+                text: "Jede Anfrage wird vertraulich behandelt und in der Reihenfolge ihres Eingangs bearbeitet. Verbindlich wird ein Erwerb erst mit schriftlicher Bestätigung.",
               },
               {
                 num: "02",
-                title: "Struktur",
-                text: "Verfahren scheitern selten am Recht — meist an fehlender Ordnung. Wir bringen von Beginn an klare Prozesse, dokumentierte Entscheidungswege und eine belastbare Kommunikation mit allen Beteiligten.",
+                title: "Gläubigerinteresse",
+                text: "Als gerichtlich bestellter Insolvenzverwalter ist es meine Aufgabe, die Insolvenzmasse bestmöglich im Interesse aller Gläubiger zu verwerten.",
               },
               {
                 num: "03",
-                title: "Weitblick",
-                text: "Jede Insolvenz ist ein Übergang. Unser Rat richtet sich nicht nur auf den Abschluss des Verfahrens, sondern auf die Zeit danach — für Unternehmensfortführungen ebenso wie für Neuanfänge.",
+                title: "Ordnungsmäßigkeit",
+                text: "Verkauf mit ordnungsgemäßer, vorsteuerabzugsfähiger Rechnung und ausgewiesener Mehrwertsteuer. Alle Preise netto zzgl. gesetzlicher MwSt.",
               },
             ].map((v) => (
               <div key={v.num}>
@@ -91,22 +90,23 @@ function KanzleiPage() {
       <section className="container-prose py-24 md:py-32">
         <div className="grid gap-16 md:grid-cols-[1fr_2fr]">
           <div>
-            <p className="eyebrow">Chronik</p>
-            <h2 className="mt-4 text-4xl md:text-5xl">Meilensteine</h2>
+            <p className="eyebrow">So kommen Sie zum Artikel</p>
+            <h2 className="mt-4 text-4xl md:text-5xl">Ablauf &amp; Konditionen</h2>
             <span className="rule-gold mt-6" />
           </div>
           <div className="space-y-10">
             {[
-              ["1998", "Gründung der Einzelkanzlei durch Dr. Friedrich Adler in Westerland auf Sylt."],
-              ["2003", "Erste Bestellung als Insolvenzverwalter am Amtsgericht Niebüll."],
-              ["2011", "Erweiterung um Anwältin Dr. Katharina Weber, Schwerpunkt Sanierungs- und Restrukturierungsrecht."],
-              ["2017", "Aufnahme in den VID Verband Insolvenzverwalter Deutschlands e.V."],
-              ["2020", "Eintritt von Marcus Hartmann, Fachanwalt für Handels- und Gesellschaftsrecht."],
-              ["2024", "Bezug der heutigen Kanzleiräume in der Friedrichstraße."],
-            ].map(([year, text]) => (
-              <div key={year} className="grid grid-cols-[6rem_1fr] gap-6 border-b border-border pb-8 last:border-b-0">
-                <p className="font-serif text-2xl text-gold">{year}</p>
-                <p className="text-base leading-relaxed text-foreground/80">{text}</p>
+              ["01", "Kontaktanfrage über die Webseite", "Am einfachsten über die Schaltfläche „Angebot anfordern“ — direkt zu unserem Formular. Bitte Losnummer, Produktbezeichnung und Stückzahl angeben. Alternativ per E-Mail."],
+              ["02", "Bestätigung & Reservierung", "Sie erhalten eine schriftliche Bestätigung der Verfügbarkeit. Erst damit ist der Artikel für Sie reserviert."],
+              ["03", "Rechnung & Zahlung", "Verkauf mit ordnungsgemäßer Rechnung und ausgewiesener Mehrwertsteuer, zahlbar vor Übergabe."],
+              ["04", "Abholung oder Versand", "Abholung am Lagerort nach Terminvereinbarung. Versand ab 1.000 € Warenwert frei Haus, darunter pauschal 29 €."],
+            ].map(([num, title, text]) => (
+              <div key={num} className="grid grid-cols-[3rem_1fr] gap-6 border-b border-border pb-8 last:border-b-0">
+                <p className="font-serif text-2xl text-gold">{num}</p>
+                <div>
+                  <h3 className="text-xl">{title}</h3>
+                  <p className="mt-2 text-base leading-relaxed text-foreground/80">{text}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -115,9 +115,9 @@ function KanzleiPage() {
 
       <section className="container-prose pb-24">
         <div className="border border-border p-10 text-center md:p-16">
-          <h2 className="text-3xl md:text-4xl">Möchten Sie unser Team persönlich kennenlernen?</h2>
-          <Link to="/anwaelte" className="mt-8 inline-block bg-primary px-8 py-4 text-xs uppercase tracking-[0.2em] text-primary-foreground hover:bg-primary/90">
-            Zu den Anwälten
+          <h2 className="text-3xl md:text-4xl">Bereit, eine Anfrage zu stellen?</h2>
+          <Link to="/angebot-anfordern" search={{ ref: undefined }} className="mt-8 inline-block bg-primary px-8 py-4 text-xs uppercase tracking-[0.2em] text-primary-foreground hover:bg-primary/90">
+            Angebot anfordern
           </Link>
         </div>
       </section>

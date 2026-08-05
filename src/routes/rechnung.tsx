@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { PRODUKTE, KATEGORIEN, type Produkt } from "@/lib/katalog";
+import { SITE } from "@/lib/site";
 import { BelegView, belegPrintStyles, type BelegViewPosition } from "@/components/BelegView";
 
 
@@ -10,7 +11,7 @@ const printStyles = belegPrintStyles;
 export const Route = createFileRoute("/rechnung")({
   head: () => ({
     meta: [
-      { title: "Angebots- & Rechnungsgenerator — Kanzlei Adler und Sohn" },
+      { title: "Angebots- & Rechnungsgenerator — Kanzlei Laumann" },
       { name: "description", content: "Internes Tool zur Erstellung von Angeboten und Rechnungen aus dem Verwertungskatalog." },
       { name: "robots", content: "noindex, nofollow" },
     ],
@@ -31,10 +32,10 @@ function RechnungPage() {
   const [belegArt, setBelegArt] = useState<BelegArt>("Angebot");
   const [belegNr, setBelegNr] = useState(`${new Date().getFullYear()}-0000`);
   const [datum, setDatum] = useState(heute());
-  const [bankName, setBankName] = useState("Sparkasse Trier");
-  const [bankIban, setBankIban] = useState("DE00 0000 0000 0000 0000 00");
-  const [bankBic, setBankBic] = useState("TRISDE55XXX");
-  const [bankInhaber, setBankInhaber] = useState("Kanzlei Adler und Sohn");
+  const [bankName, setBankName] = useState("");
+  const [bankIban, setBankIban] = useState("");
+  const [bankBic, setBankBic] = useState("");
+  const [bankInhaber, setBankInhaber] = useState<string>(SITE.brand);
   const [gueltigBis, setGueltigBis] = useState(() => {
     const d = new Date();
     d.setDate(d.getDate() + 21);
@@ -49,7 +50,7 @@ function RechnungPage() {
   const [rabatt, setRabatt] = useState(0);
   const [lieferkosten, setLieferkosten] = useState(0);
   const [notizen, setNotizen] = useState(
-    "Alle Positionen aus laufender Verwertung. Lieferung ab Bestellwert 3.000 € netto kostenfrei innerhalb des Liefergebiets. Zwischenverkauf vorbehalten.",
+    "Alle Positionen aus laufender Verwertung. Versand ab 1.000 € Warenwert frei Haus, darunter pauschal 29 €. Zwischenverkauf vorbehalten.",
   );
 
   useEffect(() => {
@@ -99,7 +100,7 @@ function RechnungPage() {
   const netto = zwischensumme - rabattBetrag + lieferkosten;
   const mwst = netto * (mwstSatz / 100);
   const brutto = netto + mwst;
-  const bestaetigungsUrl = `https://adlerundsohn.de/api/public/hooks/confirm-manual?art=${encodeURIComponent(belegArt)}&nr=${encodeURIComponent(belegNr)}&kunde=${encodeURIComponent(kundeName)}&anschrift=${encodeURIComponent(kundeAnschrift)}&total=${encodeURIComponent(brutto.toFixed(2))}`;
+  const bestaetigungsUrl = `${SITE.baseUrl}/api/public/hooks/confirm-manual?art=${encodeURIComponent(belegArt)}&nr=${encodeURIComponent(belegNr)}&kunde=${encodeURIComponent(kundeName)}&anschrift=${encodeURIComponent(kundeAnschrift)}&total=${encodeURIComponent(brutto.toFixed(2))}`;
 
   const drucken = () => window.print();
 
@@ -110,7 +111,7 @@ function RechnungPage() {
         <h1 className="mt-6 text-4xl md:text-5xl">Angebots- & Rechnungsgenerator</h1>
         <span className="rule-gold mt-6" />
         <p className="mt-6 max-w-2xl text-sm text-muted-foreground">
-          Wählen Sie Produkte aus dem Verwertungskatalog (124 Positionen) und erstellen Sie
+          Wählen Sie Positionen aus dem Verwertungskatalog (18 Lose) und erstellen Sie
           direkt ein Angebot oder eine Rechnung. Über „Drucken / PDF speichern" erhalten Sie
           ein druckfertiges Dokument.
         </p>

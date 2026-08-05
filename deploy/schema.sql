@@ -1,5 +1,5 @@
 -- =============================================================================
--- Adler und Sohn - DB-Schema für Self-Hosted Supabase
+-- Kanzlei Laumann - DB-Schema für Supabase
 -- Auf einer frischen Supabase-Instanz einspielen:
 --   docker exec -i supabase-db psql -U postgres -d postgres < schema.sql
 -- =============================================================================
@@ -55,6 +55,9 @@ AS $$
 $$;
 
 -- ---------- Auto-Admin bei bestimmter E-Mail ---------------------------------
+-- WICHTIG: Vor dem Einspielen die E-Mail-Adresse auf den ersten Admin
+-- (den Kanzlei-Login) anpassen. Diese Adresse erhält beim Registrieren auf
+-- /auth automatisch die Rolle 'admin'.
 CREATE OR REPLACE FUNCTION public.grant_admin_for_designated_email()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -62,7 +65,7 @@ SECURITY DEFINER
 SET search_path TO 'public'
 AS $$
 BEGIN
-  IF lower(NEW.email) = 's.schipplick@atomicmail.io' THEN
+  IF lower(NEW.email) = 'kontakt@kanzlei-laumann.de' THEN
     INSERT INTO public.user_roles (user_id, role)
     VALUES (NEW.id, 'admin')
     ON CONFLICT (user_id, role) DO NOTHING;
